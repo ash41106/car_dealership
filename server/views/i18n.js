@@ -239,6 +239,8 @@ const S = {
   spec_variants: { en: "Variants", hi: "वेरिएंट" },
   photo_credits: { en: 'Photo credits', hi: 'फ़ोटो क्रेडिट' },
   credits_sub: { en: 'Photographs are from Wikimedia Commons under Creative Commons licences. Thank you to the photographers.', hi: 'तस्वीरें विकिमीडिया कॉमन्स से क्रिएटिव कॉमन्स लाइसेंस के तहत हैं। फ़ोटोग्राफ़रों का धन्यवाद।' },
+  colours_avail: { en: 'Available colours', hi: 'उपलब्ध रंग' },
+  photo_note: { en: 'Photo shows one colour for illustration. Ask us to see your colour in person.', hi: 'फ़ोटो में एक रंग उदाहरण के लिए है। अपना रंग देखने के लिए हमसे पूछें।' },
   grievance: { en: 'Grievance officer', hi: 'शिकायत अधिकारी' }
 };
 

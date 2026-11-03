@@ -71,3 +71,6 @@ td.saved input{border-color:#14822f}td.fail input{border-color:var(--red)}
 .mx input[type=checkbox]{width:22px;height:22px}.mx .grp td{background:#fafafa;font-weight:700;text-transform:uppercase;font-size:.7rem;letter-spacing:.1em}
 .chip.on{background:#e3f4e8;color:#0f5a2a;border-color:transparent}.chip.off{background:#eee;color:#666}
 .sb .chip{color:#ddd;border-color:#555}
+
+.savebar{position:fixed;left:50%;bottom:16px;transform:translateX(-50%);z-index:90;background:#0b0b0b;color:#fff;border-radius:999px;padding:8px 8px 8px 22px;display:flex;align-items:center;gap:12px;box-shadow:0 18px 50px rgba(0,0,0,.35)}.savebar[hidden]{display:none}.savebar .btn-o{color:#fff;border-color:#666}.savebar .btn:not(.btn-o){background:var(--red);border-color:var(--red)}
+.diff{list-style:none;padding:0;margin:0 0 8px;font-family:ui-monospace,monospace;font-size:.85rem}.diff .add{color:#0f5a2a}.diff .rem{color:#a10000}

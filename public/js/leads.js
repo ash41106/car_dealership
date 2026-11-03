@@ -4,7 +4,7 @@
   var list = $('#list'), pager = $('#pager'), fbar = $('#fbar');
 
   function pad(n) { return (n < 10 ? '0' : '') + n; }
-  function mmss(s) { s = Math.abs(Math.round(s)); return pad(Math.floor(s / 60)) + ':' + pad(s % 60); }
+  function mmss(s) { return S.dur(s); }
   function chip(l) {
     var s = l.sla || {};
     if (s.responded) return '<span class="sla ' + (s.breached ? 'r' : 'g') + '">' + (s.breached ? 'Late ' : 'Replied ') + mmss(s.response_sec) + '</span>';

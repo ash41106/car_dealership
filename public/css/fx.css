@@ -135,3 +135,16 @@ body{animation:none!important}
 .save-b{margin-left:10px}.save-b[aria-pressed=true]{color:var(--red);border-color:var(--red)}.save-b[aria-pressed=true] path{fill:currentColor}
 .mcard .heart{top:12px;right:12px}.mcard .cmp{top:auto;bottom:auto;position:static;margin:8px 0 0;width:max-content;background:var(--grey)}
 .ftr .mapc{padding:16px 16px 16px 64px;min-height:88px}
+
+[data-bg]{background-color:#16161a}.hero2-bg{transition:opacity 1.2s}.hero2-bg[data-bg]{opacity:0}.hero2-bg.bg-in{opacity:.16}
+
+.colchips{list-style:none;display:flex;flex-wrap:wrap;gap:8px;margin:12px 0 4px;padding:0}.colchips li{display:flex;align-items:center;gap:8px;border:1px solid var(--line);border-radius:999px;padding:6px 14px 6px 8px;font-size:.85rem}.colchips i{width:18px;height:18px;border-radius:50%;background:var(--c);box-shadow:inset 0 0 0 1px rgba(0,0,0,.2)}
+
+@media(min-width:960px){.story-vis{position:sticky;top:96px;height:min(70vh,560px);align-self:start}}
+.ghost[data-t]::before{content:attr(data-t)}
+.hero2 .ghost{opacity:0;transition:opacity 1.4s}.hero2 .ghost.on,html:not(.js) .hero2 .ghost{opacity:.055}
+
+.hero2 svg.ghost{opacity:.055!important;transition:none;width:min(1500px,118vw);height:auto;max-height:70%;font-size:initial;top:3%}
+.hero2 svg.ghost{width:min(1000px,88vw)!important}
+/* non-active hero slides stay display:none until the page is idle so their lazy images do not compete with the LCP image */
+.vframe:not(.ready) .slide:not(.on){display:none}

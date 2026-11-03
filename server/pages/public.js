@@ -10,6 +10,9 @@ function today(off) { const d = new Date(Date.now() + (off || 0) * 864e5); retur
 const safe = (fn, dflt) => { try { return fn(); } catch (e) { return dflt; } };
 
 // ---------- HOME ----------
+// Marketing figures: backend setting site_stats {new_cars_per_year, used_cars_per_year}; these constants are only the fallback.
+const DEFAULT_STATS = { new_cars_per_year: 6000, used_cars_per_year: 900 };
+function siteStats() { try { return Object.assign({}, DEFAULT_STATS, require('../services/admin').publicSettings().site_stats || {}); } catch (e) { return DEFAULT_STATS; } }
 function home(ctx) {
   const t = ctxT(ctx); const lang = ctx.lang;
   const models = safe(() => svc.catalog.listModels(), []);
@@ -18,40 +21,41 @@ function home(ctx) {
   const offers = safe(() => svc.catalog.listOffers({ active: true }), []).slice(0, 3);
   const banners = safe(() => svc.catalog.listBanners(), []);
   const showrooms = safe(() => svc.sales.listShowrooms(), []);
+  const st = siteStats();
   const slides = (models.filter(m => m.featured).concat(models)).filter((m, i, a) => a.indexOf(m) === i).slice(0, 4);
   const types = ['hatchback', 'sedan', 'suv', 'mpv'];
   const heroSrc = (m) => { const hx = m.colors && m.colors[0] && m.colors[0].hex; const h = M.car(m.slug, 'hero', m.body_type, hx); return h.photo ? h : M.car(m.slug, 'side', m.body_type, hx); };
-  const heroSlides = slides.map((m, i) => { const h = heroSrc(m); return `<figure class="slide${i ? '' : ' on'}" data-slide="${i}">${img(h.src, m.name, { w: h.w, h: h.h, eager: i === 0 })}<figcaption><a href="/new-cars/${esc(m.slug)}"><strong>${esc(m.name)}</strong> <span>${esc(t('from'))} ${esc(lakh(m.from_price))}</span> ${ICON.arrow}</a></figcaption></figure>`; }).join('');
+  const heroSlides = slides.map((m, i) => { const h = heroSrc(m); return `<figure class="slide${i ? '' : ' on'}" data-slide="${i}">${img(h.src, m.name, { w: h.w, h: h.h, eager: i === 0, sizes: '(min-width:960px) 62vw, 100vw' })}<figcaption><a href="/new-cars/${esc(m.slug)}"><strong>${esc(m.name)}</strong> <span>${esc(t('from'))} ${esc(lakh(m.from_price))}</span> ${ICON.arrow}</a></figcaption></figure>`; }).join('');
   const dots = slides.map((m, i) => `<button type="button" class="dot-b${i ? '' : ' on'}" data-go="${i}" aria-label="${esc(m.name)}"></button>`).join('');
   const banner = banners[0];
-  const bgScene = M.scene('hero-road');
+  const bgScene = null; // decorative hero background dropped: it became the LCP element
   const tiles = types.map(ty => {
     const m = models.find(x => x.body_type === ty);
     return `<a class="tile reveal" href="/new-cars?type=${ty}"><div class="tile-in">${m ? C.carHero(m, {}) : ''}<div class="tile-t"><small>${esc(t(ty))}</small><span>${esc(t('cat_' + ty))}</span></div><span class="circ circ-w">${ICON.arrow}</span></div></a>`;
   }).join('');
   const mq = [1, 2, 3, 4, 5, 6].map(i => `<span>${esc(t('mq' + i))}</span>`).join('');
-  const scenes = ['mountain', 'showroom', 'city-night', 'hero-road'];
+  const scenes = ['mountain', 'showroom', 'city-night', 'mountain'];
   const stepLinks = ['/new-cars', '/compare', '/test-drive', '/contact'];
-  const story = `<section class="story" data-story><div class="wrap story-in"><div class="story-vis" aria-hidden="true"><div class="rail"><i></i></div>${[1, 2, 3, 4].map(i => { const sc = M.scene(scenes[i - 1]); return `<div class="sv sv-${i}"${sc ? ` style="background-image:url(${esc(sc)})"` : ''}><span class="num-xl">0${i}</span><b>${esc(t('st' + i))}<i>.</i></b></div>`; }).join('')}</div>
+  const story = `<section class="story" data-story><div class="wrap story-in"><div class="story-vis" aria-hidden="true"><div class="rail"><i></i></div>${[1, 2, 3, 4].map(i => { const sc = M.sceneBg(scenes[i - 1]); return `<div class="sv sv-${i}"${sc ? ` data-bg="${esc(sc.s)}" data-bg-l="${esc(sc.l)}"` : ''}><span class="num-xl">0${i}</span><b>${esc(t('st' + i))}<i>.</i></b></div>`; }).join('')}</div>
 <div><p class="script">${esc(t('script_tag'))}</p>${V.heading(t('story_a'), t('story_b'))}<ol class="story-steps">${[1, 2, 3, 4].map(i => `<li><h3><small>0${i}</small>${esc(t('st' + i))}<span class="dot">.</span></h3><p>${esc(t('st' + i + 'b'))}</p><p><a class="btn btn-sm btn-o" href="${stepLinks[i - 1]}">${esc(t('st' + i))} ${ICON.arrow}</a></p></li>`).join('')}</ol></div></div></section>`;
-  const visit = M.scene('showroom');
-  const body = `<section class="hero2"><div class="hero2-bg"${bgScene ? ` style="background-image:url(${esc(bgScene)})"` : ' hidden'}></div><div class="ghost" aria-hidden="true" data-par>DRIVE</div>
+  const visit = M.sceneBg('showroom');
+  const body = `<section class="hero2"><div class="hero2-bg"${bgScene ? ` data-bg="${esc(bgScene.s)}" data-bg-l="${esc(bgScene.l)}"` : ' hidden'}></div><svg class="ghost" aria-hidden="true" data-par viewBox="0 0 1300 300" focusable="false"><path fill-rule="evenodd" fill="#000" d="M0,20H140C230,20 290,75 290,150C290,225 230,280 140,280H0ZM70,80V220H130C175,220 215,195 215,150C215,105 175,80 130,80Z M330,20H465C545,20 595,60 595,120C595,160 575,190 540,205L610,280H525L465,215H400V280H330ZM400,78V160H460C490,160 520,148 520,119C520,90 490,78 460,78Z M650,20H720V280H650Z M770,20H845L910,210L975,20H1050L945,280H875Z M1090,20H1290V80H1160V120H1270V175H1160V220H1290V280H1090Z"/></svg>
 <div class="wrap hero2-in"><div class="hero-t"><ul class="eyebrow"><li>${esc(t('hero_eyebrow1'))}</li><li>${esc(t('hero_eyebrow2'))}</li><li>${esc(t('hero_eyebrow3'))}</li></ul>
 <h1 class="h1 xl">${esc(t('hero_h1a'))}<br>${esc(t('hero_h1b'))}<span class="dot">.</span></h1><p class="lead">${esc(banner ? (L(banner, 'sub', lang) || t('hero_sub')) : t('hero_sub'))}</p>
 <div class="cta-row"><a class="btn" href="/new-cars">${esc(t('explore_new'))} ${ICON.arrow}</a><a class="btn btn-o" href="/used-cars">${esc(t('browse_used'))} ${ICON.arrow}</a></div></div>
 <div class="hero-visual" data-carousel><span class="slash-a" aria-hidden="true"></span><span class="slash-b" aria-hidden="true"></span><div class="vframe">${heroSlides}</div><div class="hero-ctl"><button class="circ" type="button" data-prev aria-label="${esc(t('prev'))}">${ICON.left}</button><div class="dots">${dots}</div><button class="circ" type="button" data-next aria-label="${esc(t('next'))}">${ICON.arrow}</button></div></div></div>
-<div class="wrap"><ul class="stats"><li>${ICON.car}<div><strong data-count="6000" data-suffix="+">6,000+</strong><span>${esc(t('stat1'))}</span></div></li><li>${ICON.shield}<div><strong data-count="900" data-suffix="+">900+</strong><span>${esc(t('stat2'))}</span></div></li><li>${ICON.pin}<div><strong data-count="${showrooms.length || 3}">${showrooms.length || 3}</strong><span>${esc(t('stat3'))}</span></div></li></ul></div></section>
+<div class="wrap"><ul class="stats"><li>${ICON.car}<div><strong data-count="${Number(st.new_cars_per_year)}" data-suffix="+">${Number(st.new_cars_per_year).toLocaleString('en-IN')}+</strong><span>${esc(t('stat1'))}</span></div></li><li>${ICON.shield}<div><strong data-count="${Number(st.used_cars_per_year)}" data-suffix="+">${Number(st.used_cars_per_year).toLocaleString('en-IN')}+</strong><span>${esc(t('stat2'))}</span></div></li><li>${ICON.pin}<div><strong data-count="${showrooms.length || 3}">${showrooms.length || 3}</strong><span>${esc(t('stat3'))}</span></div></li></ul></div></section>
 <div class="marquee" aria-hidden="true"><div class="marquee-t">${mq}${mq}</div></div>
 ${story}
 ${usedRes.items && usedRes.items.length ? `<section class="sec sec-grey"><div class="wrap"><div class="sec-h"><div><p class="script">${esc(t('script_tag'))}</p>${V.heading(t('handpicked_a'), t('handpicked_b'))}</div><div class="ctl"><button class="circ" type="button" data-strip-prev aria-label="${esc(t('prev'))}">${ICON.left}</button><button class="circ" type="button" data-strip-next aria-label="${esc(t('next'))}">${ICON.arrow}</button></div></div>
 <div class="strip" data-strip tabindex="0" aria-label="${esc(t('used_cars'))}">${usedRes.items.map(u => C.usedCard(u, t, lang, bm)).join('')}</div><p class="center"><a class="btn btn-o" href="/used-cars">${esc(t('view_all'))} ${ICON.arrow}</a></p></div></section>` : ''}
 <section class="sec"><div class="wrap"><div class="sec-h"><div>${V.heading(t('perfect_a'), t('perfect_b'))}<p class="lead">${esc(t('new_cars_sub'))}</p></div></div><div class="tiles">${tiles}</div></div></section>
 ${models.length ? `<section class="sec sec-grey"><div class="wrap"><div class="sec-h"><h2 class="h2">${esc(t('new_cars'))}<span class="dot">.</span></h2><a class="btn btn-o" href="/new-cars">${esc(t('view_all'))} ${ICON.arrow}</a></div><div class="grid">${models.map(m => C.modelCard(m, t, lang)).join('')}</div></div></section>` : ''}
-<section class="scene-band"${visit ? ` style="background-image:url(${esc(visit)})"` : ''}><div class="wrap"><h2 class="h2">${esc(t('visit_t'))}<span class="dot">.</span></h2><p>${esc(t('visit_b'))}</p><div class="cta-row"><a class="btn btn-w" href="/contact">${esc(t('nav_contact'))} ${ICON.arrow}</a><a class="btn btn-w" href="/service">${esc(t('nav_service'))} ${ICON.arrow}</a></div></div></section>
+<section class="scene-band"${visit ? ` data-bg="${esc(visit.s)}" data-bg-l="${esc(visit.l)}"` : ''}><div class="wrap"><h2 class="h2">${esc(t('visit_t'))}<span class="dot">.</span></h2><p>${esc(t('visit_b'))}</p><div class="cta-row"><a class="btn btn-w" href="/contact">${esc(t('nav_contact'))} ${ICON.arrow}</a><a class="btn btn-w" href="/service">${esc(t('nav_service'))} ${ICON.arrow}</a></div></div></section>
 ${offers.length ? `<section class="sec"><div class="wrap"><h2 class="h2">${esc(t('offers'))}<span class="dot">.</span></h2><div class="grid g3">${offers.map(o => `<article class="offer reveal"><span class="badge">${esc(t('new_arrival'))}</span><h3>${esc(L(o, 'title', lang))}</h3><p>${esc(L(o, 'body', lang))}</p>${o.valid_until ? `<small class="muted">${esc(t('valid_until'))} ${esc(o.valid_until)}</small>` : ''}</article>`).join('')}</div></div></section>` : ''}
 <section class="sec sec-grey"><div class="wrap"><h2 class="h2">${esc(t('why_us'))}<span class="dot">.</span></h2><div class="grid g4">${[1, 2, 3, 4].map(i => `<div class="why reveal"><span class="num">0${i}</span><h3>${esc(t('why' + i + 't'))}</h3><p>${esc(t('why' + i + 'b'))}</p></div>`).join('')}</div></div></section>
 <section class="band"><div class="wrap band-in"><h2 class="h2 inv">${esc(t('td_title'))}<span class="dot">.</span></h2><a class="btn btn-w" href="/test-drive">${esc(t('book_td'))} ${ICON.arrow}</a></div></section>`;
-  return ctx.html(page({ ctx, path: '/', title: lang === 'hi' ? 'Brand X कारें लखनऊ' : 'Brand X new & certified used cars in Lucknow', desc: t('hero_sub'), body, jsonld: [V.dealerLd(showrooms, lang)], bodyClass: 'home', scripts: ['/js/home.js', '/js/forms.js'] }));
+  return ctx.html(page({ ctx, path: '/', title: lang === 'hi' ? 'Brand X कारें लखनऊ' : 'Brand X new & certified used cars in Lucknow', desc: t('hero_sub'), body, jsonld: [V.dealerLd(showrooms, lang)], bodyClass: 'home', preload: { src: heroSrc(slides[0] || { slug: 'model-h' }).src, sizes: '(min-width:960px) 62vw, 100vw' }, scripts: ['/js/home.js', '/js/forms.js'] }));
 }
 
 // ---------- NEW CARS ----------
@@ -94,7 +98,7 @@ function modelPage(ctx) {
   const hl = (m.highlights || []).map(h => `<div class="why reveal"><h3>${esc(L(h, 'title', lang))}</h3><p>${esc(L(h, 'body', lang))}</p></div>`).join('');
   const offers = (m.offers || []).map(o => `<article class="offer"><span class="badge">${esc(t('offers'))}</span><h3>${esc(L(o, 'title', lang))}</h3><p>${esc(L(o, 'body', lang))}</p></article>`).join('');
   const body = `${crumbsHtml([[t('new_cars'), '/new-cars'], [m.name, '/new-cars/' + m.slug]], t)}
-<section class="pdp wrap"><div class="pdp-media"><div class="stage">${img(hero, m.name, { eager: true, cls: 'stage-img', w: heroI.w, h: heroI.h })}<img class="xf" alt="" src="data:image/gif;base64,R0lGODlhAQABAAAAACH5BAEKAAEALAAAAAABAAEAAAICTAEAOw==" width="${heroI.w}" height="${heroI.h}" style="opacity:0"></div>${sw && (!photoMode || colors.some(c => M.carColour(m.slug, c.name_en))) ? `<div class="swatches" role="group" aria-label="${esc(t('colours'))}">${sw}</div>` : ''}${gal && !photoMode ? `<ul class="gal">${gal}</ul>` : ''}</div>
+<section class="pdp wrap"><div class="pdp-media"><div class="stage">${img(hero, m.name, { eager: true, cls: 'stage-img', w: heroI.w, h: heroI.h, sizes: '(min-width:960px) 55vw, 100vw' })}<img class="xf" alt="" src="data:image/gif;base64,R0lGODlhAQABAAAAACH5BAEKAAEALAAAAAABAAEAAAICTAEAOw==" width="${heroI.w}" height="${heroI.h}" style="opacity:0"></div>${sw && (!photoMode || colors.some(c => M.carColour(m.slug, c.name_en))) ? `<div class="swatches" role="group" aria-label="${esc(t('colours'))}">${sw}</div>` : (colors.length ? `<ul class="colchips" aria-label="${esc(t('colours_avail'))}">${colors.map(c => `<li><i style="--c:${esc(c.hex)}"></i>${esc(L(c, 'name', lang))}</li>`).join('')}</ul><p class="muted small">${esc(t('photo_note'))}</p>` : '')}${gal && !photoMode ? `<ul class="gal">${gal}</ul>` : ''}</div>
 <div class="pdp-info"><p class="eyebrow-s">${esc(t(m.body_type) || m.body_type)} <button class="btn btn-sm btn-o save-b" type="button" data-save="${esc(m.slug)}" aria-pressed="false">${ICON.heart} ${esc(t('save'))}</button></p><h1 class="h1">${esc(m.name)}<span class="dot">.</span></h1><p class="lead">${esc(L(m, 'tagline', lang))}</p><p>${esc(L(m, 'description', lang))}</p>${stripHtml}
 <div class="pricebox" data-onroad data-slug="${esc(m.slug)}" data-model="${esc(m.id)}"><div class="pb-h"><h2>${esc(t('on_road'))}</h2></div>
 <div class="pb-f"><div class="field"><label for="pb-city">${esc(t('city'))}</label><select id="pb-city" name="city">${cities.map(c => `<option value="${esc(c.slug)}"${c.slug === city ? ' selected' : ''}>${esc(L(c, 'name', lang))}</option>`).join('')}</select></div>

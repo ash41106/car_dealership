@@ -23,6 +23,8 @@
   S.errText = function (e) {
     var m = e.message || 'Error'; if (e.errors && typeof e.errors === 'object') { m += ': ' + Object.keys(e.errors).map(function (k) { return k + ' ' + e.errors[k]; }).join('; '); } return m;
   };
+  // human duration: mm:ss under an hour, then 'Xh Ym', then 'Xd Yh'
+  S.dur = function (sec) { sec = Math.abs(Math.round(sec)); var p = function (n) { return (n < 10 ? '0' : '') + n; }; if (sec < 3600) return p(Math.floor(sec / 60)) + ':' + p(sec % 60); if (sec < 86400) return Math.floor(sec / 3600) + 'h ' + Math.floor(sec % 3600 / 60) + 'm'; return Math.floor(sec / 86400) + 'd ' + Math.floor(sec % 86400 / 3600) + 'h'; };
   S.ago = function (iso) { var s = Math.max(0, (Date.now() - Date.parse(iso)) / 1000); if (s < 90) return Math.round(s) + 's'; if (s < 5400) return Math.round(s / 60) + 'm'; if (s < 129600) return Math.round(s / 3600) + 'h'; return Math.round(s / 86400) + 'd'; };
   S.fmtDT = function (iso) { var x = new Date(iso); return isNaN(x) ? '' : x.toLocaleString('en-IN', { day: '2-digit', month: 'short', hour: '2-digit', minute: '2-digit' }); };
   S.pretty = function (k) { return String(k).replace(/_/g, ' ').replace(/^./, function (c) { return c.toUpperCase(); }); };

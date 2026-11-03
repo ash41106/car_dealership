@@ -69,7 +69,7 @@
   "author": "Throwawayacc222",
   "license": "CC0",
   "source": "https://commons.wikimedia.org/wiki/File:Hyundai_Creta_orange.jpg",
-  "modification": "resized"
+  "modification": "dealer-signage plate region pixelated for privacy; resized"
  },
  {
   "file": "img/cars/model-s-side.jpg",
@@ -85,7 +85,7 @@
   "author": "Dairokkan9",
   "license": "CC BY-SA 4.0",
   "source": "https://commons.wikimedia.org/wiki/File:2021_Hyundai_Creta_SX(O)_CRDi_(India)_rear_view.jpg",
-  "modification": "resized"
+  "modification": "licence-plate region pixelated for privacy; resized"
  },
  {
   "file": "img/cars/model-s-interior.jpg",
@@ -101,7 +101,7 @@
   "author": "Ramakrishna Mission Vidyapith",
   "license": "Public domain",
   "source": "https://commons.wikimedia.org/wiki/File:2022_Maruti_Suzuki_Ertiga_LXi.jpg",
-  "modification": "resized"
+  "modification": "third-party hood sticker pixelated; resized"
  },
  {
   "file": "img/cars/model-v-side.jpg",
@@ -109,7 +109,7 @@
   "author": "Ethan Llamas",
   "license": "CC BY-SA 4.0",
   "source": "https://commons.wikimedia.org/wiki/File:2024_Suzuki_Ertiga_1.5_GLX_Hybrid_in_Snow_White_Pearl,_front_right,_06-16-2024.jpg",
-  "modification": "resized"
+  "modification": "licence-plate region pixelated for privacy; resized"
  },
  {
   "file": "img/cars/model-v-rear.jpg",
@@ -117,7 +117,7 @@
   "author": "Ethan Llamas",
   "license": "CC BY-SA 4.0",
   "source": "https://commons.wikimedia.org/wiki/File:2024_Suzuki_Ertiga_1.5_GLX_Hybrid_in_Snow_White_Pearl,_rear_right,_06-16-2024.jpg",
-  "modification": "resized"
+  "modification": "licence-plate region pixelated for privacy; resized"
  },
  {
   "file": "img/cars/model-v-interior.jpg",
@@ -126,14 +126,6 @@
   "license": "CC BY-SA 4.0",
   "source": "https://commons.wikimedia.org/wiki/File:2022_Kia_Carens_1.4_Premiere_(Indonesia)_interior.jpg",
   "modification": "resized"
- },
- {
-  "file": "img/scenes/hero-road.jpg",
-  "title": "Darcha Padum Road Below Shinku La Lahaul Oct22 A7C 03533.jpg",
-  "author": "This Photo was taken by Timothy A. Gonsalves. Feel free to use my photos, but please mention me as the author. I would much appreciate if you send me an email tagooty@yahoo.com or write on my talk page, for my information. Please contact me before commercial use. Please do not upload an edited image here without consulting me. I would like to make corrections only at my own source to ensure that the changes improve the image and are preserved.Otherwise you may upload an edited image with a new name. Please use one of the templates derivative or extract.",
-  "license": "CC BY-SA 4.0",
-  "source": "https://commons.wikimedia.org/wiki/File:Darcha_Padum_Road_Below_Shinku_La_Lahaul_Oct22_A7C_03533.jpg",
-  "modification": "center-cropped to 16:9 and resized"
  },
  {
   "file": "img/scenes/mountain.jpg",
@@ -154,7 +146,7 @@
  {
   "file": "img/scenes/showroom.jpg",
   "title": "Retro car in showroom (Unsplash).jpg",
-  "author": "Chloé Lam jlmo9492",
+  "author": "Chloï¿½ Lam jlmo9492",
   "license": "CC0",
   "source": "https://commons.wikimedia.org/wiki/File:Retro_car_in_showroom_(Unsplash).jpg",
   "modification": "center-cropped to 16:9 and resized"
@@ -173,7 +165,7 @@
   "author": "Dairokkan9",
   "license": "CC BY-SA 4.0",
   "source": "https://commons.wikimedia.org/wiki/File:2023_Volkswagen_Virtus_Topline_front_20230520.jpg",
-  "modification": "center-cropped to 4:3 and resized"
+  "modification": "center-cropped to 4:3 and licence-plate region pixelated for privacy; resized"
  },
  {
   "file": "img/used/uc-1190.jpg",
@@ -181,7 +173,7 @@
   "author": "LuvsMG481",
   "license": "CC BY-SA 4.0",
   "source": "https://commons.wikimedia.org/wiki/File:2023_Hyundai_Venue_base_front.jpg",
-  "modification": "center-cropped to 4:3 and resized"
+  "modification": "center-cropped to 4:3 and licence-plate region pixelated for privacy; resized"
  },
  {
   "file": "img/used/uc-1191.jpg",
@@ -189,7 +181,7 @@
   "author": "Biswarup Ganguly",
   "license": "CC BY 3.0",
   "source": "https://commons.wikimedia.org/wiki/File:Maruti_Suzuki_Dzire_VXi_VVT_(front).JPG",
-  "modification": "center-cropped to 4:3 and resized"
+  "modification": "center-cropped to 4:3 and licence-plate region pixelated for privacy; resized"
  },
  {
   "file": "img/used/uc-1192.jpg",
@@ -197,7 +189,7 @@
   "author": "Dairokkan9",
   "license": "CC BY-SA 4.0",
   "source": "https://commons.wikimedia.org/wiki/File:2022_Tata_Tiago_XZA%2B_front_20230512.jpg",
-  "modification": "center-cropped to 4:3 and resized"
+  "modification": "center-cropped to 4:3 and licence-plate region pixelated for privacy; resized"
  },
  {
   "file": "img/used/uc-1193.jpg",
@@ -205,7 +197,7 @@
   "author": "Milind Kwatra",
   "license": "CC BY 3.0",
   "source": "https://commons.wikimedia.org/wiki/File:2022_Maruti_Suzuki_Baleno_Alpha_(India)_front_view.jpg",
-  "modification": "center-cropped to 4:3 and resized"
+  "modification": "center-cropped to 4:3 and licence-plate region pixelated for privacy; resized"
  },
  {
   "file": "img/used/uc-1194.jpg",
@@ -221,7 +213,7 @@
   "author": "Premnath Kudva",
   "license": "CC BY-SA 4.0",
   "source": "https://commons.wikimedia.org/wiki/File:Toyota_Innova_Crysta_2.4_Z_front_right.jpg",
-  "modification": "center-cropped to 4:3 and resized"
+  "modification": "center-cropped to 4:3 and licence-plate region pixelated for privacy; resized"
  },
  {
   "file": "img/used/uc-1196.jpg",
@@ -229,7 +221,7 @@
   "author": "VulcanSphere",
   "license": "CC BY 4.0",
   "source": "https://commons.wikimedia.org/wiki/File:2018_Toyota_Fortuner_TRD_Sportivo_looking_from_front.jpg",
-  "modification": "center-cropped to 4:3 and resized"
+  "modification": "center-cropped to 4:3 and licence-plate region pixelated for privacy; resized"
  },
  {
   "file": "img/used/uc-1197.jpg",
@@ -237,7 +229,7 @@
   "author": "Akashpbrahmavar",
   "license": "CC0",
   "source": "https://commons.wikimedia.org/wiki/File:Maruti_Suzuki_Ertiga(1).jpg",
-  "modification": "center-cropped to 4:3 and resized"
+  "modification": "center-cropped to 4:3 and licence-plate region pixelated for privacy; resized"
  },
  {
   "file": "img/used/uc-1198.jpg",
@@ -245,7 +237,7 @@
   "author": "Kannada DriveSpark",
   "license": "CC BY 3.0",
   "source": "https://commons.wikimedia.org/wiki/File:2022_Kia_Carens_1.4_Luxury_Plus_(India)_front_view_01.jpg",
-  "modification": "center-cropped to 4:3 and resized"
+  "modification": "center-cropped to 4:3 and licence-plate region pixelated for privacy; resized"
  },
  {
   "file": "img/used/uc-1199.jpg",
@@ -253,7 +245,7 @@
   "author": "Keithkberger",
   "license": "Public domain",
   "source": "https://commons.wikimedia.org/wiki/File:Tata_Nexon_Blue_Dual_Tone.jpg",
-  "modification": "center-cropped to 4:3 and resized"
+  "modification": "center-cropped to 4:3 and licence-plate region pixelated for privacy; resized"
  },
  {
   "file": "img/used/uc-1200.jpg",
@@ -269,7 +261,7 @@
   "author": "Ethan Llamas",
   "license": "CC BY-SA 4.0",
   "source": "https://commons.wikimedia.org/wiki/File:2022_Kia_Seltos_(gray,_front).jpg",
-  "modification": "center-cropped to 4:3 and resized"
+  "modification": "center-cropped to 4:3 and licence-plate region pixelated for privacy; resized"
  },
  {
   "file": "img/used/uc-1202.jpg",
@@ -289,10 +281,10 @@
  },
  {
   "file": "img/og-default.jpg",
-  "title": "Darcha Padum Road Below Shinku La Lahaul Oct22 A7C 03533.jpg",
-  "author": "This Photo was taken by Timothy A. Gonsalves. Feel free to use my photos, but please mention me as the author. I would much appreciate if you send me an email tagooty@yahoo.com or write on my talk page, for my information. Please contact me before commercial use. Please do not upload an edited image here without consulting me. I would like to make corrections only at my own source to ensure that the changes improve the image and are preserved.Otherwise you may upload an edited image with a new name. Please use one of the templates derivative or extract.",
-  "license": "CC BY-SA 4.0",
-  "source": "https://commons.wikimedia.org/wiki/File:Darcha_Padum_Road_Below_Shinku_La_Lahaul_Oct22_A7C_03533.jpg",
-  "modification": "cropped to 1200x630 from hero-road and resized"
+  "title": "Hyundai Creta orange.jpg",
+  "author": "Throwawayacc222",
+  "license": "CC0",
+  "source": "https://commons.wikimedia.org/wiki/File:Hyundai_Creta_orange.jpg",
+  "modification": "cropped to 1200x630 from cars/model-s-hero.jpg and resized"
  }
 ]

@@ -2,7 +2,7 @@
   'use strict';
   var S = window.S, $ = S.$, esc = S.esc, cons = [], busy = false;
   function pad(n) { return (n < 10 ? '0' : '') + n; }
-  function mmss(s) { s = Math.abs(Math.round(s)); return pad(Math.floor(s / 60)) + ':' + pad(s % 60); }
+  function mmss(s) { return S.dur(s); }
   function tick() {
     S.$$('[data-due]').forEach(function (el) {
       var rem = (Date.parse(el.getAttribute('data-due')) - Date.now()) / 1000, c = 'g', t = mmss(rem) + ' left';

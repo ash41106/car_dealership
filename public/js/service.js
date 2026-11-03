@@ -4,7 +4,7 @@
   var COLS = [['booked', 'Booked'], ['checked_in', 'Checked in'], ['in_progress', 'In progress'], ['ready', 'Ready'], ['delivered', 'Delivered']], NEXT = { booked: 'checked_in', confirmed: 'checked_in', checked_in: 'in_progress', in_progress: 'ready', ready: 'delivered' };
   $('#sv-date').value = date;
   function pad(n) { return (n < 10 ? '0' : '') + n; }
-  function mmss(s) { s = Math.abs(Math.round(s)); return pad(Math.floor(s / 60)) + ':' + pad(s % 60); }
+  function mmss(s) { return S.dur(s); }
   setInterval(function () { S.$$('[data-due]').forEach(function (el) { var rem = (Date.parse(el.getAttribute('data-due')) - Date.now()) / 1000, c = 'g', t = mmss(rem) + ' left'; if (rem < 0) { c = 'r'; t = 'Late +' + mmss(rem); } else if (rem <= 300) c = 'a'; el.className = 'sla ' + c; el.textContent = t; }); }, 1000);
   function jc(b) {
     var n = NEXT[b.status];

@@ -62,7 +62,7 @@
   }
   // lightbox
   var PX = 'data:image/gif;base64,R0lGODlhAQABAAAAACH5BAEKAAEALAAAAAABAAEAAAICTAEAOw==';
-  var gal = A.$('.stage img.stage-img, .gal img').filter(function (i) { return !i.closest('[data-nolb]'); });
+  var gal = A.$$('.stage img.stage-img, .gal img').filter(function (i) { return !i.closest('[data-nolb]'); });
   if (gal.length && d.createElement('dialog').showModal) {
     var dl = d.createElement('dialog'); dl.className = 'lb'; dl.setAttribute('aria-label', 'Gallery'); dl.innerHTML = '<img alt="" src="' + PX + '"><div class="lb-c"><button class="btn btn-sm btn-w" type="button" data-p>&larr;</button><button class="btn btn-sm btn-w" type="button" data-x>' + A.esc(A.I.close || 'Close') + '</button><button class="btn btn-sm btn-w" type="button" data-n>&rarr;</button></div>'; d.body.appendChild(dl);
     var idx = 0, li = A.$('img', dl);
@@ -83,4 +83,18 @@
     ft.addEventListener('click', function () { sc.hidden = !fl.classList.contains('open'); });
     sc.addEventListener('click', cl); x.addEventListener('click', cl); d.addEventListener('keydown', function (e) { if (e.key === 'Escape' && fl.classList.contains('open')) cl(); });
   }
+})();
+
+(function () {
+  var A = window.A, w = window, els = A.$$('[data-bg]'); if (!els.length) return;
+  var big = w.innerWidth > 800 || w.devicePixelRatio > 1.5;
+  var load = function (el) { var u = (big && el.getAttribute('data-bg-l')) || el.getAttribute('data-bg'); el.style.backgroundImage = 'url(' + u + ')'; el.removeAttribute('data-bg'); el.classList.add('bg-in'); };
+  if (!('IntersectionObserver' in w)) { w.addEventListener('load', function () { els.forEach(load); }); return; }
+  var io = new IntersectionObserver(function (es) { es.forEach(function (e) { if (e.isIntersecting) { io.unobserve(e.target); load(e.target); } }); }, { rootMargin: '300px 0px' });
+  els.forEach(function (el) { if (el.classList.contains('hero2-bg')) { w.addEventListener('load', function () { setTimeout(function () { if (el.hasAttribute('data-bg')) load(el); }, 600); }); } else io.observe(el); });
+})();
+(function () {
+  var g = document.querySelector('.hero2 .ghost'); if (!g) return;
+  var on = function () { setTimeout(function () { g.classList.add('on'); }, 300); };
+  if (document.readyState === 'complete') on(); else window.addEventListener('load', on);
 })();

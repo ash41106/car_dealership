@@ -38,9 +38,20 @@ function imgUrl(slug, bodyType, hexColor) {
 // <img> with explicit size, lazy by default
 function img(src, alt, o) {
   o = o || {};
-  return `<img src="${esc(src)}" alt="${esc(alt || '')}" width="${o.w || 800}" height="${o.h || 400}" ${o.eager ? 'fetchpriority="high"' : 'loading="lazy" decoding="async"'}${o.cls ? ` class="${esc(o.cls)}"` : ''}>`;
+  const M = require('./media'), v = M.variants(src);
+  const loading = o.eager ? 'fetchpriority="high" decoding="async"' : 'loading="lazy" decoding="async"';
+  const cls = o.cls ? ` class="${esc(o.cls)}"` : '';
+  if (!v) return `<img src="${esc(src)}" alt="${esc(alt || '')}" width="${o.w || 800}" height="${o.h || 400}" ${loading}${cls}>`;
+  const sizes = o.sizes || '(min-width:1100px) 340px, (min-width:600px) 45vw, 100vw';
+  const mid = v.ws[Math.min(1, v.ws.length - 1)];
+  return `<picture><source type="image/webp" srcset="${esc(M.vset(v, 'webp'))}" sizes="${esc(sizes)}"><img src="${esc(M.vurl(v, mid, 'jpg'))}" srcset="${esc(M.vset(v, 'jpg'))}" sizes="${esc(sizes)}" alt="${esc(alt || '')}" width="${v.w}" height="${v.h}" ${loading}${cls}></picture>`;
 }
 
+function preloadTag(p) { // p: {src, sizes}
+  const M = require('./media'), v = M.variants(p.src);
+  if (!v) return `<link rel="preload" as="image" href="${esc(p.src)}" fetchpriority="high">`;
+  return `<link rel="preload" as="image" type="image/webp" imagesrcset="${esc(M.vset(v, 'webp'))}" imagesizes="${esc(p.sizes || '100vw')}" fetchpriority="high">`;
+}
 function langHref(ctx, target) {
   const u = new URL(ctx.req.url, 'http://x');
   u.searchParams.set('lang', target);
@@ -66,7 +77,7 @@ function page(o) {
 ${o.noindex ? '<meta name="robots" content="noindex,nofollow">' : `<link rel="canonical" href="${esc(canon)}"><link rel="alternate" hreflang="en" href="${esc(canon)}?lang=en"><link rel="alternate" hreflang="hi" href="${esc(canon)}?lang=hi"><link rel="alternate" hreflang="x-default" href="${esc(canon)}">`}
 <meta property="og:type" content="${o.ogType || 'website'}"><meta property="og:title" content="${esc(title)}"><meta property="og:description" content="${esc(desc)}"><meta property="og:url" content="${esc(canon)}"><meta property="og:image" content="${esc(og)}"><meta property="og:locale" content="${lang === 'hi' ? 'hi_IN' : 'en_IN'}"><meta name="twitter:card" content="summary_large_image">
 <meta name="theme-color" content="#0b0b0b"><link rel="icon" href="/img/favicon.svg" type="image/svg+xml">
-<link rel="stylesheet" href="/css/app.css?v=2"><link rel="stylesheet" href="/css/fx.css?v=2">${(o.css || []).map(c => `<link rel="stylesheet" href="${c}?v=1">`).join('')}${ld}</head>
+${o.preload ? preloadTag(o.preload) : ''}<link rel="stylesheet" href="/css/app.css?v=3"><link rel="stylesheet" href="/css/fx.css?v=3">${(o.css || []).map(c => `<link rel="stylesheet" href="${c}?v=1">`).join('')}${ld}</head>
 <body class="${esc(o.bodyClass || '')}"><div class="progress" id="progress" aria-hidden="true"></div>
 <a class="skip" href="#main">${esc(t('skip'))}</a>
 <header class="hdr" id="hdr"><div class="wrap hdr-in">

@@ -17,3 +17,10 @@
     A.$('[data-strip-next]').addEventListener('click', function () { st.scrollBy({ left: step(), behavior: A.RM ? 'auto' : 'smooth' }); });
   }
 })();
+(function () {
+  var A = window.A, f = A.$('.vframe'); if (!f) return;
+  var go = function () { setTimeout(function () { f.classList.add('ready'); }, 1500); };
+  if (document.readyState === 'complete') go(); else window.addEventListener('load', go);
+  // if the user changes slide before idle, reveal immediately
+  A.$$('[data-prev],[data-next],.dot-b').forEach(function (b) { b.addEventListener('click', function () { f.classList.add('ready'); }); });
+})();

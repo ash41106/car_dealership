@@ -69,7 +69,7 @@
       A.$('#pf').onsubmit = function (ev) { ev.preventDefault(); var f = ev.target; A.post('/api/customer/me', { name: f.elements.name.value.trim(), email: f.elements.email.value.trim() || '', lang: f.elements.lang.value }, 'PATCH').then(function (r) { me = r.customer || r; remember(me); msg(T.saved2); if (me.lang && me.lang !== A.lang) location.href = '/account?lang=' + me.lang; }).catch(function (x) { if (x.errors && x.errors.email) F.setErr(f.elements.email, x.errors.email); else fail(x); }); };
       box.onclick = function (ev) {
         var b = ev.target.closest('[data-dr]'); if (!b) return; var k = b.getAttribute('data-dr');
-        if (k === 'export') { A.post('/api/customer/data-request', { type: 'export' }).catch(function () { }); fetch('/api/customer/export', { credentials: 'same-origin' }).then(function (r) { return r.blob(); }).then(function (bl) { var a = document.createElement('a'); a.href = URL.createObjectURL(bl); a.download = 'my-data.json'; a.click(); msg(T.exportDone); }).catch(fail); return; }
+        if (k === 'export') { fetch('/api/customer/export', { credentials: 'same-origin' }).then(function (r) { return r.blob(); }).then(function (bl) { var a = document.createElement('a'); a.href = URL.createObjectURL(bl); a.download = 'my-data.json'; a.click(); msg(T.exportDone); }).catch(fail); return; }
         if (!confirm(k === 'delete' ? T.delQ : T.wdQ)) return;
         A.post('/api/customer/data-request', { type: k }).then(function () { msg(T.reqDone); }).catch(fail);
       };
@@ -84,7 +84,9 @@
     show();
   }
   function boot() {
-    A.json('/api/customer/me').then(function (r) { me = r.customer || r; remember(me); try { localStorage.setItem('custName', me.name || me.phone || ''); } catch (x) { } dash(); }).catch(function () { signin(); });
+    var flag = false; try { flag = !!localStorage.getItem('cust'); } catch (x) { }
+    if (!flag) { signin(); return; }
+    A.json('/api/customer/me').then(function (r) { me = r.customer || r; remember(me); try { localStorage.setItem('custName', me.name || me.phone || ''); } catch (x) { } dash(); }).catch(function () { try { localStorage.removeItem('cust'); localStorage.removeItem('custName'); } catch (x) { } signin(); });
   }
   boot();
 })();
