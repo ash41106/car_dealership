@@ -83,3 +83,9 @@
     });
   }
 })();
+(function () {
+  var A = window.A, sv = A.$('form[data-sv]'); if (!sv) return;
+  var q = new URLSearchParams(location.search);
+  if (q.get('reg') && sv.elements.regNo) sv.elements.regNo.value = q.get('reg');
+  if (q.get('model') && sv.elements.model) { var o = A.$$('option', sv.elements.model).filter(function (x) { return x.value.toLowerCase() === q.get('model').toLowerCase(); })[0]; if (o) sv.elements.model.value = o.value; }
+})();

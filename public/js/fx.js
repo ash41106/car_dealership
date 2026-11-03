@@ -61,9 +61,10 @@
     draw();
   }
   // lightbox
-  var gal = A.$$('.stage img, .gal img');
+  var PX = 'data:image/gif;base64,R0lGODlhAQABAAAAACH5BAEKAAEALAAAAAABAAEAAAICTAEAOw==';
+  var gal = A.$('.stage img.stage-img, .gal img').filter(function (i) { return !i.closest('[data-nolb]'); });
   if (gal.length && d.createElement('dialog').showModal) {
-    var dl = d.createElement('dialog'); dl.className = 'lb'; dl.setAttribute('aria-label', 'Gallery'); dl.innerHTML = '<img alt=""><div class="lb-c"><button class="btn btn-sm btn-w" type="button" data-p>&larr;</button><button class="btn btn-sm btn-w" type="button" data-x>' + A.esc(A.I.close || 'Close') + '</button><button class="btn btn-sm btn-w" type="button" data-n>&rarr;</button></div>'; d.body.appendChild(dl);
+    var dl = d.createElement('dialog'); dl.className = 'lb'; dl.setAttribute('aria-label', 'Gallery'); dl.innerHTML = '<img alt="" src="' + PX + '"><div class="lb-c"><button class="btn btn-sm btn-w" type="button" data-p>&larr;</button><button class="btn btn-sm btn-w" type="button" data-x>' + A.esc(A.I.close || 'Close') + '</button><button class="btn btn-sm btn-w" type="button" data-n>&rarr;</button></div>'; d.body.appendChild(dl);
     var idx = 0, li = A.$('img', dl);
     var show = function (i) { idx = (i + gal.length) % gal.length; li.src = gal[idx].currentSrc || gal[idx].src; li.alt = gal[idx].alt; };
     gal.forEach(function (g, i) { var t = g.closest('.stage,li'); t.addEventListener('click', function () { show(i); dl.showModal(); }); });

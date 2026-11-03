@@ -237,6 +237,8 @@ const S = {
   spec_trans: { en: "Gearbox", hi: "गियरबॉक्स" },
   spec_body: { en: "Body", hi: "बॉडी" },
   spec_variants: { en: "Variants", hi: "वेरिएंट" },
+  photo_credits: { en: 'Photo credits', hi: 'फ़ोटो क्रेडिट' },
+  credits_sub: { en: 'Photographs are from Wikimedia Commons under Creative Commons licences. Thank you to the photographers.', hi: 'तस्वीरें विकिमीडिया कॉमन्स से क्रिएटिव कॉमन्स लाइसेंस के तहत हैं। फ़ोटोग्राफ़रों का धन्यवाद।' },
   grievance: { en: 'Grievance officer', hi: 'शिकायत अधिकारी' }
 };
 
@@ -247,7 +249,7 @@ function make(lang) {
   return t;
 }
 // subset of strings shipped to client JS
-const CLIENT_KEYS = ['loading', 'error_generic', 'retry', 'err_name', 'err_phone', 'err_email', 'err_consent', 'err_required', 'sending', 'submit', 'slot_taken', 'no_slots', 'slot_conflict', 'thanks', 'thanks_lead', 'your_consultant', 'booking_done', 'remaining', 'full', 'select', 'ex_showroom', 'on_road', 'valid_until', 'price_updating', 'request_quote', 'price_note', 'per_month', 'optout_done', 'inspection_pass', 'inspection_attn', 'step', 'continue', 'confirm_booking', 'choose_slot', 'compare', 'close'];
+const CLIENT_KEYS = ['loading', 'error_generic', 'retry', 'err_name', 'err_phone', 'err_email', 'err_consent', 'err_required', 'sending', 'submit', 'slot_taken', 'no_slots', 'slot_conflict', 'thanks', 'thanks_lead', 'your_consultant', 'booking_done', 'remaining', 'full', 'select', 'ex_showroom', 'on_road', 'valid_until', 'price_updating', 'request_quote', 'price_note', 'per_month', 'optout_done', 'inspection_pass', 'inspection_attn', 'step', 'continue', 'confirm_booking', 'choose_slot', 'compare', 'close', 'name', 'privacy'];
 function client(lang) {
   const t = make(lang); const o = {};
   CLIENT_KEYS.forEach(k => { o[k] = t(k); });

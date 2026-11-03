@@ -36,7 +36,7 @@
     [[em, 'Enter your email'], [pw, 'Enter your password']].forEach(function (p) { var er = S.$('#' + p[0].id + '-e'); if (!p[0].value.trim()) { er.textContent = p[1]; er.hidden = false; p[0].setAttribute('aria-invalid', 'true'); bad = true; } else { er.hidden = true; p[0].removeAttribute('aria-invalid'); } });
     if (bad) return; var b = S.$('[type=submit]', lf); b.disabled = true; msg.textContent = '';
     S.api('/api/auth/login', 'POST', { email: em.value.trim(), password: pw.value }).then(function (r) {
-      var home = { consultant: '/staff/leads', used_manager: '/admin/used', service_advisor: '/staff/bookings', admin: '/admin' }[r.user.role] || '/staff/leads';
+      var home = '/staff';
       location.href = lf.getAttribute('data-next') || home;
     }).catch(function (er) { b.disabled = false; msg.className = 'form-msg bad'; msg.textContent = er.message || 'Sign in failed'; });
   });
@@ -48,4 +48,34 @@
       if (e.shiftKey && d.activeElement === a) { e.preventDefault(); z.focus(); } else if (!e.shiftKey && d.activeElement === z) { e.preventDefault(); a.focus(); }
     });
   };
+})();
+(function () {
+  'use strict';
+  var S = window.S, d = document;
+  S.can = function (p) { var P = (S.user && S.user.perms) || []; if (P.indexOf('*') >= 0) return true; return [].concat(p).some(function (x) { return P.indexOf(x) >= 0; }); };
+  var t = S.$('#sb-t'), sb = S.$('#sb');
+  if (t && sb) {
+    t.addEventListener('click', function () { var o = sb.classList.toggle('open'); t.setAttribute('aria-expanded', o); });
+    d.addEventListener('keydown', function (e) { if (e.key === 'Escape' && sb.classList.contains('open')) { sb.classList.remove('open'); t.setAttribute('aria-expanded', 'false'); t.focus(); } });
+    d.addEventListener('click', function (e) { if (sb.classList.contains('open') && !sb.contains(e.target) && e.target !== t) sb.classList.remove('open'); });
+  }
+  var ck = S.$('#s-clock'); if (ck) { var tick = function () { ck.textContent = new Date().toLocaleTimeString('en-IN'); }; tick(); setInterval(tick, 1000); }
+  S.$$('[data-fill]').forEach(function (r) {
+    var go = function () { var p = r.getAttribute('data-fill').split('|'); S.$('#em').value = p[0]; S.$('#pw').value = p[1]; S.$('#pw').focus(); };
+    r.addEventListener('click', go); r.addEventListener('keydown', function (e) { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); go(); } });
+  });
+  // fix post-login redirect for new roles
+  var lf = S.$('#lf');
+  if (lf) lf.addEventListener('submit', function () { S._lf = true; });
+})();
+
+(function () {
+  'use strict';
+  var S = window.S, f = S.$('#cpf'); if (!f) return;
+  var lo = S.$('#logout'); if (lo) lo.addEventListener('click', function () { S.api('/api/auth/logout', 'POST', {}).finally(function () { location.href = '/staff/login'; }); });
+  f.addEventListener('submit', function (e) {
+    e.preventDefault(); var m = S.$('.form-msg', f), er = S.$('#cp1-e');
+    if (f.elements.new_password.value.length < 8) { er.textContent = 'Use at least 8 characters.'; er.hidden = false; f.elements.new_password.setAttribute('aria-invalid', 'true'); return; } er.hidden = true;
+    S.api('/api/auth/change-password', 'POST', { current_password: f.elements.current_password.value, new_password: f.elements.new_password.value }).then(function () { location.href = '/staff'; }).catch(function (x) { m.className = 'form-msg bad'; m.textContent = S.errText(x); });
+  });
 })();

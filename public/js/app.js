@@ -56,7 +56,12 @@
   var saved = {}; try { saved = JSON.parse(localStorage.getItem('saved') || '{}'); } catch (e) { }
   A.$$('[data-save]').forEach(function (b) {
     var k = b.getAttribute('data-save'); if (saved[k]) b.setAttribute('aria-pressed', 'true');
-    b.addEventListener('click', function () { var on = b.getAttribute('aria-pressed') !== 'true'; b.setAttribute('aria-pressed', on); if (on) saved[k] = 1; else delete saved[k]; try { localStorage.setItem('saved', JSON.stringify(saved)); } catch (e) { } });
+    b.addEventListener('click', function () {
+      var on = b.getAttribute('aria-pressed') !== 'true'; b.setAttribute('aria-pressed', on); if (on) saved[k] = 1; else delete saved[k]; try { localStorage.setItem('saved', JSON.stringify(saved)); } catch (e) { }
+      var kind = /^uc-/.test(k) ? 'used' : 'new', signed = false; try { signed = !!localStorage.getItem('cust'); } catch (e) { }
+      if (signed) { (on ? A.post('/api/customer/saved', { kind: kind, ref: k }) : A.json('/api/customer/saved?kind=' + kind + '&ref=' + encodeURIComponent(k), { method: 'DELETE', headers: { 'X-Requested-With': 'fetch' } })).catch(function () { }); }
+      else if (on) { var n = d.getElementById('save-note'); if (!n) { n = d.createElement('div'); n.id = 'save-note'; n.className = 'tray on'; n.style.bottom = '84px'; n.setAttribute('role', 'status'); n.innerHTML = '<span>' + (LANG === 'hi' ? 'सभी डिवाइस पर सेव रखने के लिए साइन इन करें' : 'Sign in to keep saved cars on all devices') + '</span><a class="btn btn-sm" href="/account">' + (LANG === 'hi' ? 'साइन इन' : 'Sign in') + '</a>'; d.body.appendChild(n); setTimeout(function () { n.remove(); }, 5000); } }
+    });
   });
   A.$$('[data-toggle]').forEach(function (b) { b.addEventListener('click', function () { var t = A.$(b.getAttribute('data-toggle')), o = t.classList.toggle('open'); b.setAttribute('aria-expanded', o); }); });
   A.$$('[data-autosubmit]').forEach(function (s) { s.addEventListener('change', function () { s.form.submit(); }); });
@@ -74,4 +79,11 @@
     box.addEventListener('emi:price', function (ev) { box.setAttribute('data-price', ev.detail); var dp = g('dp'); dp.value = Math.round(ev.detail * 0.2 / 5000) * 5000; calc(); });
     calc();
   });
+})();
+
+(function () {
+  try {
+    var nm = localStorage.getItem('custName'), si = document.querySelector('.hdr .signin');
+    if (nm && si) si.textContent = nm.split(' ')[0];
+  } catch (e) { }
 })();

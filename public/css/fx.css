@@ -127,3 +127,11 @@ dialog.lb .lb-c{display:flex;justify-content:space-between;margin-top:10px}
 @media(prefers-reduced-motion:reduce){body{animation:none}.marquee-t{animation:none}.vframe,.slash-a,.slash-b{animation:none}.card[data-tilt]:hover{transform:none}.cur,.cur-r{display:none}.vframe .slide img{transition:none;transform:none}}
 body{animation:none!important}
 .crumbs ol{align-items:center}.crumbs li{display:flex;align-items:center}
+
+.vframe .slide img,.card-img img,.stage-img,.tile img{object-fit:cover;object-position:50% 60%}
+.mcard .card-img img{object-position:50% 62%}
+.vframe .slide img{object-position:55% 58%}
+
+.save-b{margin-left:10px}.save-b[aria-pressed=true]{color:var(--red);border-color:var(--red)}.save-b[aria-pressed=true] path{fill:currentColor}
+.mcard .heart{top:12px;right:12px}.mcard .cmp{top:auto;bottom:auto;position:static;margin:8px 0 0;width:max-content;background:var(--grey)}
+.ftr .mapc{padding:16px 16px 16px 64px;min-height:88px}

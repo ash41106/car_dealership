@@ -83,28 +83,28 @@
       '<section><h3>Customer</h3><p>' + chip(l) + ' <span class="st st-' + esc(l.status) + '">' + esc(l.status.replace('_', ' ')) + '</span>' + (l.opted_out ? ' <span class="st">opted out</span>' : '') + '</p>' +
       '<dl class="kv"><dt>Phone</dt><dd><a href="tel:' + esc(l.phone) + '">' + esc(l.phone) + '</a></dd>' + (l.email ? '<dt>Email</dt><dd>' + esc(l.email) + '</dd>' : '') + '<dt>Interest</dt><dd>' + esc(l.model_name || l.type) + '</dd><dt>Source</dt><dd>' + esc(l.source) + '</dd><dt>Showroom</dt><dd>' + esc(l.showroom_name || '-') + '</dd><dt>Assigned</dt><dd>' + esc(l.assignee_name || 'Unassigned') + '</dd><dt>Created</dt><dd>' + esc(S.fmtDT(l.created_at)) + '</dd>' +
       (l.message ? '<dt>Message</dt><dd>' + esc(l.message) + '</dd>' : '') + (ti ? '<dt>Trade-in</dt><dd>' + esc(Object.keys(ti).map(function (k) { return k + ': ' + ti[k]; }).join(', ')) + '</dd>' : '') + '</dl></section>' +
-      '<section class="ai-box"><span class="ai-tag">AI-generated - review before use</span>' + renderAi(ai.summary) + '<button class="btn btn-sm btn-o" type="button" id="ai-regen">Regenerate</button></section>' +
-      '<section><h3>Status and notes</h3><div class="rowf"><div class="field"><label for="d-status">Status</label><select id="d-status">' + S.opts(['new', 'contacted', 'test_drive', 'negotiation', 'won', 'lost'], l.status) + '</select></div></div>' +
-      '<div class="field"><label for="d-notes">Notes</label><textarea id="d-notes" rows="3">' + esc(l.notes || '') + '</textarea></div><button class="btn btn-sm" type="button" id="d-save">Save status and notes</button></section>' +
-      '<section><h3>Reassign</h3><div class="rowf"><div class="field"><label for="d-user">Consultant</label><select id="d-user">' + S.opts(cons.map(function (c) { return [c.id, c.name + (c.showroom_name ? ' (' + c.showroom_name + ')' : '')]; }), l.assigned_to, 'Choose') + '</select></div><div class="field"><label for="d-reason">Reason</label><input id="d-reason" maxlength="200"></div></div><button class="btn btn-sm btn-o" type="button" id="d-re">Reassign</button></section>' +
-      '<section><h3>First reply</h3><div class="field"><label for="d-ch">Channel</label><select id="d-ch"><option value="whatsapp">WhatsApp</option><option value="sms">SMS</option></select></div>' +
+      '<section class="ai-box"><span class="ai-tag">AI-generated - review before use</span>' + renderAi(ai.summary) + (S.can('lead.ai') ? '<button class="btn btn-sm btn-o" type="button" id="ai-regen">Regenerate</button>' : '') + '</section>' +
+      (S.can('lead.update') ? '<section><h3>Status and notes</h3><div class="rowf"><div class="field"><label for="d-status">Status</label><select id="d-status">' + S.opts(['new', 'contacted', 'test_drive', 'negotiation', 'won', 'lost'], l.status) + '</select></div></div>' +
+      '<div class="field"><label for="d-notes">Notes</label><textarea id="d-notes" rows="3">' + esc(l.notes || '') + '</textarea></div><button class="btn btn-sm" type="button" id="d-save">Save status and notes</button></section>' : '') +
+      (S.can('lead.reassign') ? '<section><h3>Reassign</h3><div class="rowf"><div class="field"><label for="d-user">Consultant</label><select id="d-user">' + S.opts(cons.map(function (c) { return [c.id, c.name + (c.showroom_name ? ' (' + c.showroom_name + ')' : '')]; }), l.assigned_to, 'Choose') + '</select></div><div class="field"><label for="d-reason">Reason</label><input id="d-reason" maxlength="200"></div></div><button class="btn btn-sm btn-o" type="button" id="d-re">Reassign</button></section>' : '') +
+      (S.can('lead.reply') ? '<section><h3>First reply</h3><div class="field"><label for="d-ch">Channel</label><select id="d-ch"><option value="whatsapp">WhatsApp</option><option value="sms">SMS</option></select></div>' +
       '<div class="field"><label for="d-text">Message (AI draft - edit before sending)</label><textarea id="d-text" rows="6" maxlength="1000">' + esc(ai.draft || '') + '</textarea><p class="muted small">Do not quote discounts, offers or on-road amounts. The server rejects them.</p><p class="err" id="d-text-e" role="alert" hidden></p></div>' +
-      '<label class="chk"><input type="checkbox" id="d-ok"><span>I have reviewed and edited this message</span></label><button class="btn" type="button" id="d-send" disabled>Send reply</button></section>' +
+      '<label class="chk"><input type="checkbox" id="d-ok"><span>I have reviewed and edited this message</span></label><button class="btn" type="button" id="d-send" disabled>Send reply</button></section>' : '') +
       '<section><h3>Activity</h3><ul class="tl">' + (tl.length ? tl.map(function (x) { return '<li class="' + (x.rep ? 'rep' : '') + '"><small>' + esc(S.fmtDT(x.t)) + (x.u ? ' by ' + esc(x.u) : '') + '</small><strong>' + esc(x.k) + '</strong> ' + esc(x.d || '') + '</li>'; }).join('') : '<li>No activity yet</li>') + '</ul></section>';
     var id = l.id;
     function rerender() { return S.api('/api/staff/leads/' + id).then(function (r2) { render(r2, cons); tick(); }); }
-    $('#ai-regen').onclick = function (e) { e.target.disabled = true; e.target.textContent = 'Regenerating...'; S.api('/api/staff/leads/' + id + '/ai', 'POST', {}).then(rerender).catch(function (er) { S.toast(S.errText(er), 1); e.target.disabled = false; }); };
-    $('#d-save').onclick = function () { S.api('/api/staff/leads/' + id, 'PATCH', { status: $('#d-status').value, notes: $('#d-notes').value }).then(function () { S.toast('Saved'); return rerender(); }).catch(function (er) { S.toast(S.errText(er), 1); }); };
-    $('#d-re').onclick = function () { var u = $('#d-user').value; if (!u) { S.toast('Choose a consultant', 1); $('#d-user').focus(); return; } S.api('/api/staff/leads/' + id + '/reassign', 'POST', { user_id: +u, reason: $('#d-reason').value }).then(function () { S.toast('Reassigned'); return rerender(); }).catch(function (er) { S.toast(S.errText(er), 1); }); };
+    if ($('#ai-regen')) $('#ai-regen').onclick = function (e) { e.target.disabled = true; e.target.textContent = 'Regenerating...'; S.api('/api/staff/leads/' + id + '/ai', 'POST', {}).then(rerender).catch(function (er) { S.toast(S.errText(er), 1); e.target.disabled = false; }); };
+    if ($('#d-save')) $('#d-save').onclick = function () { S.api('/api/staff/leads/' + id, 'PATCH', { status: $('#d-status').value, notes: $('#d-notes').value }).then(function () { S.toast('Saved'); return rerender(); }).catch(function (er) { S.toast(S.errText(er), 1); }); };
+    if ($('#d-re')) $('#d-re').onclick = function () { var u = $('#d-user').value; if (!u) { S.toast('Choose a consultant', 1); $('#d-user').focus(); return; } S.api('/api/staff/leads/' + id + '/reassign', 'POST', { user_id: +u, reason: $('#d-reason').value }).then(function () { S.toast('Reassigned'); return rerender(); }).catch(function (er) { S.toast(S.errText(er), 1); }); };
     var ok = $('#d-ok'), send = $('#d-send'), tx = $('#d-text');
     function gate() { send.disabled = !(ok.checked && tx.value.trim()); }
-    ok.onchange = gate; tx.oninput = function () { ok.checked = false; gate(); $('#d-text-e').hidden = true; };
+    if (send) { ok.onchange = gate; tx.oninput = function () { ok.checked = false; gate(); $('#d-text-e').hidden = true; };
     send.onclick = function () {
       send.disabled = true; send.textContent = 'Sending...';
       S.api('/api/staff/leads/' + id + '/reply', 'POST', { text: tx.value, channel: $('#d-ch').value, confirmed_edit: true }).then(function (r2) {
         S.toast(r2.blocked ? 'Not sent: customer has opted out' : 'Reply sent', r2.blocked); return rerender();
       }).catch(function (er) { var e = $('#d-text-e'); e.textContent = er.message; e.hidden = false; send.textContent = 'Send reply'; gate(); });
-    };
+    }; }
     tick();
   }
 })();

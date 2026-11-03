@@ -68,6 +68,18 @@
     });
   });
 
+  A.$$('form[data-cb]').forEach(function (form) {
+    F.live(form);
+    form.addEventListener('submit', function (ev) {
+      ev.preventDefault(); if (!F.validate(form)) return;
+      var g = function (n) { return form.elements[n] ? form.elements[n].value.trim() : ''; };
+      F.busy(form, true);
+      A.post('/api/service/callback', { name: g('name'), phone: F.phone(g('phone')), reason: g('reason') || undefined, preferred_time: g('preferred_time') || undefined, consent: true, lang: A.lang }).then(function () {
+        F.done(form, '<h2 class="h3">' + A.esc(I.thanks) + '</h2><p>' + A.esc(I.thanks_lead) + '</p>');
+      }).catch(function (e) { F.busy(form, false); F.serverErrors(form, e); });
+    });
+  });
+
   var oo = A.$('form[data-optout]');
   if (oo) {
     F.live(oo);
@@ -78,4 +90,10 @@
         .catch(function (e) { F.busy(oo, false); F.serverErrors(oo, e); });
     });
   }
+})();
+
+(function () {
+  var A = window.A, p = null; try { p = JSON.parse(localStorage.getItem('cust') || 'null'); } catch (e) { }
+  if (!p) return;
+  A.$$('form input[name=name],form input[name=phone],form input[name=email]').forEach(function (i) { if (!i.value && p[i.name] && !i.closest('[data-optout]')) i.value = p[i.name]; });
 })();

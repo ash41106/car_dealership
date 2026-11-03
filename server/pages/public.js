@@ -83,6 +83,7 @@ function modelPage(ctx) {
   const sw = colors.map((c, i) => `<button type="button" class="sw${i ? '' : ' on'}" data-color="${esc(String(c.hex).replace('#', ''))}"${M.carColour(m.slug, c.name_en) ? ` data-src="${esc(M.carColour(m.slug, c.name_en))}"` : ''} style="--c:${esc(c.hex)}" aria-pressed="${i ? 'false' : 'true'}" aria-label="${esc(L(c, 'name', lang))}" title="${esc(L(c, 'name', lang))}"></button>`).join('');
   const extra = []; ['side', 'rear', 'interior'].forEach(k => { const c = M.car(m.slug, k, m.body_type, hx0); if (c.photo && c.src !== hero) extra.push({ url: c.src, alt: m.name + ' ' + k, w: c.w, h: c.h }); });
   const gal = extra.map(g => `<li>${img(g.url, g.alt, { w: g.w, h: g.h })}</li>`).join('') + (m.gallery || []).map(g => `<li>${img(g.url, L(g, 'alt', lang) || m.name)}</li>`).join('');
+  const photoMode = heroI.photo;
   const tr = [...new Set((m.variants || []).map(v => v.transmission))].join(' / ');
   const sp = (re) => { const x = (m.specs || []).find(z => re.test(String(z.label_en))); return x ? [L(x, 'label', lang), x.value] : null; };
   const strip = [[ICON.fuel, t('spec_fuel'), (m.fuel_types || []).join(' / ')], [ICON.gear, t('spec_trans'), tr], [ICON.car, t('spec_body'), t(m.body_type)], [ICON.seat, t('spec_variants'), (m.variants || []).length]].concat([sp(/mileage|efficien/i), sp(/power|engine/i)].filter(Boolean).map(x => [ICON.bolt, x[0], x[1]])).filter(x => x[2]);
@@ -93,8 +94,8 @@ function modelPage(ctx) {
   const hl = (m.highlights || []).map(h => `<div class="why reveal"><h3>${esc(L(h, 'title', lang))}</h3><p>${esc(L(h, 'body', lang))}</p></div>`).join('');
   const offers = (m.offers || []).map(o => `<article class="offer"><span class="badge">${esc(t('offers'))}</span><h3>${esc(L(o, 'title', lang))}</h3><p>${esc(L(o, 'body', lang))}</p></article>`).join('');
   const body = `${crumbsHtml([[t('new_cars'), '/new-cars'], [m.name, '/new-cars/' + m.slug]], t)}
-<section class="pdp wrap"><div class="pdp-media"><div class="stage">${img(hero, m.name, { eager: true, cls: 'stage-img', w: heroI.w, h: heroI.h })}<img class="xf" alt="" width="${heroI.w}" height="${heroI.h}" style="opacity:0"></div>${sw ? `<div class="swatches" role="group" aria-label="${esc(t('colours'))}">${sw}</div>` : ''}${gal ? `<ul class="gal">${gal}</ul>` : ''}</div>
-<div class="pdp-info"><p class="eyebrow-s">${esc(t(m.body_type) || m.body_type)}</p><h1 class="h1">${esc(m.name)}<span class="dot">.</span></h1><p class="lead">${esc(L(m, 'tagline', lang))}</p><p>${esc(L(m, 'description', lang))}</p>${stripHtml}
+<section class="pdp wrap"><div class="pdp-media"><div class="stage">${img(hero, m.name, { eager: true, cls: 'stage-img', w: heroI.w, h: heroI.h })}<img class="xf" alt="" src="data:image/gif;base64,R0lGODlhAQABAAAAACH5BAEKAAEALAAAAAABAAEAAAICTAEAOw==" width="${heroI.w}" height="${heroI.h}" style="opacity:0"></div>${sw && (!photoMode || colors.some(c => M.carColour(m.slug, c.name_en))) ? `<div class="swatches" role="group" aria-label="${esc(t('colours'))}">${sw}</div>` : ''}${gal && !photoMode ? `<ul class="gal">${gal}</ul>` : ''}</div>
+<div class="pdp-info"><p class="eyebrow-s">${esc(t(m.body_type) || m.body_type)} <button class="btn btn-sm btn-o save-b" type="button" data-save="${esc(m.slug)}" aria-pressed="false">${ICON.heart} ${esc(t('save'))}</button></p><h1 class="h1">${esc(m.name)}<span class="dot">.</span></h1><p class="lead">${esc(L(m, 'tagline', lang))}</p><p>${esc(L(m, 'description', lang))}</p>${stripHtml}
 <div class="pricebox" data-onroad data-slug="${esc(m.slug)}" data-model="${esc(m.id)}"><div class="pb-h"><h2>${esc(t('on_road'))}</h2></div>
 <div class="pb-f"><div class="field"><label for="pb-city">${esc(t('city'))}</label><select id="pb-city" name="city">${cities.map(c => `<option value="${esc(c.slug)}"${c.slug === city ? ' selected' : ''}>${esc(L(c, 'name', lang))}</option>`).join('')}</select></div>
 <div class="field"><label for="pb-var">${esc(t('variant'))}</label><select id="pb-var" name="variant">${(m.variants || []).map(v => `<option value="${esc(v.id)}">${esc(v.name)} · ${esc(v.fuel)} ${esc(v.transmission)}</option>`).join('')}</select></div></div>
@@ -144,7 +145,8 @@ function usedPage(ctx) {
   const u = svc.used.getUsed(ctx.params.slug);
   if (!u) return notFound(ctx);
   const bm = C.bodyMap();
-  const photos = (u.photos && u.photos.length ? u.photos : [C.usedImage(u, bm)]);
+  const realPhoto = M.used(u.stock_id);
+  const photos = realPhoto ? [realPhoto] : (u.photos && u.photos.length ? u.photos : [C.usedImage(u, bm)]);
   const title = u.title || [u.year, u.model, u.variant].filter(Boolean).join(' ');
   const insp = u.inspection || { sections: [] };
   const inspHtml = (insp.sections || []).map(s => `<details class="insp"><summary>${esc(L(s, 'name', lang))} <span class="insp-bar" aria-hidden="true"><i style="width:${Math.round((s.items || []).filter(i => i.status === 'ok').length * 100 / Math.max(1, (s.items || []).length))}%"></i></span><span class="muted">${(s.items || []).filter(i => i.status === 'ok').length}/${(s.items || []).length}</span></summary><ul>${(s.items || []).map(i => `<li class="${i.status === 'ok' ? 'ok' : 'warn'}"><span class="st">${esc(i.status === 'ok' ? t('inspection_pass') : t('inspection_attn'))}</span> ${esc(L(i, 'label', lang))}${i.note ? ` <small class="muted">${esc(i.note)}</small>` : ''}</li>`).join('')}</ul></details>`).join('');
@@ -152,8 +154,8 @@ function usedPage(ctx) {
   const facts = [[t('year'), u.year], [t('km'), Number(u.km || 0).toLocaleString('en-IN')], [t('fuel'), u.fuel], [t('transmission'), u.transmission], [t('owners'), u.owners], [t('reg'), u.reg_masked], [t('colours'), u.color], [t('city'), u.location]].filter(x => x[1] !== undefined && x[1] !== null && x[1] !== '');
   const model = safe(() => svc.catalog.getModel(String(u.model || '').toLowerCase().replace(/\s+/g, '-')), null);
   const body = `${crumbsHtml([[t('used_cars'), '/used-cars'], [title, '/used-cars/' + u.slug]], t)}
-<section class="pdp wrap"><div class="pdp-media"><div class="stage">${img(photos[0], title, { eager: true, cls: 'stage-img' })}</div>${photos.length > 1 ? `<ul class="gal">${photos.slice(1).map((p, i) => `<li>${img(p, title + ' ' + (i + 2))}</li>`).join('')}</ul>` : ''}</div>
-<div class="pdp-info"><p><span class="badge${sold ? ' badge-dark' : ''}">${esc(sold ? t(u.status) : t('verified'))}</span></p><h1 class="h1">${esc(title)}<span class="dot">.</span></h1>
+<section class="pdp wrap"><div class="pdp-media" data-nolb><div class="stage" style="cursor:default">${img(photos[0], title, { eager: true, cls: 'stage-img', w: realPhoto ? 1200 : 800, h: realPhoto ? 900 : 400 })}</div>${photos.length > 1 ? `<ul class="gal">${photos.slice(1).map((p, i) => `<li>${img(p, title + ' ' + (i + 2))}</li>`).join('')}</ul>` : ''}</div>
+<div class="pdp-info"><p><span class="badge${sold ? ' badge-dark' : ''}">${esc(sold ? t(u.status) : t('verified'))}</span> <button class="btn btn-sm btn-o save-b" type="button" data-save="${esc(u.slug)}" aria-pressed="false">${ICON.heart} ${esc(t('save'))}</button></p><h1 class="h1">${esc(title)}<span class="dot">.</span></h1>
 <div class="pb-total"><strong class="price big">${esc(inr(u.price))}</strong>${u.emi_from ? `<small>${esc(t('emi_from'))} ${esc(inr(u.emi_from))}${esc(t('per_month'))}</small>` : ''}</div>
 <dl class="facts">${facts.map(f => `<div><dt>${esc(f[0])}</dt><dd>${esc(f[1])}</dd></div>`).join('')}</dl>
 ${(u.warranty_en || u.warranty_hi) ? `<p class="note">${ICON.shield} <span><strong>${esc(t('warranty'))}:</strong> ${esc(L(u, 'warranty', lang))}</span></p>` : ''}
@@ -186,7 +188,7 @@ function testDrive(ctx) {
 }
 
 function callbackBox(t) {
-  return `<aside class="callback" id="callback"><h3 class="h3">${esc(t('callback_t'))}</h3><p>${esc(t('callback_b'))}</p>${C.leadForm(t, { source: 'callback', type: 'callback', id: 'cb', btn: t('callback_btn'), message: 'Service call back request' })}</aside>`;
+  return `<aside class="callback" id="callback"><h3 class="h3">${esc(t('callback_t'))}</h3><p>${esc(t('callback_b'))}</p><form class="form" data-cb method="post" action="/forms/callback" novalidate>${field(t, { name: 'name', label: t('name'), required: true, autocomplete: 'name', maxlength: 80, id: 'cb-name' })}${field(t, { name: 'phone', label: t('phone'), required: true, type: 'tel', autocomplete: 'tel-national', inputmode: 'numeric', maxlength: 16, id: 'cb-phone' })}${field(t, { name: 'reason', label: t('message'), type: 'textarea', rows: 2, id: 'cb-reason' })}${field(t, { name: 'preferred_time', label: t('time'), id: 'cb-time' })}${consentField(t, 'c-cb')}<div class="form-msg" role="status" aria-live="polite"></div><button class="btn btn-red" type="submit">${esc(t('callback_btn'))} ${ICON.arrow}</button></form></aside>`;
 }
 function servicePage(ctx) {
   const t = ctxT(ctx); const lang = ctx.lang;
@@ -221,6 +223,20 @@ function comparePage(ctx) {
   }
   const body = `${crumbsHtml([[t('compare_title'), '/compare']], t)}${C.hdr({ title: esc(t('compare_title')) })}<section class="sec tight"><div class="wrap">${inner}</div></section>`;
   return ctx.html(page({ ctx, path: '/compare', title: t('compare_title'), desc: t('st2b'), body, noindex: ms.length > 0, scripts: [] }));
+}
+
+function credits(ctx) {
+  const t = ctxT(ctx); let list = [];
+  try { list = JSON.parse(require('node:fs').readFileSync(require('node:path').join(__dirname, '..', '..', 'public', 'img', 'credits.json'), 'utf8')); } catch (e) { list = []; }
+  const rows = list.map(c => `<tr><td>${esc(c.file)}</td><td><a href="${esc(c.source)}" rel="noopener nofollow" target="_blank">${esc(c.title)}</a></td><td>${esc(c.author)}</td><td>${esc(c.license)}</td><td>${esc(c.modification || '')}</td></tr>`).join('');
+  const body = `${crumbsHtml([[t('photo_credits'), '/credits']], t)}${C.hdr({ title: esc(t('photo_credits')), sub: t('credits_sub') })}<section class="sec tight"><div class="wrap"><div class="tbl-w"><table class="tbl dense"><thead><tr><th>File</th><th>Title</th><th>Author</th><th>Licence</th><th>Changes</th></tr></thead><tbody>${rows || '<tr><td colspan="5">-</td></tr>'}</tbody></table></div></div></section>`;
+  return ctx.html(page({ ctx, title: t('photo_credits'), desc: t('credits_sub'), body, scripts: [] }));
+}
+
+function account(ctx) {
+  const t = ctxT(ctx);
+  const body = `${crumbsHtml([[t('account'), '/account']], t)}${C.hdr({ title: esc(t('account')) })}<section class="sec tight"><div class="wrap"><div id="acc">${'<div class="skel row"></div>'}</div><noscript><p>JavaScript is required to sign in.</p></noscript></div></section>`;
+  return ctx.html(page({ ctx, title: t('account'), desc: t('account'), body, noindex: true, scripts: ['/js/forms.js', '/js/account.js'] }));
 }
 
 function emiPage(ctx) {
@@ -307,6 +323,10 @@ async function formService(ctx) {
   const b = ctx.body || {}; const t = ctxT(ctx);
   try { await svc.sales.createServiceBooking({ name: b.name, phone: b.phone, regNo: b.regNo, model: b.model, workshopId: b.workshopId, date: b.date, time: b.time, serviceType: b.serviceType, pickupDrop: !!b.pickupDrop, notes: b.notes, consent: !!b.consent, lang: ctx.lang }); return thanks(ctx, t('booking_done') + ': ' + b.date + ' ' + b.time); } catch (e) { return thanks(ctx, (e && e.message) || t('error_generic')); }
 }
+async function formCallback(ctx) {
+  const b = ctx.body || {}; const t = ctxT(ctx);
+  try { require('../services/callbacks').createCallback({ name: b.name, phone: b.phone, reason: b.reason, preferred_time: b.preferred_time, consent: !!b.consent, lang: ctx.lang }, { ip: ctx.ip }); return thanks(ctx, t('thanks_lead')); } catch (e) { return thanks(ctx, (e && e.message) || t('error_generic')); }
+}
 async function formOptOut(ctx) {
   const t = ctxT(ctx);
   try { svc.sales.optOut({ phone: digits((ctx.body || {}).phone) }); return thanks(ctx, t('optout_done')); } catch (e) { return thanks(ctx, (e && e.message) || t('error_generic')); }
@@ -353,8 +373,8 @@ function wrap(fn) { return async (ctx) => { try { return await fn(ctx); } catch 
 module.exports = { register(router) {
   const g = (p, fn) => router.get(p, wrap(fn));
   g('/', home); g('/new-cars', newCars); g('/new-cars/:slug', modelPage); g('/used-cars', usedList); g('/used-cars/:slug', usedPage);
-  g('/test-drive', testDrive); g('/service', servicePage); g('/emi', emiPage); g('/compare', comparePage); g('/trade-in', tradeIn); g('/contact', contact); g('/privacy', privacy); g('/opt-out', optOut);
+  g('/test-drive', testDrive); g('/service', servicePage); g('/emi', emiPage); g('/account', account); g('/credits', credits); g('/compare', comparePage); g('/trade-in', tradeIn); g('/contact', contact); g('/privacy', privacy); g('/opt-out', optOut);
   g('/sitemap.xml', sitemap); g('/robots.txt', robots); g('/img/car/:file', carImage); g('/ui/onroad', onroadFragment);
-  router.post('/forms/lead', wrap(formLead)); router.post('/forms/test-drive', wrap(formTD)); router.post('/forms/service', wrap(formService)); router.post('/forms/optout', wrap(formOptOut));
+  router.post('/forms/lead', wrap(formLead)); router.post('/forms/test-drive', wrap(formTD)); router.post('/forms/service', wrap(formService)); router.post('/forms/optout', wrap(formOptOut)); router.post('/forms/callback', wrap(formCallback));
   router.notFound = wrap(notFound);
 }, notFound, serverError, ctxT };

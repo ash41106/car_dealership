@@ -46,7 +46,7 @@ function modelCard(m, t, lang) {
   const fuels = (m.fuel_types || []).map(f => `<span class="chip">${esc(f)}</span>`).join('');
   return `<article class="card mcard reveal" data-tilt><a class="card-img" href="/new-cars/${esc(m.slug)}" tabindex="-1" aria-hidden="true">${carHero(m, {})}</a>
 <div class="card-b"><div class="chips">${fuels}</div><h3><a href="/new-cars/${esc(m.slug)}">${esc(m.name)}</a></h3><p class="muted">${esc(L(m, 'tagline', lang))}</p>
-<label class="cmp"><input type="checkbox" data-cmp="${esc(m.slug)}" data-name="${esc(m.name)}"><span>${esc(t('compare'))}</span></label><div class="card-f"><div><small>${esc(t('from'))} ${esc(t('ex_showroom'))}</small><strong class="price">${esc(lakh(m.from_price))}</strong></div><a class="circ" href="/new-cars/${esc(m.slug)}" aria-label="${esc(t('view_details') + ': ' + m.name)}">${ICON.arrow}</a></div></div></article>`;
+<button class="heart" type="button" data-save="${esc(m.slug)}" aria-pressed="false" aria-label="${esc(t('save') + ': ' + m.name)}">${ICON.heart}</button><label class="cmp"><input type="checkbox" data-cmp="${esc(m.slug)}" data-name="${esc(m.name)}"><span>${esc(t('compare'))}</span></label><div class="card-f"><div><small>${esc(t('from'))} ${esc(t('ex_showroom'))}</small><strong class="price">${esc(lakh(m.from_price))}</strong></div><a class="circ" href="/new-cars/${esc(m.slug)}" aria-label="${esc(t('view_details') + ': ' + m.name)}">${ICON.arrow}</a></div></div></article>`;
 }
 
 function usedCard(u, t, lang, bm) {

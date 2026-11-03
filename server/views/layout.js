@@ -54,7 +54,7 @@ function page(o) {
   const canon = BASE() + path;
   const title = o.title ? `${o.title} | ${t('brand')}` : t('brand');
   const desc = o.desc || t('hero_sub');
-  const og = o.ogImage ? (o.ogImage.startsWith('http') ? o.ogImage : BASE() + o.ogImage) : BASE() + '/img/car/model-s.svg?t=suv&c=1c1c1f';
+  const og = o.ogImage ? (o.ogImage.startsWith('http') ? o.ogImage : BASE() + o.ogImage) : BASE() + (require('./media').has('img/og-default.jpg') ? '/img/og-default.jpg' : '/img/car/model-s.svg?t=suv&c=1c1c1f');
   const nav = [['/new-cars', 'nav_new'], ['/used-cars', 'nav_used'], ['/test-drive', 'nav_td'], ['/service', 'nav_service'], ['/emi', 'nav_emi'], ['/trade-in', 'nav_trade'], ['/contact', 'nav_contact']];
   const cur = (p) => path === p || path.startsWith(p + '/');
   const navHtml = nav.map(([p, k]) => `<a href="${p}"${cur(p) ? ' aria-current="page"' : ''}>${esc(t(k))}</a>`).join('');
@@ -79,7 +79,7 @@ ${o.noindex ? '<meta name="robots" content="noindex,nofollow">' : `<link rel="ca
 <footer class="ftr"><div class="wrap">${footMaps(t, lang)}</div><div class="wrap ftr-in"><div><a class="logo" href="/"><span class="logo-mark">A</span><span class="logo-t">Company A <b>Motors</b></span></a><p>${esc(t('footer_tag'))}</p><p class="muted">${esc(t('footer_legal'))}</p></div>
 <div><h3>${esc(t('new_cars'))}</h3><a href="/new-cars">${esc(t('nav_new'))}</a><a href="/used-cars">${esc(t('nav_used'))}</a><a href="/emi">${esc(t('nav_emi'))}</a><a href="/trade-in">${esc(t('nav_trade'))}</a></div>
 <div><h3>${esc(t('contact_title'))}</h3><a href="/test-drive">${esc(t('nav_td'))}</a><a href="/service">${esc(t('nav_service'))}</a><a href="/contact">${esc(t('nav_contact'))}</a><a href="/staff/login">${esc(t('staff_login'))}</a></div>
-<div><h3>${esc(t('privacy'))}</h3><a href="/privacy">${esc(t('privacy_title'))}</a><a href="/opt-out">${esc(t('optout_title'))}</a></div></div>
+<div><h3>${esc(t('privacy'))}</h3><a href="/privacy">${esc(t('privacy_title'))}</a><a href="/opt-out">${esc(t('optout_title'))}</a><a href="/credits">${esc(t('photo_credits'))}</a></div></div>
 <div class="wrap ftr-b">&copy; ${new Date().getFullYear()} ${esc(t('brand'))}</div></footer>
 <script>window.__I=${jsonSafe(client(lang))};window.__LANG=${jsonSafe(lang)};</script>${scripts}</body></html>`;
 }
