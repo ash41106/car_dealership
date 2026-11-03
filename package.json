@@ -8,6 +8,6 @@
   "scripts": {
     "start": "node server/server.js",
     "seed": "node server/seed.js",
-    "test": "node --test tests/api"
+    "test": "node --test --test-reporter=spec \"tests/api/*.test.js\""
   }
 }
