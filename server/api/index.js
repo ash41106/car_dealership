@@ -19,7 +19,7 @@ function register(router) {
   const pub = fn => async ctx => {
     if (!rateLimit('pub|' + ctx.ip, PUBLIC_LIMIT())) throw httpError(429, 'Too many requests. Please wait a minute.');
     const isForm = /x-www-form-urlencoded/i.test(String(ctx.req.headers['content-type'] || ''));
-    const next = isForm && typeof ctx.body._next === 'string' && /^\/[^/\\]/.test(ctx.body._next) ? ctx.body._next : null;
+    const next = isForm && typeof ctx.body._next === 'string' && /^\/(?!\/)[A-Za-z0-9\-._~\/?=&%#+:,]{0,200}$/.test(ctx.body._next) && !/%0[ad]/i.test(ctx.body._next) ? ctx.body._next : null;
     try {
       const out = await fn(ctx);
       if (next) return ctx.redirect(next + (next.includes('?') ? '&' : '?') + 'ok=1', 303);
@@ -51,7 +51,7 @@ function register(router) {
     const principal = Number(ctx.query.principal);
     ctx.json(catalog.emi({ principal, rate: ctx.query.rate !== undefined ? ctx.query.rate : d.rate, months: ctx.query.months !== undefined ? ctx.query.months : d.months, downPayment: ctx.query.downPayment || 0 }));
   });
-  router.get('/api/used', ctx => ctx.json(used.listUsed(ctx.query)));
+  router.get('/api/used', ctx => ctx.json(used.listUsed(ctx.query, { staff: !!ctx.user })));
   router.get('/api/used/:id', ctx => { const u = used.getUsed(ctx.params.id); if (!u) throw httpError(404, 'Car not found'); ctx.json(u); });
   router.get('/api/showrooms', ctx => ctx.json(sales.listShowrooms()));
   router.get('/api/workshops', ctx => ctx.json(sales.listWorkshops()));

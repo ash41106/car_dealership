@@ -19,9 +19,10 @@ function card(r) {
   };
 }
 
-function listUsed(f = {}) {
+function listUsed(f = {}, opts = {}) {
   const where = [], p = [];
-  const status = f.status && ['available', 'booked', 'sold'].includes(f.status) ? f.status : null;
+  const allowed = opts.staff ? ['available', 'booked', 'sold'] : ['available', 'booked'];
+  const status = f.status && allowed.includes(f.status) ? f.status : null;
   if (status) { where.push('status = ?'); p.push(status); } else where.push("status IN ('available','booked')");
   if (f.model) { where.push("(lower(model) = lower(?) OR replace(lower(model),' ','-') = lower(?))"); p.push(String(f.model), String(f.model)); }
   if (f.fuel) { where.push('lower(fuel) = lower(?)'); p.push(String(f.fuel)); }

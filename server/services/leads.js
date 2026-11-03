@@ -21,14 +21,15 @@ function pickAssignee(showroomId, modelId) {
                       FROM users u WHERE u.role = 'consultant' AND u.active = 1`);
   const specOk = u => { const s = parseJson(u.specialty_model_ids, []); return !s.length || !modelId || s.includes(modelId); };
   const rank = (a, b) => a.open_n - b.open_n || String(a.last_at || '').localeCompare(String(b.last_at || '')) || a.id - b.id;
-  const tiers = [
-    cons.filter(u => u.showroom_id === showroomId && specOk(u)),
-    cons.filter(u => u.showroom_id === showroomId),
-    cons.filter(u => specOk(u)),
-    cons,
-  ];
-  for (const t of tiers) if (t.length) return t.sort(rank)[0];
-  return null;
+  // Specialty is a preference: specialists/generalists at the showroom are preferred, but a clearly less-loaded
+  // other consultant (more than 5 fewer open leads) wins.
+  const at = cons.filter(u => u.showroom_id === showroomId);
+  const pref = at.filter(specOk).sort(rank)[0];
+  const other = at.filter(u => !specOk(u)).sort(rank)[0];
+  if (pref && other) return other.open_n + 5 < pref.open_n ? other : pref;
+  if (pref || other) return pref || other;
+  const anyOk = cons.filter(specOk).sort(rank)[0];
+  return anyOk || cons.sort(rank)[0] || null;
 }
 
 function resolveShowroom(showroomId, city) {
