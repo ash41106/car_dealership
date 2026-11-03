@@ -1,3 +1,54 @@
+# QA Report - Company A Motors (Round 3)
+
+Tester: QA lead. Fresh seeded DB, port 3400 (RATE_LIMIT_PUBLIC=5000), headless Edge via CDP. No app code edited. New/updated tests: `tests/e2e/rbac.js` (122 API checks: RBAC, sessions, OTP, CSRF, forced change), `tests/e2e/browser3.js` (visuals + perf), `browser3_customer.js` (account flow), `browser3_staff.js` (every role UI), `probe.js` (ad-hoc CDP probe); `run.js` CSV-import section now logs in as lead_desk (consultants lost `lead.import` by design). Rounds 2 and 1 follow unchanged.
+
+## Round 3 score: 79 / 100 (round 2: 91)
+
+| Area | Max | R3 | Why |
+|---|---|---|---|
+| Functionality vs brief | 30 | 26 | Customer OTP login, prefill, test-drive booking, cancel, add vehicle, saved cars, export, delete request, withdraw consent and sign-out all work in a real browser. Every role's menu/landing/pages are correct; desk assign, service-board move, role-matrix edit work. Deductions: story section visual does not stay sticky (R3-04); lightbox, inspection-ring animation and filters drawer never initialise because of a JS crash on every page (R3-01). |
+| Backend / security | 20 | 16 | Strong: dealer_principal 403 on all 51 mutating calls; consultant/manager/advisor data scoping; AI band only admin+used_manager; role edit effective on live sessions and audited; logout, revoke-all, deactivate, role-change all kill live sessions; forced-change gate; login lock (429 after 5); CSRF text/plain blocked; customer/staff cookies isolated; customer data isolation. Deductions: content_editor can change price inputs (R3-02, Major); password policy is length-only (R3-06). |
+| Frontend UX / design | 20 | 15 | Real photos plus cinematic hero, marquee, tilt cards, compare tray, staff shell and exec dashboard look premium and cohesive; staff pages have no horizontal scroll at 390. Deductions: broken sticky story (R3-04), legible number plates (R3-05), duplicated/branded photos (R3-11), minor staff UI issues. |
+| SEO / perf / a11y | 10 | 6 | HTML 6 KB gz, CSS 11 KB gz, JS 6 KB gz, images cached 30 days. But home transfers 2.69 MB (target 1.5 MB) and LCP is 7.5 s on throttled 1.6 Mbps/150 ms/4x CPU (R3-03); a console exception on every page (R3-01). No horizontal scroll at 390 and no broken images on any public page tested. |
+| i18n + DPDP | 10 | 9 | Hindi works on /compare, /account, /credits and home. Export/delete/withdraw requests recorded and audited. Staff UI English only (documented). |
+| Deployability / docs / tests | 10 | 7 | `npm test` 53/53. README login table and docs are stale (R3-07). Docker still unbuilt (N-02). |
+| **Total** | **100** | **79** | |
+
+## Round 2 open items
+| ID | Status |
+|---|---|
+| D-12 | Still open (Minor, Frontend): home still shows hard-coded "6,000+ / 900+". |
+| N-01 | Fixed: AI summary now reads "model not specified yet". |
+| N-02 | Still open (Manager): no Docker on QA machine; Dockerfile not build-tested. |
+
+## Suite results
+- `npm test` 53/53. `node tests/e2e/run.js`: all pass except the CSV-import block, which logged in as a consultant (now correctly 403); test updated to lead_desk.
+- `tests/e2e/rbac.js`: 118/122. The 4 fails: 2 real defects (R3-02 x2), 1 test artefact (password reused after the policy probe), 1 expectation of OTP lock in mock mode (mock accepts 123456 by design; with OTP_MODE=real wrong codes get 400/401, no bypass). Page matrix 200/403 confirmed for admin, principal, desk, manager, consultant, used, content, service, workshop roles.
+- Browser: customer flow 7/11 and public sweep 88/112; every failure is the R3-01 console exception (functional checks pass).
+
+## New defects (round 3)
+| ID | Sev | Owner | Issue and repro |
+|---|---|---|---|
+| R3-01 | Major | Frontend | `public/js/fx.js:64`: `A.$('.stage img.stage-img, .gal img').filter(...)`. `A.$` is querySelector, so this throws `TypeError ... reading 'filter'` on EVERY public page. Everything after it never runs: gallery lightbox, inspection-ring animation (line 76), filters drawer (line 77). Fix: use `A.$$`. |
+| R3-02 | Major | Backend | content_editor can change prices. Log in as content@companya.in: `PUT /api/admin/models/1 {"accessories_amount":1}` -> 200 (was 18500); `PUT /api/admin/offers/1 {"amount":77777}` -> 200 (cash offer shown in on-road price). Both are in the audit log under content@. Restrict those fields to prices.write/admin. |
+| R3-03 | Major | Frontend | Home weight 2.69 MB transferred (2.66 MB images, 25 requests; five 225-245 KB scene JPGs plus ~200 KB car heroes), above the ~1.5 MB bar. Slow-4G + 4x CPU: load 7.0 s, LCP 7.5 s. Use srcset/WebP at ~60-80 KB, preload only the hero. Other pages: /new-cars 643 KB, model page 189 KB, /used-cars 1.0 MB. |
+| R3-04 | Major | Frontend | Home "story" section: `.story-vis` should be sticky but scrolls away (rect top -323 at scroll 500), leaving the left half blank for ~1,800 px on desktop; on mobile the steps are big empty gaps. Likely ancestor overflow or grid stretch; add `align-self:start`. |
+| R3-05 | Major | Manager (assets) | Registration plates legible in used-car photos (blue SUV "MH14 TC ..." card on /used-cars; Kia card). Brief requires masked registration; IMAGE_CREDITS admits plates are not all blurred. Blur or replace. The text reg no. is masked correctly (UP32 •• ••34). |
+| R3-06 | Minor | Backend | Password policy is length-only (10): `abcdefghijkl` and the user's own email are accepted; no common-password check. |
+| R3-07 | Minor | Manager | README demo-login table lists 4 of 17 seeded users; missing principal@ (Principal@123), desk@ (Desk@123), manager.gomti/aliganj/alambagh@ (Manager@123), ravi@, sunita@, content@ (Content@123), service2@, wm.amausi@ (Workshop@123). Checklist still says "replace placeholder car art". No mention of OTP_MODE, /account, /compare, /exec. With NODE_ENV=production (Dockerfile) OTP is real but the only provider is a mock logger, so customers cannot sign in in production until messaging is wired; seeded demo passwords are not force-changed. run.bat itself is consistent. |
+| R3-08 | Minor | Frontend | Anonymous /account logs a 401 console/network error (`GET /api/customer/me`). |
+| R3-09 | Minor | Frontend | /staff/desk shows "Breached +35675:03" (unbounded mm:ss on old seed leads); show h/d. |
+| R3-10 | Minor | Frontend | /admin/roles saves on a single checkbox click with no confirm or undo (one click granted admin.read to consultant). |
+| R3-11 | Minor | Manager (assets) | Photos are real Tata/Kia/VW/Hyundai/Honda cars with visible badges for fictional "Brand X"; same image reused for different stock (three gold hatchbacks, two Honda City; 2022 Model C listed "Red" but photo is white); hero is CC BY-SA 4.0 with "contact before commercial use". Needs licence/brand sign-off. |
+| R3-12 | Minor | Backend | `/api/staff/consultants` and the desk Assign list include admin, managers and used manager, so a lead can be assigned to the Administrator account. |
+| D-12 | Minor | Frontend | (carried) hard-coded home stats. |
+| N-02 | Minor | Manager | (carried) Docker build untested. |
+
+## Verified OK
+Customer: OTP request rate limit, customer cookie blocked from all staff APIs/pages and vice versa, cross-customer vehicle/booking edits denied, export is an attachment with own data only, CSRF blocked, logout kills session. Staff: principal UI fully read-only and every API write 403; consultant cannot read/patch/reply/reassign other showrooms' leads or import CSV; manager sees own showroom only; service_advisor limited to own workshop; AI band only admin/used_manager; exec only admin+principal; role edit removed a permission from a live session at once and is audited; deactivate/role change/revoke-all/logout kill live sessions; forced-change gate; login lock after 5 fails. Compare tray, saved-car sync, booking prefill, service-board move, desk assign, users screen and demo-accounts helper all worked in the browser.
+
+---
+
 # QA Report - Company A Motors (Round 2)
 
 Tester: QA lead. Fresh seeded DB on port 3300 (RATE_LIMIT_PUBLIC=5000). No application code edited. Round 1 report follows below, unchanged.

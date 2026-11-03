@@ -3,3 +3,4 @@ data/
 *.log
 .env
 .claude/
+docs/_originals_private/

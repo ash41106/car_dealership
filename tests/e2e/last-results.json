@@ -1148,7 +1148,7 @@
   "section": "Performance",
   "name": "/ html gz < 60KB",
   "ok": true,
-  "info": 30931
+  "info": 37748
  },
  {
   "section": "Performance",
@@ -1165,7 +1165,7 @@
   "section": "Performance",
   "name": "/new-cars/model-h html gz < 60KB",
   "ok": true,
-  "info": 18947
+  "info": 21652
  },
  {
   "section": "Performance",
@@ -1182,13 +1182,13 @@
   "section": "Performance",
   "name": "/used-cars html gz < 60KB",
   "ok": true,
-  "info": 24285
+  "info": 25269
  },
  {
   "section": "Performance",
   "name": "/used-cars TTFB<500ms local",
   "ok": true,
-  "info": 5
+  "info": 4
  },
  {
   "section": "Performance",
@@ -1212,7 +1212,7 @@
   "section": "Performance",
   "name": "/js/app.js gz<40KB",
   "ok": true,
-  "info": 6190
+  "info": 7362
  },
  {
   "section": "Performance",
@@ -1224,7 +1224,7 @@
   "section": "Performance",
   "name": "/js/leads.js gz<40KB",
   "ok": true,
-  "info": 11692
+  "info": 11882
  },
  {
   "section": "Performance",
@@ -1623,7 +1623,7 @@
   "section": "Auth / RBAC / CSRF",
   "name": "session cookie HttpOnly+SameSite",
   "ok": true,
-  "info": "sid=eyJ1IjoxLCJlIjoxNzkzNzQ3MjQ2ODE5fQ.W91U70vmCqwwjujCPSUYwPh8CPZX8JEo_j95dXtObpw; Path=/; SameSite=Lax; HttpOnly; Max-Age=28800"
+  "info": "sid=llrLwjEK5tNypBLon0o5-xGAQEzbZWRVU-fLnPz0pkc; Path=/; SameSite=Lax; HttpOnly; Max-Age=43200"
  },
  {
   "section": "Auth / RBAC / CSRF",
@@ -1639,13 +1639,13 @@
   "section": "Auth / RBAC / CSRF",
   "name": "consultant HTML /admin/prices denied",
   "ok": true,
-  "info": 302
+  "info": 403
  },
  {
   "section": "Auth / RBAC / CSRF",
   "name": "consultant HTML /admin/users denied",
   "ok": true,
-  "info": 302
+  "info": 403
  },
  {
   "section": "Auth / RBAC / CSRF",
@@ -1711,7 +1711,7 @@
   "section": "Leads / consent / assignment",
   "name": "+91 phone accepted & normalised",
   "ok": true,
-  "info": "201{\"lead\":{\"id\":61,\"source\":\"website\",\"type\":\"enquiry\",\"status\":\"new\",\"created_at\":\"2026-11-03T15:07:27.177Z\",\"due_at\":\"20"
+  "info": "201{\"lead\":{\"id\":83,\"source\":\"website\",\"type\":\"enquiry\",\"status\":\"new\",\"created_at\":\"2026-11-03T16:20:25.756Z\",\"due_at\":\"20"
  },
  {
   "section": "Leads / consent / assignment",
@@ -1733,7 +1733,7 @@
   "section": "Leads / consent / assignment",
   "name": "lead created 201 with due_at 5 min",
   "ok": true,
-  "info": "{\"lead\":{\"id\":63,\"source\":\"website\",\"type\":\"enquiry\",\"status\":\"new\",\"created_at\":\"2026-11-03T15:07:27.184Z\",\"due_at\":\"2026-11-03T15:12:27.184Z\"},\"assignee\":{\"name\":\"Neha Singh\",\"phone\":\"9810000005\"}}"
+  "info": "{\"lead\":{\"id\":85,\"source\":\"website\",\"type\":\"enquiry\",\"status\":\"new\",\"created_at\":\"2026-11-03T16:20:25.761Z\",\"due_at\":\"2026-11-03T16:25:25.761Z\"},\"assignee\":{\"name\":\"Neha Singh\",\"phone\":\"9810000005\"}}"
  },
  {
   "section": "Leads / consent / assignment",
@@ -1744,19 +1744,19 @@
   "section": "Leads / consent / assignment",
   "name": "assignee belongs to showroom 2",
   "ok": true,
-  "info": "{\"id\":5,\"name\":\"Neha Singh\",\"role\":\"consultant\",\"showroom_id\":2,\"phone\":\"9810000005\",\"showroom_name\":\"Company A Motors - Aliganj\",\"open_leads\":11}"
+  "info": "{\"id\":9,\"name\":\"Neha Singh\",\"role\":\"consultant\",\"showroom_id\":2,\"phone\":\"9810000005\",\"showroom_name\":\"Company A Motors - Aliganj\",\"open_leads\":6}"
  },
  {
   "section": "Leads / consent / assignment",
   "name": "assignment spreads across showroom consultants",
   "ok": true,
-  "info": "INFO {\"Priya Sharma\":4,\"Rahul Verma\":4}"
+  "info": "INFO {\"Priya Sharma\":5,\"Rahul Verma\":3}"
  },
  {
   "section": "Leads / consent / assignment",
   "name": "lead without showroom still assigned",
   "ok": true,
-  "info": "{\"lead\":{\"id\":72,\"source\":\"website\",\"type\":\"enquiry\",\"status\":\"new\",\"created_at\":\"2026-11-03T15:07:27.201Z\",\"due_at\":\"2026-11-03T15:12:27.201Z\"},\"assi"
+  "info": "{\"lead\":{\"id\":94,\"source\":\"website\",\"type\":\"enquiry\",\"status\":\"new\",\"created_at\":\"2026-11-03T16:20:25.776Z\",\"due_at\":\"2026-11-03T16:25:25.776Z\"},\"assi"
  },
  {
   "section": "Leads / consent / assignment",
@@ -1774,7 +1774,7 @@
   "section": "Leads / consent / assignment",
   "name": "SLA status new (not breached)",
   "ok": true,
-  "info": "{\"due_at\":\"2026-11-03T15:12:27.184Z\",\"responded\":false,\"breached\":false,\"remaining_sec\":300,\"response_sec\":null}"
+  "info": "{\"due_at\":\"2026-11-03T16:25:25.761Z\",\"responded\":false,\"breached\":false,\"remaining_sec\":300,\"response_sec\":null}"
  },
  {
   "section": "Leads / consent / assignment",
@@ -1791,7 +1791,7 @@
   "section": "Leads / consent / assignment",
   "name": "PATCH status contacted",
   "ok": true,
-  "info": "200{\"id\":63,\"source\":\"website\",\"type\":\"enquiry\",\"name\":\"QA Tester\",\"phone\":\"9439303515\",\"email\":null,\"c"
+  "info": "200{\"id\":85,\"source\":\"website\",\"type\":\"enquiry\",\"name\":\"QA Tester\",\"phone\":\"9034280001\",\"email\":null,\"c"
  },
  {
   "section": "Leads / consent / assignment",
@@ -1808,7 +1808,7 @@
   "section": "Leads / consent / assignment",
   "name": "reassign OK",
   "ok": true,
-  "info": "200{\"id\":63,\"source\":\"website\",\"type\":\"enquiry\",\"name\":\"QA Tester\",\"phone\":\"9439303515\",\"email\":null,\"c"
+  "info": "200{\"id\":85,\"source\":\"website\",\"type\":\"enquiry\",\"name\":\"QA Tester\",\"phone\":\"9034280001\",\"email\":null,\"c"
  },
  {
   "section": "Leads / consent / assignment",
@@ -1826,7 +1826,7 @@
   "section": "Leads / consent / assignment",
   "name": "clean reply sent",
   "ok": true,
-  "info": "200{\"message\":{\"id\":13,\"status\":\"sent\"},\"blocked\":false}"
+  "info": "200{\"message\":{\"id\":47,\"status\":\"sent\"},\"blocked\":false}"
  },
  {
   "section": "Leads / consent / assignment",
@@ -1838,7 +1838,7 @@
   "section": "Leads / consent / assignment",
   "name": "opt-out ok",
   "ok": true,
-  "info": "201{\"updated\":1}"
+  "info": "201{\"updated\":3}"
  },
  {
   "section": "Leads / consent / assignment",
@@ -1849,13 +1849,13 @@
   "section": "Leads / consent / assignment",
   "name": "reply to opted-out blocked/not sent",
   "ok": true,
-  "info": "200{\"message\":{\"id\":15,\"status\":\"blocked_optout\"},\"blocked\":true}"
+  "info": "200{\"message\":{\"id\":49,\"status\":\"blocked_optout\"},\"blocked\":true}"
  },
  {
   "section": "Leads / consent / assignment",
   "name": "new lead of opted-out phone: no ack message sent",
   "ok": true,
-  "info": "[{\"id\":16,\"channel\":\"whatsapp\",\"template\":\"ack_lead\",\"body\":\"Hi QA, thank you for contacting Company A Motors. Priya Sharma will call you within 5 minutes. Reply STOP to opt out.\",\"direction\":\"out\",\"status\":\"blocked_optout\",\"created_at\":\"2026-11-03T15:07:27.231Z\"}]"
+  "info": "[{\"id\":50,\"channel\":\"whatsapp\",\"template\":\"ack_lead\",\"body\":\"Hi QA, thank you for contacting Company A Motors. Rahul Verma will call you within 5 minutes. Reply STOP to opt out.\",\"direction\":\"out\",\"status\":\"blocked_optout\",\"created_at\":\"2026-11-03T16:20:25.802Z\"}]"
  },
  {
   "section": "Leads / consent / assignment",
@@ -1866,13 +1866,13 @@
   "section": "Test drive / service capacity",
   "name": "slots list",
   "ok": true,
-  "info": "[{\"time\":\"10:00\",\"available\":true,\"demoCarId\":1},{\"time\":\"11:00\",\"available\":true,\"demoCarId\":1},{\"t"
+  "info": "[{\"time\":\"10:00\",\"available\":false,\"demoCarId\":null},{\"time\":\"11:00\",\"available\":true,\"demoCarId\":1}"
  },
  {
   "section": "Test drive / service capacity",
   "name": "test drive booked",
   "ok": true,
-  "info": "201{\"booking\":{\"id\":9,\"ref\":\"TD-00009\",\"type\":\"test_drive\",\"date\":\"2026-11-06\",\"time\":\"10:00\",\"status\":\"booked\",\"showroom\":{\"id\":1,\"name_en\":\"Company A M"
+  "info": "201{\"booking\":{\"id\":21,\"ref\":\"TD-00021\",\"type\":\"test_drive\",\"date\":\"2026-11-06\",\"time\":\"11:00\",\"status\":\"booked\",\"showroom\":{\"id\":1,\"name_en\":\"Company A "
  },
  {
   "section": "Test drive / service capacity",
@@ -1907,13 +1907,13 @@
   "section": "Test drive / service capacity",
   "name": "service slots with remaining",
   "ok": true,
-  "info": "{\"time\":\"09:00\",\"capacity\":6,\"remaining\":6}"
+  "info": "{\"time\":\"09:00\",\"capacity\":6,\"remaining\":0}"
  },
  {
   "section": "Test drive / service capacity",
   "name": "service bay capacity enforced (409 after capacity)",
-  "ok": true,
-  "info": "n=6 cap=6"
+  "ok": false,
+  "info": "n=0 cap=6"
  },
  {
   "section": "Test drive / service capacity",
@@ -1924,56 +1924,54 @@
  {
   "section": "CSV import",
   "name": "import dryRun ok",
-  "ok": true,
-  "info": "200{\"created\":2,\"duplicates\":1,\"errors\":[{\"row\":5,\"message\":\"Invalid phone number\"}],\"preview\":[{\"row\":2,\"name\":\"Sharma, Rajesh\",\"phone\":\"9876511111\",\"model\":\"Model H\",\"status\":\"ok\"},{\"row\":3,\"name\":\"<sc"
+  "ok": false,
+  "info": "403{\"error\":\"Not permitted for your role\"}"
  },
  {
   "section": "CSV import",
   "name": "dry run creates nothing",
-  "ok": true,
-  "info": "{\"created\":2,\"duplicates\":1,\"errors\":[{\"row\":5,\"message\":\"Invalid phone number\"}],\"preview\":[{\"row\":2,\"name\":\"Sharma, Rajesh\",\"phone\":\"9876511111\",\"model\":\"Model H\",\"status\":\"ok\"},{\"row\":3,\"name\":\"<script>alert(1)</script>\",\"phone\":\"9876522222\",\"model\":\"Model S\",\"status\":\"ok\"},{\"row\":4,\"name\":\"Dup O"
+  "ok": false,
+  "info": "{\"error\":\"Not permitted for your role\"}"
  },
  {
   "section": "CSV import",
   "name": "import real ok",
-  "ok": true,
-  "info": "200{\"created\":2,\"duplicates\":1,\"errors\":[{\"row\":5,\"message\":\"Invalid phone number\"}],\"preview\":[{\"row\":2,\"name\":\"Sharma, Rajesh\",\"phone\":\"9876511111\",\"model\":\"Model H\",\"status\":\"ok\",\"lead_id\":79,\"assignee\":\"Rahul Verma\"},{\"row\":3,\"name\":\"<script>alert(1)</script>\",\"phone\":\"9876522222\",\"model\":\"Model S\""
+  "ok": false,
+  "info": "403{\"error\":\"Not permitted for your role\"}"
  },
  {
   "section": "CSV import",
   "name": "import mapped messy headers (>=2 created)",
-  "ok": true,
-  "info": "{\"created\":2,\"duplicates\":1,\"errors\":[{\"row\":5,\"message\":\"Invalid phone number\"}],\"preview\":[{\"row\":2,\"name\":\"Sharma, Rajesh\",\"phone\":\"9876511111\",\"model\":\"Model H\",\"status\":\"ok\",\"lead_id\":79,\"assignee\":\"Rahul Verma\"},{\"row\":3,\"name\":\"<script>alert(1)</script>\",\"phone\":\"9876522222\",\"model\":\"Model S\""
+  "ok": false,
+  "info": "{\"error\":\"Not permitted for your role\"}"
  },
  {
   "section": "CSV import",
   "name": "import flags dup + bad phone",
-  "ok": true,
-  "info": "{\"created\":2,\"duplicates\":1,\"errors\":[{\"row\":5,\"message\":\"Invalid phone number\"}],\"preview\":[{\"row\":2,\"name\":\"Sharma, Rajesh\",\"phone\":\"9876511111\",\"model\":\"Model H\",\"status\":\"ok\",\"lead_id\":79,\"assignee\":\"Rahul Verma\"},{\"row\":3,\"name\":\"<script>alert(1)</script>\",\"phone\":\"9876522222\",\"model\":\"Model S\""
+  "ok": false,
+  "info": "{\"error\":\"Not permitted for your role\"}"
  },
  {
   "section": "CSV import",
   "name": "re-import yields 0 new (dedupe)",
-  "ok": true,
-  "info": "{\"created\":0,\"duplicates\":3,\"errors\":[{\"row\":5,\"message\":\"Invalid phone number\"}],\"preview\":[{\"row\":2,\"name\":\"Sharma, Rajesh\",\"phone\":\"9876511111\",\"model\":\"Model H\",\"status\":\"duplicate\"},{\"row\":3,\"nam"
+  "ok": false,
+  "info": "{\"error\":\"Not permitted for your role\"}"
  },
  {
   "section": "CSV import",
   "name": "quoted comma name preserved",
-  "ok": true,
-  "info": "[\"Sharma, Rajesh\"]"
+  "ok": false,
+  "info": "[]"
  },
  {
   "section": "CSV import",
   "name": "newline in quoted field preserved",
-  "ok": true,
-  "info": "Wants \"best\" deal\nsecond line"
+  "ok": false
  },
  {
   "section": "CSV import",
   "name": "imported phone normalised to 10 digits",
-  "ok": true,
-  "info": "9876511111"
+  "ok": false
  },
  {
   "section": "CSV import",
@@ -1984,13 +1982,13 @@
   "section": "CSV import",
   "name": "empty csv 4xx",
   "ok": true,
-  "info": 400
+  "info": 403
  },
  {
   "section": "CSV import",
   "name": "bad source not 500",
   "ok": true,
-  "info": 422
+  "info": 403
  },
  {
   "section": "CSV import",
@@ -2128,7 +2126,7 @@
   "section": "i18n",
   "name": "Hindi page has Devanagari >150 chars & differs: /",
   "ok": true,
-  "info": "hi=1321 en=6"
+  "info": "hi=2024 en=6"
  },
  {
   "section": "i18n",
@@ -2140,7 +2138,7 @@
   "section": "i18n",
   "name": "Hindi page has Devanagari >150 chars & differs: /new-cars",
   "ok": true,
-  "info": "hi=483 en=6"
+  "info": "hi=660 en=6"
  },
  {
   "section": "i18n",
@@ -2152,7 +2150,7 @@
   "section": "i18n",
   "name": "Hindi page has Devanagari >150 chars & differs: /new-cars/model-h",
   "ok": true,
-  "info": "hi=1591 en=6"
+  "info": "hi=1803 en=6"
  },
  {
   "section": "i18n",
@@ -2164,7 +2162,7 @@
   "section": "i18n",
   "name": "Hindi page has Devanagari >150 chars & differs: /used-cars",
   "ok": true,
-  "info": "hi=701 en=6"
+  "info": "hi=842 en=6"
  },
  {
   "section": "i18n",
@@ -2176,7 +2174,7 @@
   "section": "i18n",
   "name": "Hindi page has Devanagari >150 chars & differs: /used-cars/uc-1182-model-c-vx-2022",
   "ok": true,
-  "info": "hi=3005 en=6"
+  "info": "hi=3153 en=6"
  },
  {
   "section": "i18n",
@@ -2188,7 +2186,7 @@
   "section": "i18n",
   "name": "Hindi page has Devanagari >150 chars & differs: /test-drive",
   "ok": true,
-  "info": "hi=658 en=6"
+  "info": "hi=799 en=6"
  },
  {
   "section": "i18n",
@@ -2200,7 +2198,7 @@
   "section": "i18n",
   "name": "Hindi page has Devanagari >150 chars & differs: /service",
   "ok": true,
-  "info": "hi=657 en=6"
+  "info": "hi=974 en=6"
  },
  {
   "section": "i18n",
@@ -2212,7 +2210,7 @@
   "section": "i18n",
   "name": "Hindi page has Devanagari >150 chars & differs: /emi",
   "ok": true,
-  "info": "hi=639 en=6"
+  "info": "hi=780 en=6"
  },
  {
   "section": "i18n",
@@ -2224,7 +2222,7 @@
   "section": "i18n",
   "name": "Hindi page has Devanagari >150 chars & differs: /trade-in",
   "ok": true,
-  "info": "hi=554 en=6"
+  "info": "hi=695 en=6"
  },
  {
   "section": "i18n",
@@ -2236,7 +2234,7 @@
   "section": "i18n",
   "name": "Hindi page has Devanagari >150 chars & differs: /contact",
   "ok": true,
-  "info": "hi=776 en=6"
+  "info": "hi=1093 en=6"
  },
  {
   "section": "i18n",
@@ -2248,7 +2246,7 @@
   "section": "i18n",
   "name": "Hindi page has Devanagari >150 chars & differs: /privacy",
   "ok": true,
-  "info": "hi=856 en=6"
+  "info": "hi=997 en=6"
  },
  {
   "section": "i18n",
@@ -2260,7 +2258,7 @@
   "section": "i18n",
   "name": "Hindi page has Devanagari >150 chars & differs: /opt-out",
   "ok": true,
-  "info": "hi=364 en=6"
+  "info": "hi=505 en=6"
  },
  {
   "section": "i18n",
@@ -2272,7 +2270,7 @@
   "section": "i18n",
   "name": "Hindi on-road helper localised",
   "ok": true,
-  "info": "<table class=\"bk\"><caption class=\"sr\">ऑन-रोड कीमत का विवरण</caption><tbody><tr class=\"\"><th scope=\"r"
+  "info": "<div class=\"seg\" role=\"img\" aria-label=\"ऑन-रोड कीमत का विवरण\"><i class=\"s-a\" style=\"flex:0.872371062"
  },
  {
   "section": "i18n",
@@ -2295,7 +2293,7 @@
   "section": "DPDP",
   "name": "/service: every personal-data form has unchecked consent + /privacy link",
   "ok": true,
-  "info": "forms=1 withPhone=1"
+  "info": "forms=2 withPhone=2"
  },
  {
   "section": "DPDP",
@@ -2307,7 +2305,7 @@
   "section": "DPDP",
   "name": "/contact: every personal-data form has unchecked consent + /privacy link",
   "ok": true,
-  "info": "forms=1 withPhone=1"
+  "info": "forms=2 withPhone=2"
  },
  {
   "section": "DPDP",

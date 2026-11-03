@@ -20,14 +20,24 @@ node tests/e2e/run.js   # HTTP-level QA suite against BASE_URL (default http://l
 ```
 
 ## Demo logins (seed data – change before go-live)
-| Role | Login | Password |
-|---|---|---|
-| Admin | admin@companya.in | Admin@123 |
-| Used-car manager | used@companya.in | Used@123 |
-| Sales consultants | priya@ / rahul@ / neha@ / amit@companya.in | Sales@123 |
-| Service advisor | service@companya.in | Service@123 |
+All staff emails end in `@companya.in`.
+| Role | Login | Password | Lands on |
+|---|---|---|---|
+| Admin | admin@ | Admin@123 | `/admin` (everything, incl. users, roles, audit) |
+| Dealer Principal (read-only) | principal@ | Principal@123 | `/exec` dashboard |
+| Lead desk | desk@ | Desk@123 | `/staff/desk` (SLA monitor, assign, CSV import) |
+| Showroom managers | manager.gomti@ / manager.aliganj@ / manager.alambagh@ | Manager@123 | team inbox for their showroom |
+| Sales consultants | priya@ / rahul@ (Gomti Nagar), neha@ / ravi@ (Aliganj), amit@ / sunita@ (Alambagh) | Sales@123 | `/staff/leads` |
+| Used-car manager | used@ | Used@123 | used stock + AI price band |
+| Content editor | content@ | Content@123 | banners, offers, copy (no prices) |
+| Service advisors | service@ (Amausi), service2@ (Gomti Ext) | Service@123 | `/staff/service` job cards + call-backs |
+| Workshop manager | wm.amausi@ | Workshop@123 | workshop bays + all advisors' bookings |
+| **Customer** (buyer/owner) | phone `9876500001` | OTP `123456` | `/account` |
 
-Staff sign in at `/staff/login`; the admin console is at `/admin`.
+Staff sign in at `/staff/login` (a demo-accounts list is shown outside production). Customers sign in at `/account` with phone + OTP: in demo mode (`OTP_MODE=mock`, the default outside production) any number works with OTP `123456`. In production OTPs go through the SMS/WhatsApp provider you configure (see below) and `dev_otp` is never returned.
+
+### Access control
+Permission-based RBAC: roles map to permissions (editable by admin at `/admin/roles`), every API route declares its permission, data is scoped (consultant = own/showroom leads, service advisor = own workshop, lead desk = all showrooms, Dealer Principal = read-only). Server-side sessions are revocable (logout, password change, role change, deactivation). New passwords need 10+ characters. The `tests/api/rbac_matrix.test.js` suite checks every role against every endpoint.
 
 ## What's inside
 | Area | Pages |
@@ -61,8 +71,8 @@ docker run -d -p 3000:3000 -v companya-data:/app/data -e BASE_URL=https://www.ex
 ### Before go-live checklist
 1. Change all seed passwords and set `SESSION_SECRET`.
 2. Verify the price rules (road tax %, insurance, TCS) with the Transport Dept / insurer – seed values are indicative.
-3. Replace placeholder car art with real photography via the admin image upload.
-4. Connect a real WhatsApp Business / SMS provider (DLT-approved templates) in `server/services/messaging.js`.
+3. Replace the stand-in photos (Wikimedia Commons, see `/credits` and `docs/IMAGE_CREDITS.md`; they show other manufacturers' badges) with the brand's official press images and the yard's own used-car photos via the admin image upload. Number plates must be masked on every used-car photo.
+4. Connect a real WhatsApp Business / SMS provider (DLT-approved templates) in `server/services/messaging.js` (env-configured HTTP provider). Customer OTP login cannot work in production until this is set.
 5. Have the privacy notice and Hindi copy reviewed by legal/native speakers.
 6. Set up HTTPS, backups and monitoring on `/healthz`.
 
