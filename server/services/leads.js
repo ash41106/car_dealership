@@ -4,7 +4,7 @@ const { httpError, normPhone, validEmail, clean, nowIso, sha, parseJson, toInt, 
 const { parseCsv } = require('../lib/csv');
 const messaging = require('./messaging');
 const ai = require('./ai');
-const { can } = require('../lib/perms');
+const { can, rolesWith } = require('../lib/perms');
 
 const STATUSES = ['new', 'contacted', 'test_drive', 'negotiation', 'won', 'lost'];
 const SOURCES = ['website', 'test_drive', 'trade_in', 'finance', 'carwale', 'cardekho', 'portal', 'facebook', 'instagram', 'walk_in', 'used_enquiry', 'callback'];
@@ -20,6 +20,7 @@ function pickAssignee(showroomId, modelId) {
   const cons = q.all(`SELECT u.*, (SELECT COUNT(*) FROM leads l WHERE l.assigned_to = u.id AND l.status NOT IN ('won','lost')) AS open_n,
                       (SELECT MAX(l.created_at) FROM leads l WHERE l.assigned_to = u.id) AS last_at
                       FROM users u WHERE u.role = 'consultant' AND u.active = 1`);
+  if (!cons.length) return q.get("SELECT * FROM users WHERE role = 'showroom_manager' AND active = 1 AND showroom_id = ? LIMIT 1", showroomId) || null;
   const specOk = u => { const s = parseJson(u.specialty_model_ids, []); return !s.length || !modelId || s.includes(modelId); };
   const rank = (a, b) => a.open_n - b.open_n || String(a.last_at || '').localeCompare(String(b.last_at || '')) || a.id - b.id;
   // Specialty is a preference: specialists/generalists at the showroom are preferred, but a clearly less-loaded
@@ -225,8 +226,9 @@ function updateLead(user, id, body) {
 function reassign(user, id, body) {
   return tx(() => {
     const l = loadVisible(user, id);
-    const target = q.get("SELECT id, name, showroom_id FROM users WHERE id = ? AND active = 1 AND role IN ('consultant','showroom_manager','admin','used_manager')", toInt(body.user_id));
-    if (!target) throw httpError(422, 'Choose an active staff member', { user_id: 'Invalid user' });
+    const workRoles = rolesWith('lead.work');
+    const target = q.get(`SELECT id, name, showroom_id, role FROM users WHERE id = ? AND active = 1`, toInt(body.user_id));
+    if (!target || !workRoles.includes(target.role)) throw httpError(422, 'Leads can only be assigned to active consultants or showroom managers', { user_id: 'Not assignable' });
     if (!can(user, 'lead.read.all') && target.showroom_id !== user.showroom_id) throw httpError(403, 'You can reassign only within your own showroom');
     q.run('UPDATE leads SET assigned_to = ?, updated_at = ? WHERE id = ?', target.id, nowIso(), l.id);
     addEvent(l.id, 'reassigned', `Reassigned to ${target.name}${body.reason ? ': ' + clean(body.reason, 200) : ''}`, user.id);
@@ -279,12 +281,15 @@ function stats(user) {
   };
 }
 
+/** Assignable people: active users whose role holds `lead.work`, limited to the viewer's showroom unless they can see all leads. */
 function listConsultants(user) {
   const scoped = user && !can(user, 'lead.read.all');
+  const roles = rolesWith('lead.work');
+  if (!roles.length) return [];
   return q.all(`SELECT u.id, u.name, u.role, u.showroom_id, u.phone, s.name_en AS showroom_name,
     (SELECT COUNT(*) FROM leads l WHERE l.assigned_to = u.id AND l.status NOT IN ('won','lost')) AS open_leads
-    FROM users u LEFT JOIN showrooms s ON s.id = u.showroom_id WHERE u.active = 1 AND u.role IN ('consultant','showroom_manager','used_manager','admin')
-    ${scoped ? 'AND u.showroom_id = ?' : ''} ORDER BY u.name`, ...(scoped ? [user.showroom_id || 0] : []));
+    FROM users u LEFT JOIN showrooms s ON s.id = u.showroom_id WHERE u.active = 1 AND u.role IN (${roles.map(() => '?').join(',')})
+    ${scoped ? 'AND u.showroom_id = ?' : ''} ORDER BY u.name`, ...roles, ...(scoped ? [user.showroom_id || 0] : []));
 }
 
 /** Live SLA monitor within the viewer's scope: unassigned, breached and near-breach open leads plus consultant load. */

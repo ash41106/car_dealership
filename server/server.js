@@ -34,6 +34,7 @@ function createApp() {
   if (process.env.AUTO_SEED !== '0' && !db.q.get('SELECT 1 x FROM models LIMIT 1')) {
     require('./seed').seed();
   }
+  require('./seed').fixups();
   const router = new Router();
   require('./api').register(router);
   const pagesIndex = path.join(__dirname, 'pages', 'index.js');

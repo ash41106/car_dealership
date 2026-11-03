@@ -12,12 +12,15 @@ const used = require('./used');
 const admin = require('./admin');
 
 const OTP_TTL_MS = 5 * 60 * 1000, MAX_ATTEMPTS = 5, FIXED_OTP = '123456';
-const mockMode = () => (process.env.OTP_MODE ? process.env.OTP_MODE === 'mock' : process.env.NODE_ENV !== 'production');
+/** Mock OTP mode (dev_otp + fixed 123456) can never be active in production. */
+const mockMode = () => (process.env.NODE_ENV === 'production' ? false : process.env.OTP_MODE ? process.env.OTP_MODE === 'mock' : true);
 const otpHash = (phone, otp) => auth.hmac(`otp:${phone}:${otp}`);
 
-function requestOtp({ phone, lang }, ip) {
+async function requestOtp({ phone, lang }, ip) {
   const p = normPhone(phone);
   if (!p) throw httpError(422, 'Enter a valid 10-digit Indian mobile number', { phone: 'Invalid phone' });
+  const ready = messaging.otpDeliverable();
+  if (!ready.ok) { console.error('[otp] cannot send OTP:', ready.reason); throw httpError(503, 'OTP login is temporarily unavailable. Please call the dealership.'); }
   const limit = parseInt(process.env.OTP_RATE_LIMIT || '3', 10);
   if (!rateLimit('otp|' + p, limit, 10 * 60000) || !rateLimit('otpip|' + ip, limit * 7, 10 * 60000)) throw httpError(429, 'Too many OTP requests. Please wait a few minutes.');
   const otp = String(crypto.randomInt(0, 1000000)).padStart(6, '0');
@@ -25,7 +28,13 @@ function requestOtp({ phone, lang }, ip) {
     q.run('UPDATE customer_otps SET used = 1 WHERE phone = ? AND used = 0', p);
     q.run('INSERT INTO customer_otps(phone,otp_hash,expires_at,created_at) VALUES (?,?,?,?)', p, otpHash(p, otp), new Date(Date.now() + OTP_TTL_MS).toISOString(), nowIso());
   });
-  messaging.sendTemplate({ phone: p, template: 'otp', lang: lang === 'hi' ? 'hi' : 'en', vars: { otp }, channel: 'sms', transactional: true });
+  const sent = messaging.sendTemplate({ phone: p, template: 'otp', lang: lang === 'hi' ? 'hi' : 'en', vars: { otp }, channel: 'sms', transactional: true });
+  const result = sent.promise ? await sent.promise : sent;
+  if (result.status === 'failed') {
+    q.run('UPDATE customer_otps SET used = 1 WHERE phone = ? AND used = 0', p);
+    console.error('[otp] gateway failed:', result.error);
+    throw httpError(502, 'We could not send the OTP right now. Please try again in a minute.');
+  }
   const out = { ok: true, expires_in: OTP_TTL_MS / 1000 };
   if (mockMode()) { out.dev_otp = otp; out.dev_note = `OTP_MODE=mock: ${FIXED_OTP} also works for any number`; }
   return out;

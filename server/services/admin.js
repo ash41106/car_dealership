@@ -26,6 +26,8 @@ const ENTITIES = {
   used: { table: 'used_cars', read: ['used.read'], write: 'used.write', req: ['model', 'variant', 'year', 'km', 'fuel', 'transmission', 'price'], fields: { stock_id: 's', model: 's', variant: 's', year: 'i', km: 'i', owners: 'i', fuel: 's', transmission: 's', color: 's', price: 'i', status: 's', reg_no: 's', location: 's', highlights: 'j', inspection: 'j', photos: 'j', warranty_en: 's', warranty_hi: 's' }, enums: { status: ['available', 'booked', 'sold'] }, order: 'id DESC', audit: true },
   'past-sales': { table: 'past_sales', read: ['used.read'], write: 'used.write', req: ['model', 'year', 'km', 'sold_price'], fields: { model: 's', variant: 's', year: 'i', km: 'i', fuel: 's', sold_price: 'i', sold_date: 'd' }, order: 'id DESC', audit: true },
 };
+/** Price-bearing fields: changing them needs `prices.write` (content editors may edit copy/images only). Used-car price needs used.write (used_manager/admin). */
+const PRICE_FIELDS = { models: ['accessories_amount'], offers: ['amount', 'type', 'show_in_onroad'], variants: ['ex_showroom'], 'price-rules': ['*'] };
 const AUDITED = new Set(['price-rules', 'variants', 'offers', 'users', 'used', 'past-sales', 'models']);
 
 function audit(user, action, entity, id, detail) {
@@ -63,6 +65,16 @@ function shapeRow(cfg, r) {
   for (const h of cfg.hidden || []) delete o[h];
   for (const [f, t] of Object.entries(cfg.fields)) if (t === 'j' && o[f] !== undefined) o[f] = parseJson(o[f], null);
   return o;
+}
+
+function checkPriceFields(user, name, out, existing) {
+  const fields = PRICE_FIELDS[name];
+  if (!fields || can(user, 'prices.write')) return;
+  for (const f of fields === '*' ? Object.keys(out) : fields) {
+    if (out[f] === undefined) continue;
+    const same = existing ? String(existing[f] ?? '') === String(out[f] ?? '') : (out[f] === null || out[f] === 0 || out[f] === 'info' || out[f] === '');
+    if (!same) throw httpError(403, `Changing "${f}" requires the price permission`, { [f]: 'Requires prices.write' });
+  }
 }
 
 function hooks(name, out, existing, errors) {
@@ -140,8 +152,9 @@ function create(user, name, body) {
   const cfg = entity(name); allow(user, cfg, 'write');
   const { out, errors } = coerce(cfg, body, null);
   if (name === 'users') {
-    try { auth.checkPolicy(body.password); } catch (e) { errors.password = e.message; }
+    try { auth.checkPolicy(body.password, { email: body.email, name: body.name }); } catch (e) { errors.password = e.message; }
   }
+  checkPriceFields(user, name, out, null);
   hooks(name, out, null, errors);
   if (Object.keys(errors).length) throw httpError(422, 'Validation failed', errors);
   if (name === 'users') out.password_hash = hashPassword(body.password);
@@ -159,9 +172,10 @@ function update(user, name, id, body) {
   const ex = q.get(`SELECT * FROM ${cfg.table} WHERE id = ?`, toInt(id));
   if (!ex) throw httpError(404, 'Not found');
   const { out, errors } = coerce(cfg, body, ex);
+  checkPriceFields(user, name, out, ex);
   hooks(name, out, ex, errors);
   if (name === 'users') {
-    if (body.password) { try { auth.checkPolicy(body.password); out.password_hash = hashPassword(body.password); out.password_changed_at = nowIso(); } catch (e) { errors.password = e.message; } }
+    if (body.password) { try { auth.checkPolicy(body.password, { email: out.email || ex.email, name: out.name || ex.name }); out.password_hash = hashPassword(body.password); out.password_changed_at = nowIso(); } catch (e) { errors.password = e.message; } }
     if (ex.id === user.id && (out.active === 0 || (out.role && out.role !== 'admin'))) errors.role = 'You cannot demote or deactivate yourself';
   }
   if (Object.keys(errors).length) throw httpError(422, 'Validation failed', errors);
@@ -221,10 +235,34 @@ function setRolePermissions(user, role, list) {
   return perms.listRoles().find(r => r.name === role);
 }
 
-function getSettings() { return Object.fromEntries(q.all('SELECT key, value FROM settings').map(r => [r.key, r.value])); }
+const JSON_SETTINGS = ['site_stats', 'contact'];
+function getSettings() {
+  const o = Object.fromEntries(q.all('SELECT key, value FROM settings').map(r => [r.key, r.value]));
+  for (const k of JSON_SETTINGS) o[k] = parseJson(o[k], {});
+  return o;
+}
+/** Public, cacheable subset used by the website (marketing numbers and contact details; no secrets). */
+function publicSettings() {
+  const s = getSettings();
+  return { site_stats: s.site_stats, contact: s.contact, emi: { rate: Number(s.emi_rate || 9.5), months: Number(s.emi_months || 60), down_pct: Number(s.emi_down_pct || 20) } };
+}
+function jsonSetting(k, v) {
+  const o = typeof v === 'string' ? parseJson(v, undefined) : v;
+  if (!o || typeof o !== 'object' || Array.isArray(o)) throw httpError(422, `${k} must be a JSON object`, { [k]: 'Invalid' });
+  const out = {};
+  for (const [key, val] of Object.entries(o)) {
+    if (!/^[a-z0-9_]{1,40}$/i.test(key)) throw httpError(422, `${k}: invalid key "${key}"`, { [k]: 'Invalid key' });
+    if (typeof val === 'number' && Number.isFinite(val)) out[key] = val;
+    else if (typeof val === 'string' && val.length <= 300) out[key] = clean(val, 300);
+    else throw httpError(422, `${k}.${key} must be a number or short text`, { [k]: 'Invalid value' });
+  }
+  return JSON.stringify(out);
+}
 function putSettings(user, body) {
   const allowed = ['emi_rate', 'emi_months', 'emi_down_pct', 'td_slots', 'svc_slots'];
+  const jsons = JSON_SETTINGS.filter(k => body[k] !== undefined).map(k => [k, jsonSetting(k, body[k])]);
   tx(() => {
+    for (const [k, v] of jsons) q.run('INSERT INTO settings(key,value) VALUES(?,?) ON CONFLICT(key) DO UPDATE SET value=excluded.value', k, v);
     for (const k of allowed) if (body[k] !== undefined) q.run('INSERT INTO settings(key,value) VALUES(?,?) ON CONFLICT(key) DO UPDATE SET value=excluded.value', k, clean(body[k], 200));
     audit(user, 'update', 'settings', '', body);
   });
@@ -286,4 +324,4 @@ function dashboard() {
   };
 }
 
-module.exports = { ENTITIES, list, get, create, update, remove, auditLog, resetPassword, listRoles, setRolePermissions, saveUpload, dmsCsv, dashboard, audit, getSettings, putSettings };
+module.exports = { publicSettings, ENTITIES, list, get, create, update, remove, auditLog, resetPassword, listRoles, setRolePermissions, saveUpload, dmsCsv, dashboard, audit, getSettings, putSettings };

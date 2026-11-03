@@ -8,6 +8,7 @@ const PERMS = {
   'lead.read.all': 'See leads of all showrooms',
   'lead.read.used': 'See used-car / trade-in leads',
   'lead.update': 'Change lead status and notes',
+  'lead.work': 'Can be assigned leads (works leads personally)',
   'lead.reassign': 'Assign / reassign leads (within scope)',
   'lead.reply': 'Send replies to leads',
   'lead.import': 'Import portal CSV leads',
@@ -41,15 +42,15 @@ const PERMS = {
 
 const MATRIX = {
   customer: { label: 'Customer', perms: ['customer.self'] },
-  consultant: { label: 'Sales consultant', perms: ['lead.read.own', 'lead.update', 'lead.reassign', 'lead.reply', 'lead.stats', 'lead.ai', 'booking.read.showroom', 'booking.update'] },
+  consultant: { label: 'Sales consultant', perms: ['lead.work', 'lead.read.own', 'lead.update', 'lead.reassign', 'lead.reply', 'lead.stats', 'lead.ai', 'booking.read.showroom', 'booking.update'] },
   lead_desk: { label: 'Lead desk', perms: ['lead.read.all', 'lead.update', 'lead.reassign', 'lead.reply', 'lead.import', 'lead.stats', 'lead.ai', 'sla.monitor'] },
-  showroom_manager: { label: 'Showroom manager', perms: ['lead.read.showroom', 'lead.update', 'lead.reassign', 'lead.reply', 'lead.stats', 'lead.ai', 'sla.monitor', 'booking.read.showroom', 'booking.update'] },
+  showroom_manager: { label: 'Showroom manager', perms: ['lead.work', 'lead.read.showroom', 'lead.update', 'lead.reassign', 'lead.reply', 'lead.stats', 'lead.ai', 'sla.monitor', 'booking.read.showroom', 'booking.update'] },
   service_advisor: { label: 'Service advisor', perms: ['booking.read.workshop', 'booking.update', 'callback.read', 'callback.update'] },
   workshop_manager: { label: 'Workshop manager', perms: ['booking.read.workshop', 'booking.update', 'callback.read', 'callback.update', 'workshop.manage'] },
   used_manager: { label: 'Used-car manager', perms: ['lead.read.used', 'lead.update', 'lead.reply', 'lead.stats', 'lead.ai', 'used.read', 'used.write', 'used.price_suggestion', 'upload', 'audit.read.used'] },
   content_editor: { label: 'Content editor', perms: ['content.models', 'content.offers', 'content.banners', 'upload'] },
   dealer_principal: { label: 'Dealer principal (read-only)', perms: ['lead.read.all', 'lead.stats', 'sla.monitor', 'booking.read.all', 'callback.read', 'used.read', 'admin.read', 'users.read', 'roles.read', 'dashboard.read', 'settings.read', 'audit.read', 'export.dms', 'exec.read'] },
-  admin: { label: 'Administrator', perms: Object.keys(PERMS).filter(p => p !== 'customer.self') },
+  admin: { label: 'Administrator', perms: Object.keys(PERMS).filter(p => p !== 'customer.self' && p !== 'lead.work') },
 };
 
 const cache = new Map();
@@ -65,6 +66,19 @@ function ensure() {
     }
   }
   for (const p of MATRIX.admin.perms) q.run('INSERT OR IGNORE INTO role_permissions(role,perm) VALUES (?,?)', 'admin', p);
+  backfill();
+}
+
+/** One-off grants of permissions introduced after a role already existed in a database (flagged in settings). */
+const BACKFILL = { 'lead.work': ['consultant', 'showroom_manager'] };
+function backfill() {
+  for (const [perm, roles] of Object.entries(BACKFILL)) {
+    const flag = 'perm_backfill:' + perm;
+    if (q.get('SELECT 1 x FROM settings WHERE key = ?', flag)) continue;
+    for (const r of roles) if (q.get('SELECT 1 x FROM roles WHERE name = ?', r)) q.run('INSERT OR IGNORE INTO role_permissions(role,perm) VALUES (?,?)', r, perm);
+    q.run("INSERT INTO settings(key,value) VALUES (?, '1')", flag);
+  }
+  clear();
 }
 
 function permsOf(role) {
@@ -86,6 +100,7 @@ function setRolePerms(role, list) {
   for (const p of list) q.run('INSERT INTO role_permissions(role,perm) VALUES (?,?)', role, p);
   clear();
 }
+function rolesWith(perm) { return q.all('SELECT role FROM role_permissions WHERE perm = ?', perm).map(r => r.role); }
 function roleNames() { return q.all('SELECT name FROM roles').map(r => r.name); }
 
-module.exports = { PERMS, MATRIX, ensure, can, permsOf, listRoles, setRolePerms, roleNames, clear };
+module.exports = { PERMS, MATRIX, ensure, can, permsOf, listRoles, setRolePerms, roleNames, rolesWith, clear };

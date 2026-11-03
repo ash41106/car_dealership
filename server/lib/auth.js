@@ -43,11 +43,21 @@ function verifyPassword(pw, stored) {
   } catch { return false; }
 }
 const DUMMY = hashPassword('dummy-password-for-timing');
-function checkPolicy(pw) {
-  if (typeof pw !== 'string' || pw.length < MIN_PASSWORD) throw httpError(422, `Password must be at least ${MIN_PASSWORD} characters`, { password: `Minimum ${MIN_PASSWORD} characters` });
-  if (pw.length > 200) throw httpError(422, 'Password too long', { password: 'Too long' });
+const COMMON = ['password', 'passw0rd', 'welcome', 'qwerty', 'companya', 'letmein', 'changeme', 'admin123', 'iloveyou', 'abc123', '123456', 'dealership', 'brandx', 'sales123', 'service123', 'monkey', 'dragon'];
+/** >=10 chars, 3 of 4 classes, no email local-part / name, no common password, (equality to current checked by caller). */
+function checkPolicy(pw, ctx = {}) {
+  const fail = (m) => { throw httpError(422, m, { password: m }); };
+  if (typeof pw !== 'string' || pw.length < MIN_PASSWORD) fail(`Password must be at least ${MIN_PASSWORD} characters`);
+  if (pw.length > 200) fail('Password too long');
+  const classes = [/[a-z]/, /[A-Z]/, /\d/, /[^A-Za-z0-9]/].filter(r => r.test(pw)).length;
+  if (classes < 3) fail('Use at least 3 of: lowercase, uppercase, digits, symbols');
+  const low = pw.toLowerCase();
+  if (COMMON.some(w => low.includes(w))) fail('Password is too common or guessable');
+  const local = String(ctx.email || '').split('@')[0].toLowerCase();
+  if (local.length >= 3 && low.includes(local)) fail('Password must not contain your email name');
+  for (const tok of String(ctx.name || '').toLowerCase().split(/\s+/)) if (tok.length >= 3 && low.includes(tok)) fail('Password must not contain your name');
 }
-function tempPassword() { return crypto.randomBytes(9).toString('base64url') + 'a1'; }
+function tempPassword() { return crypto.randomBytes(9).toString('base64url') + 'Zq9!'; }
 
 // ------------------------------------------------------------------ sessions
 const sha = s => crypto.createHash('sha256').update(s).digest('hex');
@@ -131,7 +141,7 @@ function resetThrottle() { fails.clear(); }
 function changePassword(user, current, next, currentToken) {
   const u = q.get('SELECT * FROM users WHERE id = ?', user.id);
   if (!verifyPassword(current || '', u.password_hash)) { audit(u.email, u.id, 'password_change_failed', null); throw httpError(401, 'Current password is incorrect'); }
-  checkPolicy(next);
+  checkPolicy(next, { email: u.email, name: u.name });
   if (next === current) throw httpError(422, 'New password must be different', { password: 'Must differ from the current password' });
   q.run('UPDATE users SET password_hash = ?, must_change_password = 0, password_changed_at = ? WHERE id = ?', hashPassword(next), nowIso(), u.id);
   revokeUserSessions(u.id);

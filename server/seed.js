@@ -16,12 +16,14 @@ function seed() {
   const { q, tx } = db;
   db.open();
   perms.ensure();
-  if (q.get('SELECT 1 x FROM models LIMIT 1')) return { skipped: true };
+  if (q.get('SELECT 1 x FROM models LIMIT 1')) { fixups(); return { skipped: true }; }
   const leads = require('./services/leads');
   tx(() => {
     const now = nowIso();
     // ---- settings
-    for (const [k, v] of Object.entries({ emi_rate: '9.5', emi_months: '60', emi_down_pct: '20', td_slots: '10:00,11:00,12:00,14:00,15:00,16:00,17:00', svc_slots: '09:00,10:00,11:00,12:00,14:00,15:00,16:00' }))
+    for (const [k, v] of Object.entries({ emi_rate: '9.5', emi_months: '60', emi_down_pct: '20', td_slots: '10:00,11:00,12:00,14:00,15:00,16:00,17:00', svc_slots: '09:00,10:00,11:00,12:00,14:00,15:00,16:00',
+      site_stats: J({ new_cars_per_year: 6000, used_cars_per_year: 900 }),
+      contact: J({ phone: '0522 4001001', whatsapp: '919810000001', email: 'hello@companya.in', hours: 'Mon-Sat 9:30-19:30, Sun 10:00-17:00', city: 'Lucknow' }) }))
       q.run('INSERT INTO settings(key,value) VALUES (?,?)', k, v);
 
     // ---- locations
@@ -177,18 +179,24 @@ function seed() {
       ['UC-1171', 'Model H', 'LX', 2020, 52300, 1, 'Petrol', 'Manual', 'White', 'f4f4f2', 385000, 'available', 'UP32AB1171'],
       ['UC-1175', 'Model H', 'ZX', 2022, 21800, 1, 'Petrol', 'Automatic', 'Grey', '6b6f75', 689000, 'available', 'UP32CD5075'],
       ['UC-1179', 'Model H', 'VX', 2019, 68900, 2, 'CNG', 'Manual', 'Silver', 'b9bcc1', 372000, 'available', 'UP78EF2279'],
-      ['UC-1182', 'Model C', 'VX', 2022, 41200, 1, 'Diesel', 'Manual', 'Red', 'b3122d', 845000, 'available', 'UP32KL7834'],
+      ['UC-1182', 'Model C', 'VX', 2022, 41200, 1, 'Diesel', 'Manual', 'White', 'f4f4f2', 845000, 'available', 'UP32KL7834'],
       ['UC-1184', 'Model C', 'LX', 2021, 36400, 1, 'Petrol', 'Manual', 'White', 'f4f4f2', 715000, 'available', 'UP32MN6184'],
       ['UC-1186', 'Model C', 'ZX', 2023, 14200, 1, 'Petrol', 'Automatic', 'Black', '16171a', 1125000, 'available', 'UP32PQ0186'],
       ['UC-1188', 'Model S', 'VX', 2020, 74500, 2, 'Diesel', 'Manual', 'Blue', '1f4e8c', 895000, 'available', 'UP32RS3388'],
-      ['UC-1190', 'Model S', 'LX', 2021, 58600, 1, 'Petrol', 'Manual', 'Silver', 'b9bcc1', 512000, 'booked', 'UP32HN4521'],
-      ['UC-1191', 'Model S', 'ZX', 2022, 33900, 1, 'Diesel', 'Automatic', 'White', 'f1f1ef', 1195000, 'available', 'UP32TU9191'],
-      ['UC-1193', 'Model V', 'LX', 2019, 81200, 2, 'Petrol', 'Manual', 'Grey', '6b6f75', 565000, 'available', 'UP65VW1193'],
-      ['UC-1195', 'Model V', 'VX', 2021, 47600, 1, 'Diesel', 'Manual', 'Silver', 'c4c7cb', 985000, 'booked', 'UP32XY7795'],
-      ['UC-1197', 'Model V', 'ZX', 2022, 28800, 1, 'Petrol', 'Automatic', 'Black', '18191c', 1090000, 'available', 'UP32ZA4297'],
-      ['UC-1199', 'Model H', 'LX', 2018, 91200, 3, 'Petrol', 'Manual', 'Blue', '1f4e8c', 265000, 'available', 'UP32BC8099'],
-      ['UC-1201', 'Model C', 'VX', 2019, 77100, 2, 'Diesel', 'Manual', 'Grey', '6b6f75', 585000, 'available', 'UP32DE5601'],
-      ['UC-1203', 'Model S', 'ZX', 2018, 99500, 2, 'Diesel', 'Automatic', 'Black', '16171a', 745000, 'sold', 'UP32FG3203'],
+      ['UC-1190', 'Model S', 'LX', 2021, 58600, 1, 'Petrol', 'Manual', 'White', 'f4f4f2', 512000, 'booked', 'UP32HN4521'],
+      ['UC-1191', 'Model C', 'ZX', 2022, 33900, 1, 'Diesel', 'Automatic', 'Silver', 'b9bcc1', 1195000, 'available', 'UP32TU9191'],
+      ['UC-1193', 'Model H', 'ZX', 2019, 81200, 2, 'Petrol', 'Manual', 'Midnight Blue', '1b2a4a', 565000, 'available', 'UP65VW1193'],
+      ['UC-1195', 'Model V', 'VX', 2021, 47600, 1, 'Diesel', 'Manual', 'Pearl White', 'f1f1ef', 985000, 'booked', 'UP32XY7795'],
+      ['UC-1197', 'Model V', 'ZX', 2022, 28800, 1, 'Petrol', 'Automatic', 'Graphite Grey', '55565a', 1090000, 'available', 'UP32ZA4297'],
+      ['UC-1199', 'Model S', 'LX', 2018, 91200, 3, 'Petrol', 'Manual', 'Blue', '2a7fc4', 695000, 'available', 'UP32BC8099'],
+      ['UC-1201', 'Model S', 'VX', 2019, 77100, 2, 'Diesel', 'Manual', 'Charcoal Grey', '3b3e43', 925000, 'available', 'UP32DE5601'],
+      ['UC-1203', 'Model S', 'ZX', 2018, 99500, 2, 'Diesel', 'Automatic', 'Dark Blue', '1f2f55', 745000, 'sold', 'UP32FG3203'],
+      ['UC-1192', 'Model H', 'LX', 2022, 18900, 1, 'Petrol', 'Manual', 'Black', '16171a', 595000, 'available', 'UP32GH1192'],
+      ['UC-1194', 'Model S', 'ZX+', 2023, 12400, 1, 'Diesel', 'Automatic', 'White', 'f4f4f2', 1745000, 'available', 'UP32JK1194'],
+      ['UC-1196', 'Model S', 'ZX', 2018, 88800, 2, 'Diesel', 'Automatic', 'Black', '16171a', 1595000, 'available', 'UP32LM1196'],
+      ['UC-1198', 'Model V', 'LX', 2022, 22100, 1, 'Petrol', 'Manual', 'Silver', 'b9bcc1', 1085000, 'available', 'UP32NP1198'],
+      ['UC-1200', 'Model S', 'LX', 2019, 52300, 1, 'Petrol', 'Manual', 'Red', 'b3122d', 735000, 'available', 'UP32QR1200'],
+      ['UC-1202', 'Model C', 'VX', 2022, 29700, 1, 'Petrol', 'Manual', 'Slate Grey', '6b7078', 1015000, 'available', 'UP32ST1202'],
     ];
     for (const u of USED) {
       const ms = slugify(u[1]);
@@ -261,7 +269,25 @@ function seed() {
   return { skipped: false };
 }
 
-module.exports = { seed };
+/** Idempotent data corrections applied to already-seeded databases too. */
+const COLOUR_FIXES = [['UC-1182', 'White', 'f4f4f2', 'Model C'], ['UC-1190', 'White', 'f4f4f2', 'Model S'], ['UC-1191', 'Silver', 'b9bcc1', 'Model C'], ['UC-1192', 'Black', '16171a', 'Model H'],
+  ['UC-1193', 'Midnight Blue', '1b2a4a', 'Model H'], ['UC-1194', 'White', 'f4f4f2', 'Model S'], ['UC-1195', 'Pearl White', 'f1f1ef', 'Model V'], ['UC-1196', 'Black', '16171a', 'Model S'],
+  ['UC-1197', 'Graphite Grey', '55565a', 'Model V'], ['UC-1198', 'Silver', 'b9bcc1', 'Model V'], ['UC-1199', 'Blue', '2a7fc4', 'Model S'], ['UC-1200', 'Red', 'b3122d', 'Model S'],
+  ['UC-1201', 'Charcoal Grey', '3b3e43', 'Model S'], ['UC-1202', 'Slate Grey', '6b7078', 'Model C'], ['UC-1203', 'Dark Blue', '1f2f55', 'Model S']];
+function fixups() {
+  const { q } = db;
+  for (const [stock, colour, hex, model] of COLOUR_FIXES) {
+    const r = q.get('SELECT * FROM used_cars WHERE stock_id = ?', stock);
+    if (!r) continue;
+    const ms = slugify(model);
+    const photos = String(r.photos).replace(/c=[0-9a-fA-F]{3,6}/g, 'c=' + hex).replace(/\/img\/car\/model-[a-z]\.svg/g, '/img/car/' + ms + '.svg');
+    q.run('UPDATE used_cars SET color = ?, model = ?, slug = ?, photos = ? WHERE id = ?', colour, model, makeSlug(stock, model, r.variant, r.year), photos, r.id);
+  }
+  for (const [k, v] of Object.entries({ site_stats: J({ new_cars_per_year: 6000, used_cars_per_year: 900 }), contact: J({ phone: '0522 4001001', whatsapp: '919810000001', email: 'hello@companya.in', hours: 'Mon-Sat 9:30-19:30, Sun 10:00-17:00', city: 'Lucknow' }) }))
+    q.run('INSERT OR IGNORE INTO settings(key,value) VALUES (?,?)', k, v);
+}
+
+module.exports = { seed, fixups };
 
 if (require.main === module) {
   if (process.argv.includes('--reset')) {

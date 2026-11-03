@@ -94,13 +94,13 @@ test('admin CRUD + audit log + DMS export + sitemap helper', async () => {
   assert.equal((await t.api('PUT', `/api/admin/offers/${c.json.id}`, { amount: 7000 }, { cookie: admin })).json.amount, 7000);
   assert.equal((await t.api('POST', '/api/admin/offers', { title_en: 'x', type: 'bogus' }, { cookie: admin })).status, 422);
   assert.equal((await t.api('DELETE', `/api/admin/offers/${c.json.id}`, undefined, { cookie: admin })).status, 200);
-  const u = await t.api('POST', '/api/admin/users', { name: 'New Person', email: 'new@companya.in', role: 'consultant', password: 'Passw0rd!x', showroom_id: 1 }, { cookie: admin });
+  const u = await t.api('POST', '/api/admin/users', { name: 'New Person', email: 'new@companya.in', role: 'consultant', password: 'Vx9#kLm2$Qz', showroom_id: 1 }, { cookie: admin });
   assert.equal(u.status, 201); assert.ok(!('password_hash' in u.json));
-  assert.ok((await t.login('new@companya.in', 'Passw0rd!x')));
+  assert.ok((await t.login('new@companya.in', 'Vx9#kLm2$Qz')));
   const audit = (await t.api('GET', '/api/admin/audit', undefined, { cookie: admin })).json;
   assert.ok(audit.some(a => a.entity === 'offers' && a.action === 'update'));
   assert.ok(audit.some(a => a.entity === 'users' && a.action === 'create'));
-  assert.ok(!JSON.stringify(audit).includes('Passw0rd'));
+  assert.ok(!JSON.stringify(audit).includes('Vx9#kLm2'));
   const csv = await t.api('GET', '/api/admin/export/dms.csv?date=' + new Date().toISOString().slice(0, 10), undefined, { cookie: admin });
   assert.equal(csv.status, 200); assert.match(csv.text, /^record_type,id,date/);
   const urls = require('../../server/services/seo').listAllUrls();

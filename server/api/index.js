@@ -59,7 +59,13 @@ function register(router) {
   });
   R('/api/used', ctx => ctx.json(used.listUsed(ctx.query, { staff: !!ctx.user })));
   R('/api/used/:id', ctx => { const u = used.getUsed(ctx.params.id); if (!u) throw httpError(404, 'Car not found'); ctx.json(u); });
-  R('/api/showrooms', ctx => ctx.json(sales.listShowrooms()));
+  R('/api/settings/public', ctx => {
+    const body = JSON.stringify(admin.publicSettings());
+    ctx.setHeader('Cache-Control', 'public, max-age=300');
+    ctx.setHeader('ETag', 'W/"' + require('node:crypto').createHash('sha1').update(body).digest('base64url').slice(0, 20) + '"');
+    ctx.text(body, 200, 'application/json; charset=utf-8');
+  });
+  R('/api/showrooms',ctx => ctx.json(sales.listShowrooms()));
   R('/api/workshops', ctx => ctx.json(sales.listWorkshops()));
   R('/api/slots/test-drive', ctx => ctx.json(sales.listTestDriveSlots({ showroomId: ctx.query.showroom, modelId: ctx.query.model, date: ctx.query.date })));
   R('/api/slots/service', ctx => ctx.json(sales.listServiceSlots({ workshopId: ctx.query.workshop, date: ctx.query.date })));
@@ -115,7 +121,7 @@ function register(router) {
   }, { allowPasswordChange: true }));
 
   // ---------------- customer accounts (cookie `cs`, separate from staff)
-  router.post('/api/customer/otp/request', pub0(ctx => ctx.json(customers.requestOtp({ phone: ctx.body.phone, lang: ctx.body.lang || ctx.lang }, ctx.ip))));
+  router.post('/api/customer/otp/request', pub0(async ctx => ctx.json(await customers.requestOtp({ phone: ctx.body.phone, lang: ctx.body.lang || ctx.lang }, ctx.ip))));
   router.post('/api/customer/otp/verify', pub0(ctx => {
     const r = customers.verifyOtp(ctx.body, ctx);
     auth.destroySession(ctx.cookies[auth.CUSTOMER_COOKIE]);
