@@ -71,7 +71,9 @@
   function renderAi(sum) {
     if (!sum) return '<p class="muted">No summary yet.</p>';
     if (typeof sum === 'string') return '<p>' + esc(sum) + '</p>';
-    return '<dl class="kv">' + Object.keys(sum).map(function (k) { var v = sum[k]; if (Array.isArray(v)) v = v.join(', '); else if (v && typeof v === 'object') v = JSON.stringify(v); return '<dt>' + esc(S.pretty(k)) + '</dt><dd>' + esc(v) + '</dd>'; }).join('') + '</dl>';
+    var L = [['model_interest', 'Interest'], ['needs', 'Needs'], ['budget', 'Budget'], ['timeline', 'Timeline'], ['next_best_action', 'Next best action']], rows = '';
+    L.forEach(function (p) { var v = sum[p[0]]; if (Array.isArray(v)) v = v.join(', '); if (v == null || v === '' || v === 'not specified') return; rows += '<dt>' + p[1] + '</dt><dd>' + esc(v) + '</dd>'; });
+    return (sum.text ? '<p>' + esc(sum.text) + '</p>' : '') + (rows ? '<dl class="kv">' + rows + '</dl>' : '');
   }
   function render(r, cons) {
     var l = r.lead, ai = r.ai || {}, ti = l.trade_in;

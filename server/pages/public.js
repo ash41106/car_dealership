@@ -31,7 +31,7 @@ function home(ctx) {
 <h1 class="h1 xl">${esc(t('hero_h1a'))}<br>${esc(t('hero_h1b'))}<span class="dot">.</span></h1><p class="lead">${esc(banner ? (L(banner, 'sub', lang) || t('hero_sub')) : t('hero_sub'))}</p>
 <div class="cta-row"><a class="btn" href="/new-cars">${esc(t('explore_new'))} ${ICON.arrow}</a><a class="btn btn-o" href="/used-cars">${esc(t('browse_used'))} ${ICON.arrow}</a></div></div>
 <div class="hero-car" data-carousel>${heroSlides}<div class="hero-ctl"><button class="circ" type="button" data-prev aria-label="${esc(t('prev'))}">${ICON.left}</button><div class="dots">${dots}</div><button class="circ" type="button" data-next aria-label="${esc(t('next'))}">${ICON.arrow}</button></div></div></div>
-<div class="wrap"><ul class="stats"><li>${ICON.car}<div><strong data-count="6000" data-suffix="+">6,000+</strong><span>${esc(t('stat1'))}</span></div></li><li>${ICON.shield}<div><strong data-count="100" data-suffix="%">100%</strong><span>${esc(t('stat2'))}</span></div></li><li>${ICON.pin}<div><strong data-count="3">3</strong><span>${esc(t('stat3'))}</span></div></li></ul></div></section>
+<div class="wrap"><ul class="stats"><li>${ICON.car}<div><strong data-count="6000" data-suffix="+">6,000+</strong><span>${esc(t('stat1'))}</span></div></li><li>${ICON.shield}<div><strong data-count="900" data-suffix="+">900+</strong><span>${esc(t('stat2'))}</span></div></li><li>${ICON.pin}<div><strong data-count="${showrooms.length || 3}">${showrooms.length || 3}</strong><span>${esc(t('stat3'))}</span></div></li></ul></div></section>
 ${usedRes.items && usedRes.items.length ? `<section class="sec sec-grey"><div class="wrap"><div class="sec-h"><div><p class="script">${esc(t('script_tag'))}</p>${V.heading(t('handpicked_a'), t('handpicked_b'))}</div><div class="ctl"><button class="circ" type="button" data-strip-prev aria-label="${esc(t('prev'))}">${ICON.left}</button><button class="circ" type="button" data-strip-next aria-label="${esc(t('next'))}">${ICON.arrow}</button></div></div>
 <div class="strip" data-strip tabindex="0" aria-label="${esc(t('used_cars'))}">${usedRes.items.map(u => C.usedCard(u, t, lang, bm)).join('')}</div><p class="center"><a class="btn btn-o" href="/used-cars">${esc(t('view_all'))} ${ICON.arrow}</a></p></div></section>` : ''}
 <section class="sec"><div class="wrap"><div class="sec-h"><div>${V.heading(t('perfect_a'), t('perfect_b'))}<p class="lead">${esc(t('new_cars_sub'))}</p></div></div><div class="tiles">${tiles}</div></div></section>
@@ -224,13 +224,13 @@ function privacy(ctx) {
     ['Grievance officer', 'privacy@companya.example | Lucknow, Uttar Pradesh']
   ];
   const body = `${crumbsHtml([[t('privacy_title'), '/privacy']], t)}${C.hdr({ title: esc(t('privacy_title')) })}<section class="sec tight"><div class="wrap narrow prose">${P.map(p => `<h2 class="h3">${esc(p[0])}</h2><p>${esc(p[1])}</p>`).join('')}<p><a class="btn" href="/opt-out">${esc(t('optout_title'))} ${ICON.arrow}</a></p></div></section>`;
-  return ctx.html(page({ ctx, title: t('privacy_title'), desc: P[0][1], body, scripts: [] }));
+  return ctx.html(page({ ctx, title: t('privacy_title'), desc: P[0][1], body, jsonld: [{ '@context': 'https://schema.org', '@type': 'WebPage', name: t('privacy_title'), url: BASE() + '/privacy' }, crumbsLd([['Home', '/'], [t('privacy_title'), '/privacy']])], scripts: [] }));
 }
 
 function optOut(ctx) {
   const t = ctxT(ctx);
   const body = `${crumbsHtml([[t('optout_title'), '/opt-out']], t)}${C.hdr({ title: esc(t('optout_title')), sub: t('optout_sub') })}<section class="sec tight"><div class="wrap narrow"><form class="form" data-optout method="post" action="/forms/optout" novalidate>${field(t, { name: 'phone', label: t('phone'), type: 'tel', required: true, inputmode: 'numeric', autocomplete: 'tel-national' })}<div class="form-msg" role="status" aria-live="polite"></div><button class="btn" type="submit">${esc(t('optout_btn'))} ${ICON.arrow}</button></form></div></section>`;
-  return ctx.html(page({ ctx, title: t('optout_title'), desc: t('optout_sub'), body, scripts: ['/js/forms.js'] }));
+  return ctx.html(page({ ctx, title: t('optout_title'), desc: t('optout_sub'), body, jsonld: [{ '@context': 'https://schema.org', '@type': 'WebPage', name: t('optout_title'), url: BASE() + '/opt-out' }, crumbsLd([['Home', '/'], [t('optout_title'), '/opt-out']])], scripts: ['/js/forms.js'] }));
 }
 
 function thanks(ctx, msg, extra) {

@@ -11,7 +11,7 @@
     if (body !== undefined) { o.headers['Content-Type'] = 'application/json'; o.body = JSON.stringify(body); }
     return fetch(url, o).then(function (r) {
       return r.json().catch(function () { return {}; }).then(function (j) {
-        if (r.status === 401) { location.href = '/staff/login?next=' + encodeURIComponent(location.pathname); throw new Error('Signed out'); }
+        if (r.status === 401 && url.indexOf('/api/auth/login') < 0) { location.href = '/staff/login?next=' + encodeURIComponent(location.pathname); throw new Error('Signed out'); }
         if (!r.ok) { var e = new Error(j.error || j.message || 'Request failed'); e.status = r.status; e.errors = j.errors; throw e; }
         return j;
       });
