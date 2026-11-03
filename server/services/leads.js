@@ -4,6 +4,7 @@ const { httpError, normPhone, validEmail, clean, nowIso, sha, parseJson, toInt, 
 const { parseCsv } = require('../lib/csv');
 const messaging = require('./messaging');
 const ai = require('./ai');
+const { can } = require('../lib/perms');
 
 const STATUSES = ['new', 'contacted', 'test_drive', 'negotiation', 'won', 'lost'];
 const SOURCES = ['website', 'test_drive', 'trade_in', 'finance', 'carwale', 'cardekho', 'portal', 'facebook', 'instagram', 'walk_in', 'used_enquiry', 'callback'];
@@ -140,10 +141,12 @@ function shapeLead(l) {
   return { ...rest, opted_out: !!l.opted_out, trade_in: parseJson(l.trade_in, null), sla: sla(l) };
 }
 
+/** Data scoping driven by permissions: all > showroom > own (assigned + own showroom) > used-car leads. */
 function visibility(user) {
-  if (user.role === 'admin') return { sql: '1=1', p: [] };
-  if (user.role === 'consultant') return { sql: '(l.showroom_id = ? OR l.assigned_to = ?)', p: [user.showroom_id, user.id] };
-  if (user.role === 'used_manager') return { sql: "(l.used_id IS NOT NULL OR l.type IN ('used','trade_in'))", p: [] };
+  if (can(user, 'lead.read.all')) return { sql: '1=1', p: [] };
+  if (can(user, 'lead.read.showroom')) return { sql: 'l.showroom_id = ?', p: [user.showroom_id || 0] };
+  if (can(user, 'lead.read.own')) return { sql: '(l.showroom_id = ? OR l.assigned_to = ?)', p: [user.showroom_id || 0, user.id] };
+  if (can(user, 'lead.read.used')) return { sql: "(l.used_id IS NOT NULL OR l.type IN ('used','trade_in'))", p: [] };
   throw httpError(403, 'Not permitted for your role');
 }
 
@@ -222,8 +225,9 @@ function updateLead(user, id, body) {
 function reassign(user, id, body) {
   return tx(() => {
     const l = loadVisible(user, id);
-    const target = q.get("SELECT id, name FROM users WHERE id = ? AND active = 1 AND role IN ('consultant','admin','used_manager')", toInt(body.user_id));
+    const target = q.get("SELECT id, name, showroom_id FROM users WHERE id = ? AND active = 1 AND role IN ('consultant','showroom_manager','admin','used_manager')", toInt(body.user_id));
     if (!target) throw httpError(422, 'Choose an active staff member', { user_id: 'Invalid user' });
+    if (!can(user, 'lead.read.all') && target.showroom_id !== user.showroom_id) throw httpError(403, 'You can reassign only within your own showroom');
     q.run('UPDATE leads SET assigned_to = ?, updated_at = ? WHERE id = ?', target.id, nowIso(), l.id);
     addEvent(l.id, 'reassigned', `Reassigned to ${target.name}${body.reason ? ': ' + clean(body.reason, 200) : ''}`, user.id);
     return shapeLead(q.get(`${SELECT_LEAD} WHERE l.id = ?`, l.id));
@@ -275,10 +279,38 @@ function stats(user) {
   };
 }
 
-function listConsultants() {
+function listConsultants(user) {
+  const scoped = user && !can(user, 'lead.read.all');
   return q.all(`SELECT u.id, u.name, u.role, u.showroom_id, u.phone, s.name_en AS showroom_name,
     (SELECT COUNT(*) FROM leads l WHERE l.assigned_to = u.id AND l.status NOT IN ('won','lost')) AS open_leads
-    FROM users u LEFT JOIN showrooms s ON s.id = u.showroom_id WHERE u.active = 1 AND u.role IN ('consultant','used_manager','admin') ORDER BY u.name`);
+    FROM users u LEFT JOIN showrooms s ON s.id = u.showroom_id WHERE u.active = 1 AND u.role IN ('consultant','showroom_manager','used_manager','admin')
+    ${scoped ? 'AND u.showroom_id = ?' : ''} ORDER BY u.name`, ...(scoped ? [user.showroom_id || 0] : []));
+}
+
+/** Live SLA monitor within the viewer's scope: unassigned, breached and near-breach open leads plus consultant load. */
+function slaMonitor(user) {
+  const v = visibility(user);
+  const rows = q.all(`SELECT l.*, u.name AS assignee_name, s.name_en AS showroom_name, m.name AS model_name FROM leads l LEFT JOIN users u ON u.id = l.assigned_to
+    LEFT JOIN showrooms s ON s.id = l.showroom_id LEFT JOIN models m ON m.id = l.model_id WHERE ${v.sql} AND l.status NOT IN ('won','lost') ORDER BY l.created_at`, ...v.p);
+  const item = l => ({ id: l.id, name: l.name, phone: l.phone, status: l.status, source: l.source, model_name: l.model_name, showroom_name: l.showroom_name,
+    assignee_id: l.assigned_to, assignee_name: l.assignee_name, created_at: l.created_at, due_at: l.due_at, sla: sla(l) });
+  const out = { unassigned: [], breached: [], near_breach: [], per_consultant: [], generated_at: nowIso() };
+  for (const l of rows) {
+    const s = sla(l);
+    if (!l.assigned_to) out.unassigned.push(item(l));
+    if (s.breached) out.breached.push(item(l));
+    else if (!s.responded && s.remaining_sec <= 120) out.near_breach.push(item(l));
+  }
+  const load = new Map();
+  for (const l of rows) {
+    if (!l.assigned_to) continue;
+    const c = load.get(l.assigned_to) || { user_id: l.assigned_to, name: l.assignee_name, open: 0, awaiting_response: 0, breached: 0 };
+    c.open++; const s = sla(l); if (!s.responded) c.awaiting_response++; if (s.breached) c.breached++;
+    load.set(l.assigned_to, c);
+  }
+  out.per_consultant = [...load.values()].sort((a, b) => b.open - a.open);
+  out.counts = { unassigned: out.unassigned.length, breached: out.breached.length, near_breach: out.near_breach.length, open: rows.length };
+  return out;
 }
 
 // ---------------------------------------------------------------- CSV import
@@ -349,4 +381,4 @@ function importCsv(user, { csv, source = 'portal', dryRun = true }, ip) {
   return out;
 }
 
-module.exports = { createLead, insertLead, afterCreate, optOut, pickAssignee, listLeads, getLead, regenerateAi, updateLead, reassign, reply, stats, listConsultants, importCsv, mapHeaders, sla, STATUSES, SOURCES, CONSENT_TEXT, addEvent, recordConsent };
+module.exports = { createLead, insertLead, afterCreate, optOut, pickAssignee, listLeads, getLead, regenerateAi, updateLead, reassign, reply, stats, listConsultants, slaMonitor, importCsv, mapHeaders, sla, STATUSES, SOURCES, CONSENT_TEXT, addEvent, recordConsent };

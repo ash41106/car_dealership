@@ -3,6 +3,7 @@
 const fs = require('node:fs');
 const db = require('./lib/db');
 const { hashPassword } = require('./lib/auth');
+const perms = require('./lib/perms');
 const { nowIso, today, addDays, slugify } = require('./lib/util');
 const { makeSlug } = require('./services/used');
 
@@ -14,6 +15,7 @@ const J = JSON.stringify;
 function seed() {
   const { q, tx } = db;
   db.open();
+  perms.ensure();
   if (q.get('SELECT 1 x FROM models LIMIT 1')) return { skipped: true };
   const leads = require('./services/leads');
   tx(() => {
@@ -114,17 +116,31 @@ function seed() {
     ];
     BAN.forEach((b, i) => q.run('INSERT INTO banners(title_en,title_hi,sub_en,sub_hi,image,cta_label_en,cta_label_hi,cta_url,sort) VALUES (?,?,?,?,?,?,?,?,?)', ...b, i));
 
-    // ---- users (contract logins)
+    // ---- users (documented logins; scrypt-hashed, never stored in plaintext)
+    const wid = Object.fromEntries(q.all('SELECT id, slug FROM workshops').map(r => [r.slug, r.id]));
+    const SPEC_RV = J([mid['model-s'], mid['model-v']]);
     const U = [
-      ['Administrator', 'admin@companya.in', 'Admin@123', 'admin', null, '[]', '9810000001'],
-      ['Used Car Manager', 'used@companya.in', 'Used@123', 'used_manager', 'faizabad-road-yard', '[]', '9810000002'],
-      ['Priya Sharma', 'priya@companya.in', 'Sales@123', 'consultant', 'gomti-nagar', '[]', '9810000003'],
-      ['Rahul Verma', 'rahul@companya.in', 'Sales@123', 'consultant', 'gomti-nagar', J([mid['model-s'], mid['model-v']]), '9810000004'],
-      ['Neha Singh', 'neha@companya.in', 'Sales@123', 'consultant', 'aliganj', '[]', '9810000005'],
-      ['Amit Yadav', 'amit@companya.in', 'Sales@123', 'consultant', 'alambagh', '[]', '9810000006'],
-      ['Service Advisor', 'service@companya.in', 'Service@123', 'service_advisor', null, '[]', '9810000007'],
+      // name, email, password, role, showroom, workshop, specialty, phone
+      ['Administrator', 'admin@companya.in', 'Admin@123', 'admin', null, null, '[]', '9810000001'],
+      ['Dealer Principal', 'principal@companya.in', 'Principal@123', 'dealer_principal', null, null, '[]', '9810000010'],
+      ['Lead Desk', 'desk@companya.in', 'Desk@123', 'lead_desk', null, null, '[]', '9810000011'],
+      ['Gomti Nagar Manager', 'manager.gomti@companya.in', 'Manager@123', 'showroom_manager', 'gomti-nagar', null, '[]', '9810000012'],
+      ['Aliganj Manager', 'manager.aliganj@companya.in', 'Manager@123', 'showroom_manager', 'aliganj', null, '[]', '9810000013'],
+      ['Alambagh Manager', 'manager.alambagh@companya.in', 'Manager@123', 'showroom_manager', 'alambagh', null, '[]', '9810000014'],
+      ['Priya Sharma', 'priya@companya.in', 'Sales@123', 'consultant', 'gomti-nagar', null, '[]', '9810000003'],
+      ['Rahul Verma', 'rahul@companya.in', 'Sales@123', 'consultant', 'gomti-nagar', null, SPEC_RV, '9810000004'],
+      ['Neha Singh', 'neha@companya.in', 'Sales@123', 'consultant', 'aliganj', null, '[]', '9810000005'],
+      ['Ravi Mehra', 'ravi@companya.in', 'Sales@123', 'consultant', 'aliganj', null, '[]', '9810000015'],
+      ['Amit Yadav', 'amit@companya.in', 'Sales@123', 'consultant', 'alambagh', null, '[]', '9810000006'],
+      ['Sunita Rao', 'sunita@companya.in', 'Sales@123', 'consultant', 'alambagh', null, '[]', '9810000016'],
+      ['Used Car Manager', 'used@companya.in', 'Used@123', 'used_manager', null, null, '[]', '9810000002'],
+      ['Content Editor', 'content@companya.in', 'Content@123', 'content_editor', null, null, '[]', '9810000017'],
+      ['Service Advisor Amausi', 'service@companya.in', 'Service@123', 'service_advisor', null, 'amausi', '[]', '9810000007'],
+      ['Service Advisor Gomti Ext', 'service2@companya.in', 'Service@123', 'service_advisor', null, 'gomti-nagar-extension', '[]', '9810000018'],
+      ['Workshop Manager Amausi', 'wm.amausi@companya.in', 'Workshop@123', 'workshop_manager', null, 'amausi', '[]', '9810000019'],
     ];
-    for (const u of U) q.run('INSERT INTO users(name,email,password_hash,role,showroom_id,specialty_model_ids,phone,created_at) VALUES (?,?,?,?,?,?,?,?)', u[0], u[1], hashPassword(u[2]), u[3], u[4] ? sid[u[4]] : null, u[5], u[6], now);
+    for (const u of U) q.run('INSERT INTO users(name,email,password_hash,role,showroom_id,workshop_id,specialty_model_ids,phone,created_at,password_changed_at) VALUES (?,?,?,?,?,?,?,?,?,?)',
+      u[0], u[1], hashPassword(u[2]), u[3], u[4] ? sid[u[4]] : null, u[5] ? wid[u[5]] : null, u[6], u[7], now, now);
 
     // ---- demo cars
     const vid = code => q.get('SELECT id FROM variants WHERE code = ?', code).id;
@@ -229,6 +245,18 @@ function seed() {
         pick(NAMES), '98' + String(10000000 + Math.floor(rnd() * 89999999)), ws[i % 2].id, addDays(today(), i % 3 - 1), pick(['09:00', '10:00', '11:00', '14:00']), pick(['periodic', 'repair', 'ac_service']),
         'UP32' + pick(['AB', 'CD', 'EF']) + (1000 + i * 37), pick(['Model H', 'Model C', 'Model S']), i < 3 ? 'completed' : 'booked', now, now);
     }
+
+    // ---- demo customer (login with phone 9876500001; OTP_MODE=mock accepts 123456)
+    const cr = q.run("INSERT INTO customers(phone,name,email,lang,created_at) VALUES ('9876500001','Demo Customer','demo.customer@example.com','en',?)", now);
+    const cust = Number(cr.lastInsertRowid);
+    q.run("INSERT INTO customer_vehicles(customer_id,reg_no,model,year,km,last_service,created_at) VALUES (?,?,?,?,?,?,?)", cust, 'UP32DM0001', 'Model H', 2021, 34200, addDays(today(), -75), now);
+    for (const [d, type] of [[-75, 'periodic'], [-260, 'periodic']]) {
+      const at = addDays(today(), d);
+      q.run(`INSERT INTO bookings(type,customer_id,name,phone,workshop_id,date,time,service_type,reg_no,model_name,status,delivered_at,checked_in_at,created_at,updated_at) VALUES ('service',?,?,?,?,?,?,?,?,?,'delivered',?,?,?,?)`,
+        cust, 'Demo Customer', '9876500001', ws[0].id, at, '10:00', type, 'UP32DM0001', 'Model H', at + 'T12:00:00.000Z', at + 'T04:30:00.000Z', at + 'T03:00:00.000Z', at + 'T12:00:00.000Z');
+    }
+    q.run("INSERT INTO saved_cars(customer_id,kind,ref,created_at) VALUES (?,?,?,?)", cust, 'used', makeSlug('UC-1182', 'Model C', 'VX', 2022), now);
+    q.run("INSERT INTO saved_cars(customer_id,kind,ref,created_at) VALUES (?,?,?,?)", cust, 'new', 'model-s', now);
   });
   return { skipped: false };
 }

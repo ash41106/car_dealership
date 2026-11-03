@@ -5,6 +5,10 @@ const { nowIso, randomId } = require('../lib/util');
 
 const BRAND = 'Company A Motors';
 const TEMPLATES = {
+  otp: {
+    en: 'Your Company A Motors verification code is {otp}. It is valid for 5 minutes. Do not share it with anyone.',
+    hi: 'आपका Company A Motors सत्यापन कोड {otp} है। यह 5 मिनट के लिए मान्य है। इसे किसी के साथ साझा न करें।',
+  },
   ack_lead: {
     en: 'Hi {name}, thank you for contacting ' + BRAND + '. {consultant} will call you within 5 minutes. Reply STOP to opt out.',
     hi: 'नमस्ते {name}, ' + BRAND + ' से संपर्क करने के लिए धन्यवाद। {consultant} 5 मिनट में आपको कॉल करेंगे। बंद करने के लिए STOP लिखें।',
@@ -43,14 +47,15 @@ function isOptedOut(phone) {
   return !!q.get('SELECT 1 x FROM optouts WHERE phone = ?', phone) || !!q.get('SELECT 1 x FROM leads WHERE phone = ? AND opted_out = 1 LIMIT 1', phone);
 }
 
-function deliver({ leadId, phone, channel, template, lang, body, userId }) {
-  if (isOptedOut(phone)) {
+function deliver({ leadId, phone, channel, template, lang, body, userId, transactional }) {
+  const stored = template === 'otp' ? body.replace(/\d{6}/g, '******') : body;
+  if (!transactional && isOptedOut(phone)) {
     const r = q.run('INSERT INTO messages(lead_id,phone,channel,template,lang,body,direction,status,user_id,created_at) VALUES (?,?,?,?,?,?,?,?,?,?)',
-      leadId, phone, channel, template, lang, body, 'out', 'blocked_optout', userId, nowIso());
+      leadId, phone, channel, template, lang, stored, 'out', 'blocked_optout', userId, nowIso());
     return { id: Number(r.lastInsertRowid), status: 'blocked_optout' };
   }
   const r = q.run('INSERT INTO messages(lead_id,phone,channel,template,lang,body,direction,status,user_id,created_at) VALUES (?,?,?,?,?,?,?,?,?,?)',
-    leadId, phone, channel, template, lang, body, 'out', 'queued', userId, nowIso());
+    leadId, phone, channel, template, lang, stored, 'out', 'queued', userId, nowIso());
   const id = Number(r.lastInsertRowid);
   let res;
   try { res = provider().send({ phone, channel, body }); } catch (e) { res = { ok: false }; }
@@ -59,8 +64,8 @@ function deliver({ leadId, phone, channel, template, lang, body, userId }) {
 }
 
 /** Queue a templated message (WhatsApp by default). */
-function sendTemplate({ leadId = null, phone, template, lang = 'en', vars = {}, channel = 'whatsapp' }) {
-  return deliver({ leadId, phone, channel, template, lang, body: render(template, lang, vars), userId: null });
+function sendTemplate({ leadId = null, phone, template, lang = 'en', vars = {}, channel = 'whatsapp', transactional = false }) {
+  return deliver({ leadId, phone, channel, template, lang, body: render(template, lang, vars), userId: null, transactional });
 }
 /** Free-text reply typed/confirmed by staff. */
 function sendText({ leadId, phone, text, channel = 'whatsapp', userId }) {

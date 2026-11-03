@@ -3,27 +3,28 @@ const fs = require('node:fs');
 const path = require('node:path');
 const { q, tx, dataDir } = require('../lib/db');
 const { httpError, clean, slugify, nowIso, parseJson, toInt, toNum, truthy, isDate, today, addDays, normPhone, validEmail, validReg, normReg, randomId } = require('../lib/util');
-const { hashPassword } = require('../lib/auth');
+const auth = require('../lib/auth');
+const { hashPassword } = auth;
+const perms = require('../lib/perms');
+const { can } = perms;
 const { toCsv } = require('../lib/csv');
 const { makeSlug } = require('./used');
 const ai = require('./ai');
 
-const ADMIN = ['admin'];
-const USED = ['used_manager', 'admin'];
 
 const ENTITIES = {
-  models: { table: 'models', roles: ADMIN, req: ['name'], fields: { slug: 's', name: 's', tagline_en: 's', tagline_hi: 's', body_type: 's', description_en: 't', description_hi: 't', hero_image: 's', colors: 'j', gallery: 'j', specs: 'j', highlights: 'j', accessories_amount: 'i', featured: 'b', sort: 'i', active: 'b' }, enums: { body_type: ['hatchback', 'sedan', 'suv', 'mpv'] }, order: 'sort, id' },
-  variants: { table: 'variants', roles: ADMIN, req: ['model_id', 'code', 'name', 'fuel', 'transmission', 'ex_showroom'], fields: { model_id: 'i', code: 's', name: 's', fuel: 's', transmission: 's', ex_showroom: 'i', features_en: 'j', features_hi: 'j', active: 'b' }, order: 'model_id, ex_showroom' },
-  'price-rules': { table: 'price_rules', roles: ADMIN, req: ['city_id', 'road_tax_pct', 'road_tax_pct_high'], fields: { city_id: 'i', model_id: 'i', road_tax_pct: 'n', road_tax_pct_high: 'n', road_tax_threshold: 'i', registration_fee: 'i', insurance_pct: 'n', handling: 'i', fastag: 'i', tcs_pct: 'n', tcs_threshold: 'i', valid_until: 'd', active: 'b' }, order: 'city_id, model_id' },
-  cities: { table: 'cities', roles: ADMIN, req: ['name_en'], fields: { slug: 's', name_en: 's', name_hi: 's', default_showroom_id: 'i', active: 'b', sort: 'i' }, order: 'sort, id' },
-  offers: { table: 'offers', roles: ADMIN, req: ['title_en'], fields: { title_en: 's', title_hi: 's', body_en: 't', body_hi: 't', model_id: 'i', type: 's', amount: 'i', show_in_onroad: 'b', valid_until: 'd', banner_image: 's', active: 'b' }, enums: { type: ['cash', 'info'] }, order: 'id' },
-  banners: { table: 'banners', roles: ADMIN, req: ['title_en'], fields: { title_en: 's', title_hi: 's', sub_en: 's', sub_hi: 's', image: 's', cta_label_en: 's', cta_label_hi: 's', cta_url: 's', sort: 'i', active: 'b' }, order: 'sort, id' },
-  showrooms: { table: 'showrooms', roles: ADMIN, req: ['name_en'], fields: { slug: 's', kind: 's', name_en: 's', name_hi: 's', address_en: 's', address_hi: 's', phone: 's', lat: 'n', lng: 'n', hours: 's', is_default: 'b', active: 'b' }, enums: { kind: ['showroom', 'yard'] }, order: 'id' },
-  workshops: { table: 'workshops', roles: ADMIN, req: ['name_en', 'bays'], fields: { slug: 's', name_en: 's', name_hi: 's', address_en: 's', address_hi: 's', phone: 's', lat: 'n', lng: 'n', hours: 's', bays: 'i', active: 'b' }, order: 'id' },
-  'demo-cars': { table: 'demo_cars', roles: ADMIN, req: ['showroom_id', 'model_id'], fields: { showroom_id: 'i', model_id: 'i', variant_id: 'i', reg_no: 's', active: 'b' }, order: 'showroom_id, model_id' },
-  users: { table: 'users', roles: ADMIN, req: ['name', 'email', 'role'], fields: { name: 's', email: 's', role: 's', phone: 's', showroom_id: 'i', specialty_model_ids: 'j', active: 'b' }, enums: { role: ['admin', 'used_manager', 'consultant', 'service_advisor'] }, order: 'id', hidden: ['password_hash'], audit: true },
-  used: { table: 'used_cars', roles: USED, req: ['model', 'variant', 'year', 'km', 'fuel', 'transmission', 'price'], fields: { stock_id: 's', model: 's', variant: 's', year: 'i', km: 'i', owners: 'i', fuel: 's', transmission: 's', color: 's', price: 'i', status: 's', reg_no: 's', location: 's', highlights: 'j', inspection: 'j', photos: 'j', warranty_en: 's', warranty_hi: 's' }, enums: { status: ['available', 'booked', 'sold'] }, order: 'id DESC', audit: true },
-  'past-sales': { table: 'past_sales', roles: USED, req: ['model', 'year', 'km', 'sold_price'], fields: { model: 's', variant: 's', year: 'i', km: 'i', fuel: 's', sold_price: 'i', sold_date: 'd' }, order: 'id DESC', audit: true },
+  models: { table: 'models', read: ['admin.read', 'content.models'], write: 'content.models', req: ['name'], fields: { slug: 's', name: 's', tagline_en: 's', tagline_hi: 's', body_type: 's', description_en: 't', description_hi: 't', hero_image: 's', colors: 'j', gallery: 'j', specs: 'j', highlights: 'j', accessories_amount: 'i', featured: 'b', sort: 'i', active: 'b' }, enums: { body_type: ['hatchback', 'sedan', 'suv', 'mpv'] }, order: 'sort, id' },
+  variants: { table: 'variants', read: ['admin.read'], write: 'prices.write', req: ['model_id', 'code', 'name', 'fuel', 'transmission', 'ex_showroom'], fields: { model_id: 'i', code: 's', name: 's', fuel: 's', transmission: 's', ex_showroom: 'i', features_en: 'j', features_hi: 'j', active: 'b' }, order: 'model_id, ex_showroom' },
+  'price-rules': { table: 'price_rules', read: ['admin.read'], write: 'prices.write', req: ['city_id', 'road_tax_pct', 'road_tax_pct_high'], fields: { city_id: 'i', model_id: 'i', road_tax_pct: 'n', road_tax_pct_high: 'n', road_tax_threshold: 'i', registration_fee: 'i', insurance_pct: 'n', handling: 'i', fastag: 'i', tcs_pct: 'n', tcs_threshold: 'i', valid_until: 'd', active: 'b' }, order: 'city_id, model_id' },
+  cities: { table: 'cities', read: ['admin.read'], write: 'config.write', req: ['name_en'], fields: { slug: 's', name_en: 's', name_hi: 's', default_showroom_id: 'i', active: 'b', sort: 'i' }, order: 'sort, id' },
+  offers: { table: 'offers', read: ['admin.read', 'content.offers'], write: 'content.offers', req: ['title_en'], fields: { title_en: 's', title_hi: 's', body_en: 't', body_hi: 't', model_id: 'i', type: 's', amount: 'i', show_in_onroad: 'b', valid_until: 'd', banner_image: 's', active: 'b' }, enums: { type: ['cash', 'info'] }, order: 'id' },
+  banners: { table: 'banners', read: ['admin.read', 'content.banners'], write: 'content.banners', req: ['title_en'], fields: { title_en: 's', title_hi: 's', sub_en: 's', sub_hi: 's', image: 's', cta_label_en: 's', cta_label_hi: 's', cta_url: 's', sort: 'i', active: 'b' }, order: 'sort, id' },
+  showrooms: { table: 'showrooms', read: ['admin.read'], write: 'config.write', req: ['name_en'], fields: { slug: 's', kind: 's', name_en: 's', name_hi: 's', address_en: 's', address_hi: 's', phone: 's', lat: 'n', lng: 'n', hours: 's', is_default: 'b', active: 'b' }, enums: { kind: ['showroom', 'yard'] }, order: 'id' },
+  workshops: { table: 'workshops', read: ['admin.read'], write: 'config.write', req: ['name_en', 'bays'], fields: { slug: 's', name_en: 's', name_hi: 's', address_en: 's', address_hi: 's', phone: 's', lat: 'n', lng: 'n', hours: 's', bays: 'i', active: 'b' }, order: 'id' },
+  'demo-cars': { table: 'demo_cars', read: ['admin.read'], write: 'config.write', req: ['showroom_id', 'model_id'], fields: { showroom_id: 'i', model_id: 'i', variant_id: 'i', reg_no: 's', active: 'b' }, order: 'showroom_id, model_id' },
+  users: { table: 'users', read: ['users.read'], write: 'users.manage', req: ['name', 'email', 'role'], fields: { name: 's', email: 's', role: 's', phone: 's', showroom_id: 'i', workshop_id: 'i', specialty_model_ids: 'j', active: 'b' }, order: 'id', hidden: ['password_hash'], audit: true },
+  used: { table: 'used_cars', read: ['used.read'], write: 'used.write', req: ['model', 'variant', 'year', 'km', 'fuel', 'transmission', 'price'], fields: { stock_id: 's', model: 's', variant: 's', year: 'i', km: 'i', owners: 'i', fuel: 's', transmission: 's', color: 's', price: 'i', status: 's', reg_no: 's', location: 's', highlights: 'j', inspection: 'j', photos: 'j', warranty_en: 's', warranty_hi: 's' }, enums: { status: ['available', 'booked', 'sold'] }, order: 'id DESC', audit: true },
+  'past-sales': { table: 'past_sales', read: ['used.read'], write: 'used.write', req: ['model', 'year', 'km', 'sold_price'], fields: { model: 's', variant: 's', year: 'i', km: 'i', fuel: 's', sold_price: 'i', sold_date: 'd' }, order: 'id DESC', audit: true },
 };
 const AUDITED = new Set(['price-rules', 'variants', 'offers', 'users', 'used', 'past-sales', 'models']);
 
@@ -79,6 +80,7 @@ function hooks(name, out, existing, errors) {
     for (const k of ['road_tax_pct', 'road_tax_pct_high', 'insurance_pct', 'tcs_pct']) if (out[k] !== undefined && (out[k] < 0 || out[k] > 50)) errors[k] = 'Must be between 0 and 50';
   }
   if (name === 'users') {
+    if (out.role !== undefined && (out.role === 'customer' || !perms.roleNames().includes(out.role))) errors.role = 'Unknown role';
     if (out.email !== undefined) { if (!validEmail(out.email)) errors.email = 'Invalid email'; out.email = out.email.toLowerCase(); }
     if (out.phone) { const p = normPhone(out.phone); if (!p) errors.phone = 'Invalid phone'; else out.phone = p; }
     if (!existing) out.created_at = nowIso();
@@ -120,25 +122,25 @@ function entity(name) {
   if (!cfg) throw httpError(404, 'Unknown entity');
   return cfg;
 }
-function allow(user, cfg) { if (!cfg.roles.includes(user.role)) throw httpError(403, 'Not permitted for your role'); }
+function allow(user, cfg, mode = 'read') { if (!can(user, mode === 'write' ? cfg.write : cfg.read)) throw httpError(403, 'Not permitted for your role'); }
 
 function list(user, name) {
-  const cfg = entity(name); allow(user, cfg);
+  const cfg = entity(name); allow(user, cfg, 'read');
   return q.all(`SELECT * FROM ${cfg.table} ORDER BY ${cfg.order}`).map(r => shapeRow(cfg, r));
 }
 function get(user, name, id) {
-  const cfg = entity(name); allow(user, cfg);
+  const cfg = entity(name); allow(user, cfg, 'read');
   const r = q.get(`SELECT * FROM ${cfg.table} WHERE id = ?`, toInt(id));
   if (!r) throw httpError(404, 'Not found');
   const o = shapeRow(cfg, r);
-  if (name === 'used') o.suggestion = ai.suggestUsedPrice(r);
+  if (name === 'used' && can(user, 'used.price_suggestion')) o.suggestion = ai.suggestUsedPrice(r);
   return o;
 }
 function create(user, name, body) {
-  const cfg = entity(name); allow(user, cfg);
+  const cfg = entity(name); allow(user, cfg, 'write');
   const { out, errors } = coerce(cfg, body, null);
   if (name === 'users') {
-    if (!body.password || String(body.password).length < 8) errors.password = 'Password must be at least 8 characters';
+    try { auth.checkPolicy(body.password); } catch (e) { errors.password = e.message; }
   }
   hooks(name, out, null, errors);
   if (Object.keys(errors).length) throw httpError(422, 'Validation failed', errors);
@@ -153,13 +155,13 @@ function create(user, name, body) {
 }
 function omit(o) { const c = { ...o }; delete c.password_hash; return c; }
 function update(user, name, id, body) {
-  const cfg = entity(name); allow(user, cfg);
+  const cfg = entity(name); allow(user, cfg, 'write');
   const ex = q.get(`SELECT * FROM ${cfg.table} WHERE id = ?`, toInt(id));
   if (!ex) throw httpError(404, 'Not found');
   const { out, errors } = coerce(cfg, body, ex);
   hooks(name, out, ex, errors);
   if (name === 'users') {
-    if (body.password) { if (String(body.password).length < 8) errors.password = 'Password must be at least 8 characters'; else out.password_hash = hashPassword(body.password); }
+    if (body.password) { try { auth.checkPolicy(body.password); out.password_hash = hashPassword(body.password); out.password_changed_at = nowIso(); } catch (e) { errors.password = e.message; } }
     if (ex.id === user.id && (out.active === 0 || (out.role && out.role !== 'admin'))) errors.role = 'You cannot demote or deactivate yourself';
   }
   if (Object.keys(errors).length) throw httpError(422, 'Validation failed', errors);
@@ -174,10 +176,11 @@ function update(user, name, id, body) {
     if (out.password_hash) diff.password = 'changed';
     audit(user, 'update', name, ex.id, diff);
   }
+  if (name === 'users' && (out.active === 0 || out.password_hash || (out.role && out.role !== ex.role))) auth.revokeUserSessions(ex.id);
   return get(user, name, id);
 }
 function remove(user, name, id) {
-  const cfg = entity(name); allow(user, cfg);
+  const cfg = entity(name); allow(user, cfg, 'write');
   const ex = q.get(`SELECT * FROM ${cfg.table} WHERE id = ?`, toInt(id));
   if (!ex) throw httpError(404, 'Not found');
   if (name === 'users' && ex.id === user.id) throw httpError(422, 'You cannot delete yourself');
@@ -186,8 +189,36 @@ function remove(user, name, id) {
   return { deleted: true };
 }
 
-function auditLog(limit = 200) {
-  return q.all('SELECT * FROM audit_log ORDER BY id DESC LIMIT ?', Math.min(1000, toInt(limit, 200))).map(r => ({ ...r, detail: parseJson(r.detail, r.detail) }));
+function auditLog(user, limit = 200) {
+  const rows = q.all('SELECT * FROM audit_log ORDER BY id DESC LIMIT ?', Math.min(1000, toInt(limit, 200))).map(r => ({ ...r, detail: parseJson(r.detail, r.detail) }));
+  return can(user, 'audit.read') ? rows : rows.filter(r => ['used', 'past-sales'].includes(r.entity));
+}
+
+/** Admin: reset a user's password to a one-time temporary one (must be changed at next login). */
+function resetPassword(user, id) {
+  const u = q.get('SELECT * FROM users WHERE id = ?', toInt(id));
+  if (!u) throw httpError(404, 'User not found');
+  const temp = auth.tempPassword();
+  q.run('UPDATE users SET password_hash = ?, must_change_password = 1, password_changed_at = ? WHERE id = ?', hashPassword(temp), nowIso(), u.id);
+  auth.revokeUserSessions(u.id);
+  audit(user, 'reset_password', 'users', u.id, { email: u.email });
+  return { user_id: u.id, email: u.email, temp_password: temp, must_change_password: true, note: 'Shown once. The user must change it at next login.' };
+}
+
+function listRoles() {
+  return { roles: perms.listRoles(), permissions: Object.entries(perms.PERMS).map(([perm, description]) => ({ perm, description })) };
+}
+function setRolePermissions(user, role, list) {
+  if (!perms.roleNames().includes(role)) throw httpError(404, 'Unknown role');
+  if (role === 'admin' || role === 'customer') throw httpError(422, `The ${role} role's permissions are fixed`);
+  if (!Array.isArray(list) || list.some(p => !perms.PERMS[p] || p === 'customer.self')) throw httpError(422, 'permissions must be an array of known permission names', { permissions: 'Unknown permission' });
+  const before = [...perms.permsOf(role)].sort();
+  const after = [...new Set(list)].sort();
+  tx(() => {
+    perms.setRolePerms(role, after);
+    audit(user, 'update_permissions', 'roles', role, { added: after.filter(p => !before.includes(p)), removed: before.filter(p => !after.includes(p)) });
+  });
+  return perms.listRoles().find(r => r.name === role);
 }
 
 function getSettings() { return Object.fromEntries(q.all('SELECT key, value FROM settings').map(r => [r.key, r.value])); }
@@ -255,4 +286,4 @@ function dashboard() {
   };
 }
 
-module.exports = { ENTITIES, list, get, create, update, remove, auditLog, saveUpload, dmsCsv, dashboard, audit, getSettings, putSettings };
+module.exports = { ENTITIES, list, get, create, update, remove, auditLog, resetPassword, listRoles, setRolePermissions, saveUpload, dmsCsv, dashboard, audit, getSettings, putSettings };

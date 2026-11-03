@@ -3,13 +3,14 @@ const { test, before, after } = require('node:test');
 const assert = require('node:assert/strict');
 const { start } = require('./_helper');
 const { parseCsv, toCsv } = require('../../server/lib/csv');
-let t, priya, used, admin, service;
+let t, priya, used, admin, service, desk;
 before(async () => {
   t = await start();
   priya = await t.login('priya@companya.in', 'Sales@123');
   used = await t.login('used@companya.in', 'Used@123');
   admin = await t.login('admin@companya.in', 'Admin@123');
   service = await t.login('service@companya.in', 'Service@123');
+  desk = await t.login('desk@companya.in', 'Desk@123');
 });
 after(() => t.close());
 
@@ -32,20 +33,20 @@ const CSV = [
 ].join('\n');
 
 test('portal CSV import: dry run, mapping, dedupe, per-row errors, then real import', async () => {
-  const dry = await t.api('POST', '/api/staff/leads/import', { csv: CSV, source: 'carwale', dryRun: true }, { cookie: priya });
+  const dry = await t.api('POST', '/api/staff/leads/import', { csv: CSV, source: 'carwale', dryRun: true }, { cookie: desk });
   assert.equal(dry.status, 200);
   assert.equal(dry.json.created, 2); assert.equal(dry.json.duplicates, 1);
   assert.deepEqual(dry.json.errors.map(e => e.row).sort(), [5, 6, 7]);
   assert.equal(dry.json.mapping.phone, 'Mobile No.');
   assert.equal(t.db.q.get('SELECT COUNT(*) c FROM leads WHERE phone = ?', '9811122201').c, 0); // nothing written
-  const real = await t.api('POST', '/api/staff/leads/import', { csv: CSV, source: 'carwale', dryRun: false }, { cookie: priya });
+  const real = await t.api('POST', '/api/staff/leads/import', { csv: CSV, source: 'carwale', dryRun: false }, { cookie: desk });
   assert.equal(real.json.created, 2);
   const row = t.db.q.get('SELECT * FROM leads WHERE phone = ?', '9811122201');
   assert.equal(row.source, 'carwale'); assert.ok(row.assigned_to); assert.equal(row.model_id, 3);
   // re-import: all valid rows are now duplicates (same phone+model within 7 days)
-  const again = await t.api('POST', '/api/staff/leads/import', { csv: CSV, source: 'carwale', dryRun: false }, { cookie: priya });
+  const again = await t.api('POST', '/api/staff/leads/import', { csv: CSV, source: 'carwale', dryRun: false }, { cookie: desk });
   assert.equal(again.json.created, 0); assert.equal(again.json.duplicates, 3);
-  assert.equal((await t.api('POST', '/api/staff/leads/import', { csv: 'foo,bar\n1,2', source: 'carwale' }, { cookie: priya })).status, 422);
+  assert.equal((await t.api('POST', '/api/staff/leads/import', { csv: 'foo,bar\n1,2', source: 'carwale' }, { cookie: desk })).status, 422);
 });
 
 test('RBAC: anonymous, wrong role, CSRF', async () => {

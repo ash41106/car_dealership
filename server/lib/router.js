@@ -99,7 +99,7 @@ class Router {
     this.gzCache = new Map();
     for (const m of ['get', 'post', 'put', 'patch', 'delete']) this[m] = (p, h) => this.add(m.toUpperCase(), p, h);
   }
-  add(method, pattern, handler) { this.routes.push({ method, pattern, handler, ...compile(pattern) }); return this; }
+  add(method, pattern, handler) { this.routes.push({ method, pattern, handler, perm: handler.perm, ...compile(pattern) }); return this; }
   static(prefix, dir, cache) { this.staticDirs.push({ prefix, dir: path.resolve(dir), cache }); }
 
   match(method, pathname) {
@@ -135,7 +135,7 @@ class Router {
     }
     const self = this;
     const ctx = {
-      req, res, params: {}, query, body: {}, user: null, lang, cookies, ip: this.clientIp(req), url,
+      req, res, params: {}, query, body: {}, user: null, customer: null, lang, cookies, ip: this.clientIp(req), url,
       setHeader(k, v) { extra[k] = v; },
       setCookie(name, val, o = {}) {
         let s = `${name}=${encodeURIComponent(val)}; Path=${o.path || '/'}; SameSite=${o.sameSite || 'Lax'}`;
@@ -218,7 +218,7 @@ class Router {
     const ctx = this.makeCtx(req, res, url);
     const isApi = url.pathname.startsWith('/api/') || url.pathname === '/healthz';
     try {
-      try { ctx.user = auth.userFromCookie(ctx.cookies); } catch { ctx.user = null; }
+      try { auth.actors(ctx); } catch (e) { ctx.user = null; ctx.customer = null; }
       const { route, params, pathHit } = this.match(req.method, url.pathname);
       if (route) {
         ctx.params = params;

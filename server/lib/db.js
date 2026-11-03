@@ -105,6 +105,59 @@ CREATE TABLE audit_log (
   id INTEGER PRIMARY KEY, user_id INTEGER, user_email TEXT, action TEXT NOT NULL, entity TEXT NOT NULL, entity_id TEXT, detail TEXT, created_at TEXT NOT NULL);
 CREATE INDEX idx_audit ON audit_log(id DESC);
 ` },
+  { v: 2, fkOff: true, sql: `
+CREATE TABLE users_new (
+  id INTEGER PRIMARY KEY, name TEXT NOT NULL, email TEXT UNIQUE NOT NULL, password_hash TEXT NOT NULL, role TEXT NOT NULL,
+  phone TEXT, showroom_id INTEGER REFERENCES showrooms(id) ON DELETE SET NULL, workshop_id INTEGER REFERENCES workshops(id) ON DELETE SET NULL,
+  specialty_model_ids TEXT NOT NULL DEFAULT '[]', active INTEGER NOT NULL DEFAULT 1, must_change_password INTEGER NOT NULL DEFAULT 0,
+  password_changed_at TEXT, last_login_at TEXT, created_at TEXT NOT NULL);
+INSERT INTO users_new(id,name,email,password_hash,role,phone,showroom_id,specialty_model_ids,active,created_at)
+  SELECT id,name,email,password_hash,role,phone,showroom_id,specialty_model_ids,active,created_at FROM users;
+DROP TABLE users;
+ALTER TABLE users_new RENAME TO users;
+CREATE TABLE bookings_new (
+  id INTEGER PRIMARY KEY, type TEXT NOT NULL CHECK (type IN ('test_drive','service')), lead_id INTEGER REFERENCES leads(id), customer_id INTEGER,
+  name TEXT NOT NULL, phone TEXT NOT NULL, email TEXT, showroom_id INTEGER REFERENCES showrooms(id), workshop_id INTEGER REFERENCES workshops(id),
+  model_id INTEGER REFERENCES models(id), variant_id INTEGER REFERENCES variants(id), demo_car_id INTEGER REFERENCES demo_cars(id),
+  date TEXT NOT NULL, time TEXT NOT NULL, service_type TEXT, pickup_drop INTEGER NOT NULL DEFAULT 0, reg_no TEXT, model_name TEXT, notes TEXT,
+  status TEXT NOT NULL DEFAULT 'booked' CHECK (status IN ('booked','confirmed','checked_in','in_progress','ready','delivered','completed','cancelled','no_show')),
+  checked_in_at TEXT, in_progress_at TEXT, ready_at TEXT, delivered_at TEXT, cancelled_at TEXT,
+  created_at TEXT NOT NULL, updated_at TEXT NOT NULL);
+INSERT INTO bookings_new(id,type,lead_id,name,phone,email,showroom_id,workshop_id,model_id,variant_id,demo_car_id,date,time,service_type,pickup_drop,reg_no,model_name,notes,status,created_at,updated_at)
+  SELECT id,type,lead_id,name,phone,email,showroom_id,workshop_id,model_id,variant_id,demo_car_id,date,time,service_type,pickup_drop,reg_no,model_name,notes,status,created_at,updated_at FROM bookings;
+DROP TABLE bookings;
+ALTER TABLE bookings_new RENAME TO bookings;
+CREATE UNIQUE INDEX uq_demo_slot ON bookings(demo_car_id, date, time) WHERE type='test_drive' AND status NOT IN ('cancelled','no_show');
+CREATE INDEX idx_bookings_workshop ON bookings(workshop_id, date, time);
+CREATE INDEX idx_bookings_date ON bookings(date, type);
+CREATE INDEX idx_bookings_phone ON bookings(phone);
+ALTER TABLE leads ADD COLUMN customer_id INTEGER;
+CREATE TABLE roles (name TEXT PRIMARY KEY, label TEXT NOT NULL);
+CREATE TABLE role_permissions (role TEXT NOT NULL REFERENCES roles(name) ON DELETE CASCADE, perm TEXT NOT NULL, PRIMARY KEY (role, perm));
+CREATE TABLE sessions (
+  id_hash TEXT PRIMARY KEY, kind TEXT NOT NULL CHECK (kind IN ('staff','customer')), user_id INTEGER, customer_id INTEGER, role TEXT NOT NULL,
+  created_at TEXT NOT NULL, last_seen TEXT NOT NULL, expires_at TEXT NOT NULL, ip TEXT, ua TEXT, revoked INTEGER NOT NULL DEFAULT 0);
+CREATE INDEX idx_sessions_user ON sessions(user_id);
+CREATE INDEX idx_sessions_customer ON sessions(customer_id);
+CREATE TABLE customers (
+  id INTEGER PRIMARY KEY, phone TEXT UNIQUE NOT NULL, name TEXT, email TEXT, lang TEXT NOT NULL DEFAULT 'en', created_at TEXT NOT NULL, last_login_at TEXT);
+CREATE TABLE customer_otps (
+  id INTEGER PRIMARY KEY, phone TEXT NOT NULL, otp_hash TEXT NOT NULL, expires_at TEXT NOT NULL, attempts INTEGER NOT NULL DEFAULT 0, used INTEGER NOT NULL DEFAULT 0, created_at TEXT NOT NULL);
+CREATE INDEX idx_otps_phone ON customer_otps(phone, id);
+CREATE TABLE customer_vehicles (
+  id INTEGER PRIMARY KEY, customer_id INTEGER NOT NULL REFERENCES customers(id) ON DELETE CASCADE, reg_no TEXT NOT NULL, model TEXT, year INTEGER, km INTEGER,
+  last_service TEXT, created_at TEXT NOT NULL, UNIQUE (customer_id, reg_no));
+CREATE TABLE saved_cars (
+  id INTEGER PRIMARY KEY, customer_id INTEGER NOT NULL REFERENCES customers(id) ON DELETE CASCADE, kind TEXT NOT NULL CHECK (kind IN ('new','used')), ref TEXT NOT NULL,
+  created_at TEXT NOT NULL, UNIQUE (customer_id, kind, ref));
+CREATE TABLE data_requests (
+  id INTEGER PRIMARY KEY, customer_id INTEGER, phone TEXT NOT NULL, type TEXT NOT NULL, status TEXT NOT NULL DEFAULT 'pending', created_at TEXT NOT NULL, handled_by INTEGER, handled_at TEXT);
+CREATE TABLE service_callbacks (
+  id INTEGER PRIMARY KEY, customer_id INTEGER, name TEXT NOT NULL, phone TEXT NOT NULL, reason TEXT, preferred_time TEXT, workshop_id INTEGER REFERENCES workshops(id),
+  status TEXT NOT NULL DEFAULT 'new' CHECK (status IN ('new','contacted','scheduled','closed')), assigned_to INTEGER REFERENCES users(id), notes TEXT,
+  created_at TEXT NOT NULL, due_at TEXT NOT NULL, first_response_at TEXT, updated_at TEXT NOT NULL);
+CREATE INDEX idx_callbacks ON service_callbacks(status, created_at);
+` },
 ];
 
 function open(file) {
@@ -122,12 +175,13 @@ function migrate() {
   const done = new Set(db.prepare('SELECT version FROM schema_migrations').all().map(r => r.version));
   for (const m of MIGRATIONS) {
     if (done.has(m.v)) continue;
+    if (m.fkOff) db.exec('PRAGMA foreign_keys = OFF');
     db.exec('BEGIN');
     try {
       db.exec(m.sql);
       db.prepare('INSERT INTO schema_migrations(version, applied_at) VALUES (?, ?)').run(m.v, new Date().toISOString());
       db.exec('COMMIT');
-    } catch (e) { db.exec('ROLLBACK'); throw e; }
+    } catch (e) { db.exec('ROLLBACK'); throw e; } finally { if (m.fkOff) db.exec('PRAGMA foreign_keys = ON'); }
   }
 }
 

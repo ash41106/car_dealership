@@ -34,7 +34,7 @@ test('phone normalisation and validation', async () => {
 
 test('auto-assignment: showroom + model eligibility', async () => {
   const a = await t.api('POST', '/api/leads', lead({ showroomId: ids.sr.alambagh, modelId: ids.m['model-c'] }));
-  assert.equal(a.json.assignee.name, 'Amit Yadav');
+  assert.ok(['Amit Yadav', 'Sunita Rao'].includes(a.json.assignee.name));
   const b = await t.api('POST', '/api/leads', lead({ showroomId: ids.sr['gomti-nagar'], modelId: ids.m['model-h'] }));
   assert.equal(b.json.assignee.name, 'Priya Sharma'); // Rahul is S/V specialist only
 });

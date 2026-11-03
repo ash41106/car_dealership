@@ -29,6 +29,8 @@ function carSvg(slug, color, view) {
 
 function createApp() {
   db.open();
+  require('./lib/perms').ensure();
+  require('./lib/auth').purgeSessions();
   if (process.env.AUTO_SEED !== '0' && !db.q.get('SELECT 1 x FROM models LIMIT 1')) {
     require('./seed').seed();
   }
@@ -46,6 +48,7 @@ function createApp() {
 
   router.static('/uploads', path.join(db.dataDir(), 'uploads'));
   router.static('/', path.join(db.ROOT, 'public'));
+  setInterval(() => { try { require('./lib/auth').purgeSessions(); } catch {} }, 3600000).unref();
   const server = http.createServer((req, res) => { router.handle(req, res).catch(e => { console.error(e); try { res.writeHead(500); res.end('Server error'); } catch {} }); });
   server.requestTimeout = 30000;
   server.headersTimeout = 15000;

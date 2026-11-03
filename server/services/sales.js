@@ -3,6 +3,7 @@ const { q, tx, getSetting } = require('../lib/db');
 const { httpError, normPhone, validEmail, clean, nowIso, today, nowHM, addDays, isDate, isTime, toInt, truthy, normReg, validReg, maskReg } = require('../lib/util');
 const leads = require('./leads');
 const messaging = require('./messaging');
+const { can } = require('../lib/perms');
 
 function listShowrooms() {
   return q.all("SELECT id,slug,name_en,name_hi,address_en,address_hi,phone,lat,lng,hours FROM showrooms WHERE active = 1 AND kind = 'showroom' ORDER BY id");
@@ -130,33 +131,79 @@ function createServiceBooking(d, opts = {}) {
     reg_masked: maskReg(reg), workshop: { id: w.id, name_en: w.name_en, name_hi: w.name_hi, address_en: w.address_en, phone: w.phone } } };
 }
 
-/** Staff: list bookings. Consultants see test drives at their showroom, service advisors see service only. */
+/** Booking data scoping: booking.read.all > showroom (test drives of own showroom) / workshop (service of own workshop). */
+function bookingScope(user) {
+  if (can(user, 'booking.read.all')) return { sql: '1=1', p: [] };
+  const parts = [], p = [];
+  if (can(user, 'booking.read.showroom')) { parts.push("(b.type = 'test_drive' AND b.showroom_id = ?)"); p.push(user.showroom_id || 0); }
+  if (can(user, 'booking.read.workshop')) { parts.push("(b.type = 'service' AND b.workshop_id = ?)"); p.push(user.workshop_id || 0); }
+  if (!parts.length) throw httpError(403, 'Not permitted for your role');
+  return { sql: '(' + parts.join(' OR ') + ')', p };
+}
+
 function listBookings(user, f = {}) {
-  const where = [], p = [];
-  let type = f.type;
-  if (user.role === 'service_advisor') type = 'service';
-  else if (user.role === 'consultant') { type = 'test_drive'; where.push('b.showroom_id = ?'); p.push(user.showroom_id); }
-  else if (user.role === 'used_manager') throw httpError(403, 'Not permitted for your role');
-  if (type) { where.push('b.type = ?'); p.push(type); }
+  const sc = bookingScope(user);
+  const where = [sc.sql], p = [...sc.p];
+  if (f.type && ['test_drive', 'service'].includes(f.type)) { where.push('b.type = ?'); p.push(f.type); }
   if (f.date) { where.push('b.date = ?'); p.push(String(f.date)); }
   if (f.status) { where.push('b.status = ?'); p.push(String(f.status)); }
-  const w = where.length ? 'WHERE ' + where.join(' AND ') : '';
   return q.all(`SELECT b.*, s.name_en AS showroom_name, w.name_en AS workshop_name, m.name AS model_name_ref FROM bookings b
     LEFT JOIN showrooms s ON s.id = b.showroom_id LEFT JOIN workshops w ON w.id = b.workshop_id LEFT JOIN models m ON m.id = b.model_id
-    ${w} ORDER BY b.date DESC, b.time DESC LIMIT 300`, ...p);
+    WHERE ${where.join(' AND ')} ORDER BY b.date DESC, b.time DESC LIMIT 300`, ...p);
 }
-const BOOKING_STATUS = ['booked', 'confirmed', 'in_progress', 'completed', 'cancelled', 'no_show'];
+
+const TD_STATUS = ['booked', 'confirmed', 'completed', 'cancelled', 'no_show'];
+const SVC_STATUS = ['booked', 'confirmed', 'checked_in', 'in_progress', 'ready', 'delivered', 'completed', 'cancelled', 'no_show'];
+const STAMP = { checked_in: 'checked_in_at', in_progress: 'in_progress_at', ready: 'ready_at', delivered: 'delivered_at', cancelled: 'cancelled_at' };
+const BOOKING_STATUS = SVC_STATUS;
+
+/** Job-card workflow: booked -> checked_in -> in_progress -> ready -> delivered (or cancelled). Terminal states cannot be reopened. */
 function updateBooking(user, id, body) {
-  const b = q.get('SELECT * FROM bookings WHERE id = ?', toInt(id));
-  if (!b) throw httpError(404, 'Booking not found');
-  if (user.role === 'service_advisor' && b.type !== 'service') throw httpError(403, 'Not permitted');
-  if (user.role === 'consultant' && (b.type !== 'test_drive' || b.showroom_id !== user.showroom_id)) throw httpError(403, 'Not permitted');
-  if (!BOOKING_STATUS.includes(body.status)) throw httpError(422, 'Invalid status', { status: 'Invalid status' });
-  q.run('UPDATE bookings SET status = ?, updated_at = ? WHERE id = ?', body.status, nowIso(), b.id);
+  const sc = bookingScope(user);
+  const b = q.get(`SELECT b.* FROM bookings b WHERE b.id = ? AND ${sc.sql}`, toInt(id), ...sc.p);
+  if (!b) {
+    if (q.get('SELECT 1 x FROM bookings WHERE id = ?', toInt(id))) throw httpError(403, 'Not permitted for this booking');
+    throw httpError(404, 'Booking not found');
+  }
+  const allowed = b.type === 'service' ? SVC_STATUS : TD_STATUS;
+  if (!allowed.includes(body.status)) throw httpError(422, 'Invalid status', { status: 'Allowed: ' + allowed.join(', ') });
+  if (['delivered', 'cancelled', 'completed', 'no_show'].includes(b.status) && body.status !== b.status) throw httpError(422, `Booking is already ${b.status}`, { status: 'Terminal state' });
+  const now = nowIso();
+  const stamp = STAMP[body.status];
+  q.run(`UPDATE bookings SET status = ?, updated_at = ?${stamp ? `, ${stamp} = COALESCE(${stamp}, ?)` : ''} WHERE id = ?`, ...[body.status, now, ...(stamp ? [now] : []), b.id]);
   return q.get('SELECT * FROM bookings WHERE id = ?', b.id);
+}
+
+function getWorkshopFor(user) {
+  const w = q.get('SELECT * FROM workshops WHERE id = ?', user.workshop_id || 0);
+  if (!w) throw httpError(404, 'No workshop assigned to your account');
+  return w;
+}
+/** Workshop manager: own workshop info, advisors, today's bay usage. */
+function myWorkshop(user) {
+  const w = getWorkshopFor(user);
+  const advisors = q.all("SELECT id, name, email, phone FROM users WHERE workshop_id = ? AND active = 1 AND role IN ('service_advisor','workshop_manager') ORDER BY name", w.id);
+  return { workshop: w, advisors, slots: listServiceSlots({ workshopId: w.id, date: today() }) };
+}
+function updateMyWorkshop(user, body) {
+  const w = getWorkshopFor(user);
+  const sets = [], p = [];
+  if (body.bays !== undefined) {
+    const n = toInt(body.bays, 0);
+    if (n < 1 || n > 50) throw httpError(422, 'Bays must be between 1 and 50', { bays: 'Invalid' });
+    sets.push('bays = ?'); p.push(n);
+  }
+  if (body.hours !== undefined) { sets.push('hours = ?'); p.push(clean(body.hours, 100)); }
+  if (body.phone !== undefined) { sets.push('phone = ?'); p.push(clean(body.phone, 30)); }
+  if (!sets.length) return w;
+  q.run(`UPDATE workshops SET ${sets.join(', ')} WHERE id = ?`, ...p, w.id);
+  const after = q.get('SELECT * FROM workshops WHERE id = ?', w.id);
+  require('./admin').audit(user, 'update', 'workshops', w.id, { bays: { from: w.bays, to: after.bays }, hours: { from: w.hours, to: after.hours } });
+  return after;
 }
 
 module.exports = {
   listShowrooms, listWorkshops, listYard, listTestDriveSlots, createTestDrive, listServiceSlots, createServiceBooking,
-  createLead: leads.createLead, optOut: leads.optOut, listBookings, updateBooking, SERVICE_TYPES,
+  createLead: leads.createLead, optOut: leads.optOut, listBookings, updateBooking, myWorkshop, updateMyWorkshop, bookingScope, SERVICE_TYPES,
+  slotTimes, checkDate, slotInPast,
 };

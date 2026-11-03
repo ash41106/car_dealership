@@ -54,7 +54,7 @@ function summarizeLead(lead) {
   if (lead.type === 'finance' && !needs.includes('finance support')) needs.push('finance support');
   const budget = parseBudget(lead.budget) || parseBudget(lead.message);
   const timeline = parseTimeline(lead.message);
-  const interest = ctx.used ? `Used ${ctx.used.year} ${ctx.used.model} ${ctx.used.variant} (${ctx.used.stock_id})` : ctx.model || 'not specified';
+  const interest = ctx.used ? `Used ${ctx.used.year} ${ctx.used.model} ${ctx.used.variant} (${ctx.used.stock_id})` : ctx.model || null;
   let next;
   const overdue = !lead.first_response_at && lead.due_at && Date.now() > Date.parse(lead.due_at);
   if (lead.status === 'new') next = overdue ? 'Call immediately - 5-minute SLA breached; apologise and offer a test drive slot.' : 'Call within 5 minutes, confirm requirements and offer a test drive slot.';
@@ -63,8 +63,8 @@ function summarizeLead(lead) {
   else if (lead.status === 'negotiation') next = 'Share the written quotation, confirm finance/exchange details and close with a delivery date.';
   else next = 'No action needed; log reason and keep in nurture list.';
   return {
-    needs, budget, timeline, model_interest: interest, next_best_action: next,
-    text: `${lead.name || 'Customer'} is interested in ${interest}${budget ? ` with a budget around ${budget}` : ''}${timeline ? `, timeline ${timeline}` : ''}${needs.length ? `. Needs: ${needs.join(', ')}` : ''}. Next: ${next}`,
+    needs, budget, timeline, model_interest: interest || 'not specified', next_best_action: next,
+    text: `${lead.name || 'Customer'} ${interest ? `is interested in ${interest}` : 'has enquired (model not specified yet)'}${budget ? ` with a budget around ${budget}` : ''}${timeline ? `, timeline ${timeline}` : ''}${needs.length ? `. Needs: ${needs.join(', ')}` : ''}. Next: ${next}`,
     source: 'heuristic', generated_by: 'AI-generated - review before use',
   };
 }

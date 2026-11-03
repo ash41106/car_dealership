@@ -30,8 +30,13 @@ async function start() {
     if (r.status !== 200) throw new Error('login failed ' + r.status);
     return r.headers.get('set-cookie').split(';')[0];
   }
+  async function customer(phone, otp = '123456') {
+    const r = await api('POST', '/api/customer/otp/verify', { phone, otp, name: 'Test Customer' });
+    if (r.status !== 200) throw new Error('customer login failed ' + r.status + ' ' + r.text);
+    return r.headers.get('set-cookie').split(';')[0];
+  }
   const db = require('../../server/lib/db');
-  return { app, base, api, login, db, close: () => app.close() };
+  return { app, base, api, login, customer, db, close: () => app.close() };
 }
 const futureDate = (n = 3) => new Date(Date.now() + 5.5 * 3600e3 + n * 86400e3).toISOString().slice(0, 10);
 module.exports = { start, futureDate };
