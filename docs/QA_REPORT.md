@@ -1,3 +1,50 @@
+# QA Report - Company A Motors (Round 2)
+
+Tester: QA lead. Fresh seeded DB on port 3300 (RATE_LIMIT_PUBLIC=5000). No application code edited. Round 1 report follows below, unchanged.
+
+## Round 2 score: 91 / 100 (round 1: 79)
+
+| Area | Max | R1 | R2 | Why |
+|---|---|---|---|---|
+| Functionality vs brief | 30 | 25 | 28 | All flows still pass; stepper fixed. Deduction: AI summary reads "interested in not specified" when no model is chosen (N-01), home stats are still hard-coded (D-12). |
+| Backend correctness / security | 20 | 17 | 19 | D-03, D-09, D-10 fixed and covered by new tests. Deduction: no DB-level reseed/--reset issue found, but `status=booked` used cars are listable and the booked detail page is 200 by design; kept as a note only. 1 point for unverified Docker build. |
+| Frontend UX / design | 20 | 15 | 17 | Login feedback, stepper, tap-target CSS (44 px), AI box, silhouettes, sticky CTA fixed. Look matches DriveX reference (white/black, one red accent, ghost DRIVE watermark, skewed red tile, pill buttons). Deduction: car art is still generic placeholder silhouettes (Model H still slightly wagon-like) and the hero ghost text collides with the car card. |
+| SEO / perf / a11y | 10 | 8 | 9 | JSON-LD now on /privacy and /opt-out. Tap targets verified from CSS and the FAST browser run only (full 390 px sweep not re-run). |
+| i18n + DPDP | 10 | 9 | 9 | Unchanged, passing. Staff UI English only (documented). |
+| Deployability / docs / tests | 10 | 5 | 9 | README exists, commands and logins verified (seed, start, npm test, e2e, admin login). Tests 27/27. Deduction: Dockerfile not built (no Docker here). |
+| **Total** | **100** | 79 | **91** | |
+
+## Suite results
+- `npm test`: 27/27. `node tests/e2e/run.js`: 442/442 (D-03/D-07 now pass). Browser suite with FAST=1 (login wrong/right password, lead inbox, drawer, reply, admin price edit, stepper, admin pages): 89/89. The full ~20 min public sweep was not re-run; screenshots of home, new-cars, model page, test-drive (390) and staff drawer (390/1440) were read and judged.
+- Re-seed on an existing DB is idempotent ("already seeded, use --reset"); counts unchanged. run.bat logic is sane (node check, seed on first run, start).
+
+## Round 1 defect status
+| ID | Status | Verification |
+|---|---|---|
+| D-01 | Fixed | staff.js skips redirect for /api/auth/login; browser suite wrong-password test passes. |
+| D-02 | Fixed | 390 px step 1 shows only Continue (screenshot). |
+| D-03 | Fixed | CRLF `_next` returns 201 with no 500/header injection; `//evil.com` becomes same-origin `/evil.com?ok=1`. |
+| D-04 | Fixed (CSS) | 44 px min-height on nav, pills, buttons, swatches, hearts, dots, footer links. Runtime sweep not re-run. |
+| D-05 | Fixed | AI box shows summary, next best action, Regenerate only. |
+| D-06 | Fixed, minor residue | Model H is now a hatch shape; art still generic. |
+| D-07 | Fixed | 1 JSON-LD block on /privacy and /opt-out. |
+| D-08 | Fixed | README.md present and accurate. |
+| D-09 | Fixed | `/api/used?status=sold` returns only available cars. |
+| D-10 | Fixed | New test covers load balancing. |
+| D-11 | Fixed | CTA no longer covers breakup rows at 1440 (screenshot). |
+| D-12 | Still open (Minor) | Numbers rounded to 6,000+ / 900+ but still hard-coded in server/pages/public.js, not from admin settings. |
+
+## Open defects (round 2): 0 Blocker, 0 Major, 3 Minor
+| ID | Sev | Owner | Issue |
+|---|---|---|---|
+| D-12 | Minor | Frontend | Home stat figures hard-coded (6000/900), not admin-driven or removed. |
+| N-01 | Minor | Backend | AI summary with unspecified interest reads "is interested in not specified." Should omit the clause. |
+| N-02 | Minor | Manager | Dockerfile never build-tested by QA (no Docker on the QA machine); needs a real `docker build` + `/healthz` check before go-live. |
+
+Also noted: 4 showrooms in seed vs "3 showrooms" in the brief wording of README/home (home count comes from DB, so it is consistent).
+
+---
+
 # QA Report - Company A Motors (Round 1)
 
 Tester: QA lead. Environment: Node 22.17, Windows 11, fresh seeded temp DB on port 3200, headless Edge 156 (CDP) for browser checks. No application code was edited.
