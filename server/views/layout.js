@@ -15,6 +15,10 @@ const L = (o, f, lang) => { if (!o) return ''; const v = o[f + '_' + lang]; retu
 const jsonSafe = (o) => JSON.stringify(o).replace(/</g, '\\u003c').replace(/>/g, '\\u003e').replace(/&/g, '\\u0026').replace(/\u2028/g, '\\u2028').replace(/\u2029/g, '\\u2029');
 
 const ICON = {
+  fuel: '<svg class="ic" viewBox="0 0 24 24" width="22" height="22" aria-hidden="true"><path d="M5 20V5a1 1 0 0 1 1-1h7a1 1 0 0 1 1 1v15M4 20h11M14 9h2.500a1.500 1.500 0 0 1 1.500 1.500V16a1.500 1.500 0 0 0 3 0V8l-2.500-2.500M7 8h5" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg>',
+  gear: '<svg class="ic" viewBox="0 0 24 24" width="22" height="22" aria-hidden="true"><circle cx="6" cy="6" r="2" fill="none" stroke="currentColor" stroke-width="1.8"/><circle cx="18" cy="6" r="2" fill="none" stroke="currentColor" stroke-width="1.8"/><circle cx="12" cy="18" r="2" fill="none" stroke="currentColor" stroke-width="1.8"/><path d="M6 8v4h12V8M12 12v4" fill="none" stroke="currentColor" stroke-width="1.8"/></svg>',
+  seat: '<svg class="ic" viewBox="0 0 24 24" width="22" height="22" aria-hidden="true"><rect x="4" y="4" width="7" height="7" rx="1.500" fill="none" stroke="currentColor" stroke-width="1.8"/><rect x="13" y="4" width="7" height="7" rx="1.500" fill="none" stroke="currentColor" stroke-width="1.8"/><rect x="4" y="13" width="16" height="7" rx="1.500" fill="none" stroke="currentColor" stroke-width="1.8"/></svg>',
+  bolt: '<svg class="ic" viewBox="0 0 24 24" width="22" height="22" aria-hidden="true"><path d="M13 3 5 13h6l-1 8 8-10h-6z" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linejoin="round"/></svg>',
   arrow: '<svg class="ic" viewBox="0 0 24 24" width="18" height="18" aria-hidden="true"><path d="M5 12h14M13 6l6 6-6 6" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>',
   left: '<svg class="ic" viewBox="0 0 24 24" width="18" height="18" aria-hidden="true"><path d="M19 12H5M11 6l-6 6 6 6" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>',
   heart: '<svg class="ic" viewBox="0 0 24 24" width="18" height="18" aria-hidden="true"><path d="M12 20s-7-4.4-7-10a4 4 0 0 1 7-2.5A4 4 0 0 1 19 10c0 5.600-7 10-7 10z" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linejoin="round"/></svg>',
@@ -56,23 +60,23 @@ function page(o) {
   const navHtml = nav.map(([p, k]) => `<a href="${p}"${cur(p) ? ' aria-current="page"' : ''}>${esc(t(k))}</a>`).join('');
   const other = lang === 'en' ? 'hi' : 'en';
   const ld = (o.jsonld || []).map(j => `<script type="application/ld+json">${jsonSafe(j)}</script>`).join('');
-  const scripts = ['/js/app.js'].concat(o.scripts || []).map(s => `<script src="${s}?v=1" defer></script>`).join('');
+  const scripts = ['/js/app.js', '/js/fx.js'].concat(o.scripts || []).map(s => `<script src="${s}?v=1" defer></script>`).join('');
   return `<!doctype html><html lang="${lang}"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
 <title>${esc(title)}</title><meta name="description" content="${esc(desc)}">
 ${o.noindex ? '<meta name="robots" content="noindex,nofollow">' : `<link rel="canonical" href="${esc(canon)}"><link rel="alternate" hreflang="en" href="${esc(canon)}?lang=en"><link rel="alternate" hreflang="hi" href="${esc(canon)}?lang=hi"><link rel="alternate" hreflang="x-default" href="${esc(canon)}">`}
 <meta property="og:type" content="${o.ogType || 'website'}"><meta property="og:title" content="${esc(title)}"><meta property="og:description" content="${esc(desc)}"><meta property="og:url" content="${esc(canon)}"><meta property="og:image" content="${esc(og)}"><meta property="og:locale" content="${lang === 'hi' ? 'hi_IN' : 'en_IN'}"><meta name="twitter:card" content="summary_large_image">
 <meta name="theme-color" content="#0b0b0b"><link rel="icon" href="/img/favicon.svg" type="image/svg+xml">
-<link rel="stylesheet" href="/css/app.css?v=1">${(o.css || []).map(c => `<link rel="stylesheet" href="${c}?v=1">`).join('')}${ld}</head>
+<link rel="stylesheet" href="/css/app.css?v=2"><link rel="stylesheet" href="/css/fx.css?v=2">${(o.css || []).map(c => `<link rel="stylesheet" href="${c}?v=1">`).join('')}${ld}</head>
 <body class="${esc(o.bodyClass || '')}"><div class="progress" id="progress" aria-hidden="true"></div>
 <a class="skip" href="#main">${esc(t('skip'))}</a>
 <header class="hdr" id="hdr"><div class="wrap hdr-in">
 <a class="logo" href="/" aria-label="${esc(t('brand'))}"><span class="logo-mark">A</span><span class="logo-t">Company A <b>Motors</b></span></a>
 <nav class="nav" id="nav" aria-label="Primary">${navHtml}</nav>
 <div class="hdr-r"><a class="lang" href="${esc(langHref(ctx, other))}" hreflang="${other}" lang="${other}">${esc(t('lang_toggle'))}</a>
-<a class="btn btn-sm hide-m" href="/test-drive">${esc(t('book_td'))} ${ICON.arrow}</a>
+<a class="signin hide-m" href="/account">${esc(t('signin'))}</a><a class="btn btn-sm hide-m" href="/test-drive">${esc(t('book_td'))} ${ICON.arrow}</a>
 <button class="burger" id="burger" aria-expanded="false" aria-controls="nav" aria-label="${esc(t('menu'))}"><span></span><span></span></button></div></div></header>
 <main id="main">${o.body}</main>
-<footer class="ftr"><div class="wrap ftr-in"><div><a class="logo" href="/"><span class="logo-mark">A</span><span class="logo-t">Company A <b>Motors</b></span></a><p>${esc(t('footer_tag'))}</p><p class="muted">${esc(t('footer_legal'))}</p></div>
+<footer class="ftr"><div class="wrap">${footMaps(t, lang)}</div><div class="wrap ftr-in"><div><a class="logo" href="/"><span class="logo-mark">A</span><span class="logo-t">Company A <b>Motors</b></span></a><p>${esc(t('footer_tag'))}</p><p class="muted">${esc(t('footer_legal'))}</p></div>
 <div><h3>${esc(t('new_cars'))}</h3><a href="/new-cars">${esc(t('nav_new'))}</a><a href="/used-cars">${esc(t('nav_used'))}</a><a href="/emi">${esc(t('nav_emi'))}</a><a href="/trade-in">${esc(t('nav_trade'))}</a></div>
 <div><h3>${esc(t('contact_title'))}</h3><a href="/test-drive">${esc(t('nav_td'))}</a><a href="/service">${esc(t('nav_service'))}</a><a href="/contact">${esc(t('nav_contact'))}</a><a href="/staff/login">${esc(t('staff_login'))}</a></div>
 <div><h3>${esc(t('privacy'))}</h3><a href="/privacy">${esc(t('privacy_title'))}</a><a href="/opt-out">${esc(t('optout_title'))}</a></div></div>
@@ -80,6 +84,11 @@ ${o.noindex ? '<meta name="robots" content="noindex,nofollow">' : `<link rel="ca
 <script>window.__I=${jsonSafe(client(lang))};window.__LANG=${jsonSafe(lang)};</script>${scripts}</body></html>`;
 }
 
+function footMaps(t, lang) {
+  let sh = []; try { sh = require('../services/sales').listShowrooms(); } catch (e) { sh = []; }
+  if (!sh.length) return '';
+  return `<div class="maps">${sh.map(s => `<a class="mapc" href="${s.lat ? 'https://www.google.com/maps/search/?api=1&amp;query=' + esc(s.lat) + ',' + esc(s.lng) : '/contact'}" target="_blank" rel="noopener"><span class="pin" aria-hidden="true"></span><b>${esc(L(s, 'name', lang))}</b><small>${esc(L(s, 'address', lang))}</small></a>`).join('')}</div>`;
+}
 function crumbsLd(items) {
   return { '@context': 'https://schema.org', '@type': 'BreadcrumbList', itemListElement: items.map((it, i) => ({ '@type': 'ListItem', position: i + 1, name: it[0], item: BASE() + it[1] })) };
 }

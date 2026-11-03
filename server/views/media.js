@@ -1,0 +1,30 @@
+'use strict';
+// Photo-first image resolution with procedural SVG fallback. Checks the disk (cached 5s) so photos dropped into public/img appear without restart.
+const fs = require('node:fs');
+const path = require('node:path');
+const ROOT = path.join(__dirname, '..', '..', 'public');
+const cache = new Map();
+function has(rel) {
+  const c = cache.get(rel); const now = Date.now();
+  if (c && now - c.t < 5000) return c.v;
+  let v = false; try { v = fs.statSync(path.join(ROOT, rel)).size > 1024; } catch (e) { v = false; }
+  cache.set(rel, { v, t: now }); return v;
+}
+const slugify = (s) => String(s || '').toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/^-|-$/g, '');
+const svcUrl = (slug, type, hex) => `/img/car/${encodeURIComponent(slug)}.svg?${type ? 't=' + encodeURIComponent(type) + '&' : ''}c=${String(hex || '1c1c1f').replace('#', '')}`;
+
+// kind: hero | side | rear | interior ; returns {src, photo, w, h}
+function car(slug, kind, body, hex) {
+  const rel = `img/cars/${slug}-${kind}.jpg`;
+  const dims = kind === 'rear' || kind === 'interior' ? [1200, 900] : [1600, 900];
+  if (has(rel)) return { src: '/' + rel, photo: true, w: dims[0], h: dims[1] };
+  return { src: svcUrl(slug, body, hex), photo: false, w: 800, h: 400 };
+}
+// per-colour side image if present (img/cars/<slug>-side-<colour-name>.jpg)
+function carColour(slug, colourName) {
+  const rel = `img/cars/${slug}-side-${slugify(colourName)}.jpg`;
+  return has(rel) ? '/' + rel : null;
+}
+function scene(name) { const rel = `img/scenes/${name}.jpg`; return has(rel) ? '/' + rel : null; }
+function used(stockId) { const rel = `img/used/${String(stockId || '').toLowerCase()}.jpg`; return has(rel) ? '/' + rel : null; }
+module.exports = { has, car, carColour, scene, used, svcUrl, slugify };

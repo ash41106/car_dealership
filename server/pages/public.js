@@ -2,6 +2,7 @@
 const V = require('../views/layout');
 const { esc, inr, lakh, L, ICON, imgUrl, img, page, crumbsLd, crumbsHtml, consentField, field, personFields, BASE } = V;
 const C = require('./components');
+const M = require('../views/media');
 const { svc } = C;
 
 function ctxT(ctx) { return V.make(ctx.lang); }
@@ -19,23 +20,34 @@ function home(ctx) {
   const showrooms = safe(() => svc.sales.listShowrooms(), []);
   const slides = (models.filter(m => m.featured).concat(models)).filter((m, i, a) => a.indexOf(m) === i).slice(0, 4);
   const types = ['hatchback', 'sedan', 'suv', 'mpv'];
-  const heroSlides = slides.map((m, i) => `<figure class="slide${i ? '' : ' on'}" data-slide="${i}"${i ? ' hidden' : ''}>${C.carHero(m, { eager: i === 0 })}<figcaption><a href="/new-cars/${esc(m.slug)}"><strong>${esc(m.name)}</strong> <span>${esc(t('from'))} ${esc(lakh(m.from_price))}</span> ${ICON.arrow}</a></figcaption></figure>`).join('');
+  const heroSrc = (m) => { const hx = m.colors && m.colors[0] && m.colors[0].hex; const h = M.car(m.slug, 'hero', m.body_type, hx); return h.photo ? h : M.car(m.slug, 'side', m.body_type, hx); };
+  const heroSlides = slides.map((m, i) => { const h = heroSrc(m); return `<figure class="slide${i ? '' : ' on'}" data-slide="${i}">${img(h.src, m.name, { w: h.w, h: h.h, eager: i === 0 })}<figcaption><a href="/new-cars/${esc(m.slug)}"><strong>${esc(m.name)}</strong> <span>${esc(t('from'))} ${esc(lakh(m.from_price))}</span> ${ICON.arrow}</a></figcaption></figure>`; }).join('');
   const dots = slides.map((m, i) => `<button type="button" class="dot-b${i ? '' : ' on'}" data-go="${i}" aria-label="${esc(m.name)}"></button>`).join('');
   const banner = banners[0];
+  const bgScene = M.scene('hero-road');
   const tiles = types.map(ty => {
     const m = models.find(x => x.body_type === ty);
-    return `<a class="tile reveal" href="/new-cars?type=${ty}"><div class="tile-in">${m ? img(m.hero_image || imgUrl(m.slug, ty, '1c1c1f'), m.name) : ''}<div class="tile-t"><small>${esc(t(ty))}</small><span>${esc(t('cat_' + ty))}</span></div><span class="circ circ-w">${ICON.arrow}</span></div></a>`;
+    return `<a class="tile reveal" href="/new-cars?type=${ty}"><div class="tile-in">${m ? C.carHero(m, {}) : ''}<div class="tile-t"><small>${esc(t(ty))}</small><span>${esc(t('cat_' + ty))}</span></div><span class="circ circ-w">${ICON.arrow}</span></div></a>`;
   }).join('');
-  const body = `<section class="hero"><div class="ghost" aria-hidden="true" data-par>DRIVE</div><div class="slash s1" aria-hidden="true"></div><div class="slash s2" aria-hidden="true"></div>
-<div class="wrap hero-in"><div class="hero-t"><ul class="eyebrow"><li>${esc(t('hero_eyebrow1'))}</li><li>${esc(t('hero_eyebrow2'))}</li><li>${esc(t('hero_eyebrow3'))}</li></ul>
+  const mq = [1, 2, 3, 4, 5, 6].map(i => `<span>${esc(t('mq' + i))}</span>`).join('');
+  const scenes = ['mountain', 'showroom', 'city-night', 'hero-road'];
+  const stepLinks = ['/new-cars', '/compare', '/test-drive', '/contact'];
+  const story = `<section class="story" data-story><div class="wrap story-in"><div class="story-vis" aria-hidden="true"><div class="rail"><i></i></div>${[1, 2, 3, 4].map(i => { const sc = M.scene(scenes[i - 1]); return `<div class="sv sv-${i}"${sc ? ` style="background-image:url(${esc(sc)})"` : ''}><span class="num-xl">0${i}</span><b>${esc(t('st' + i))}<i>.</i></b></div>`; }).join('')}</div>
+<div><p class="script">${esc(t('script_tag'))}</p>${V.heading(t('story_a'), t('story_b'))}<ol class="story-steps">${[1, 2, 3, 4].map(i => `<li><h3><small>0${i}</small>${esc(t('st' + i))}<span class="dot">.</span></h3><p>${esc(t('st' + i + 'b'))}</p><p><a class="btn btn-sm btn-o" href="${stepLinks[i - 1]}">${esc(t('st' + i))} ${ICON.arrow}</a></p></li>`).join('')}</ol></div></div></section>`;
+  const visit = M.scene('showroom');
+  const body = `<section class="hero2"><div class="hero2-bg"${bgScene ? ` style="background-image:url(${esc(bgScene)})"` : ' hidden'}></div><div class="ghost" aria-hidden="true" data-par>DRIVE</div>
+<div class="wrap hero2-in"><div class="hero-t"><ul class="eyebrow"><li>${esc(t('hero_eyebrow1'))}</li><li>${esc(t('hero_eyebrow2'))}</li><li>${esc(t('hero_eyebrow3'))}</li></ul>
 <h1 class="h1 xl">${esc(t('hero_h1a'))}<br>${esc(t('hero_h1b'))}<span class="dot">.</span></h1><p class="lead">${esc(banner ? (L(banner, 'sub', lang) || t('hero_sub')) : t('hero_sub'))}</p>
 <div class="cta-row"><a class="btn" href="/new-cars">${esc(t('explore_new'))} ${ICON.arrow}</a><a class="btn btn-o" href="/used-cars">${esc(t('browse_used'))} ${ICON.arrow}</a></div></div>
-<div class="hero-car" data-carousel>${heroSlides}<div class="hero-ctl"><button class="circ" type="button" data-prev aria-label="${esc(t('prev'))}">${ICON.left}</button><div class="dots">${dots}</div><button class="circ" type="button" data-next aria-label="${esc(t('next'))}">${ICON.arrow}</button></div></div></div>
+<div class="hero-visual" data-carousel><span class="slash-a" aria-hidden="true"></span><span class="slash-b" aria-hidden="true"></span><div class="vframe">${heroSlides}</div><div class="hero-ctl"><button class="circ" type="button" data-prev aria-label="${esc(t('prev'))}">${ICON.left}</button><div class="dots">${dots}</div><button class="circ" type="button" data-next aria-label="${esc(t('next'))}">${ICON.arrow}</button></div></div></div>
 <div class="wrap"><ul class="stats"><li>${ICON.car}<div><strong data-count="6000" data-suffix="+">6,000+</strong><span>${esc(t('stat1'))}</span></div></li><li>${ICON.shield}<div><strong data-count="900" data-suffix="+">900+</strong><span>${esc(t('stat2'))}</span></div></li><li>${ICON.pin}<div><strong data-count="${showrooms.length || 3}">${showrooms.length || 3}</strong><span>${esc(t('stat3'))}</span></div></li></ul></div></section>
+<div class="marquee" aria-hidden="true"><div class="marquee-t">${mq}${mq}</div></div>
+${story}
 ${usedRes.items && usedRes.items.length ? `<section class="sec sec-grey"><div class="wrap"><div class="sec-h"><div><p class="script">${esc(t('script_tag'))}</p>${V.heading(t('handpicked_a'), t('handpicked_b'))}</div><div class="ctl"><button class="circ" type="button" data-strip-prev aria-label="${esc(t('prev'))}">${ICON.left}</button><button class="circ" type="button" data-strip-next aria-label="${esc(t('next'))}">${ICON.arrow}</button></div></div>
 <div class="strip" data-strip tabindex="0" aria-label="${esc(t('used_cars'))}">${usedRes.items.map(u => C.usedCard(u, t, lang, bm)).join('')}</div><p class="center"><a class="btn btn-o" href="/used-cars">${esc(t('view_all'))} ${ICON.arrow}</a></p></div></section>` : ''}
 <section class="sec"><div class="wrap"><div class="sec-h"><div>${V.heading(t('perfect_a'), t('perfect_b'))}<p class="lead">${esc(t('new_cars_sub'))}</p></div></div><div class="tiles">${tiles}</div></div></section>
 ${models.length ? `<section class="sec sec-grey"><div class="wrap"><div class="sec-h"><h2 class="h2">${esc(t('new_cars'))}<span class="dot">.</span></h2><a class="btn btn-o" href="/new-cars">${esc(t('view_all'))} ${ICON.arrow}</a></div><div class="grid">${models.map(m => C.modelCard(m, t, lang)).join('')}</div></div></section>` : ''}
+<section class="scene-band"${visit ? ` style="background-image:url(${esc(visit)})"` : ''}><div class="wrap"><h2 class="h2">${esc(t('visit_t'))}<span class="dot">.</span></h2><p>${esc(t('visit_b'))}</p><div class="cta-row"><a class="btn btn-w" href="/contact">${esc(t('nav_contact'))} ${ICON.arrow}</a><a class="btn btn-w" href="/service">${esc(t('nav_service'))} ${ICON.arrow}</a></div></div></section>
 ${offers.length ? `<section class="sec"><div class="wrap"><h2 class="h2">${esc(t('offers'))}<span class="dot">.</span></h2><div class="grid g3">${offers.map(o => `<article class="offer reveal"><span class="badge">${esc(t('new_arrival'))}</span><h3>${esc(L(o, 'title', lang))}</h3><p>${esc(L(o, 'body', lang))}</p>${o.valid_until ? `<small class="muted">${esc(t('valid_until'))} ${esc(o.valid_until)}</small>` : ''}</article>`).join('')}</div></div></section>` : ''}
 <section class="sec sec-grey"><div class="wrap"><h2 class="h2">${esc(t('why_us'))}<span class="dot">.</span></h2><div class="grid g4">${[1, 2, 3, 4].map(i => `<div class="why reveal"><span class="num">0${i}</span><h3>${esc(t('why' + i + 't'))}</h3><p>${esc(t('why' + i + 'b'))}</p></div>`).join('')}</div></div></section>
 <section class="band"><div class="wrap band-in"><h2 class="h2 inv">${esc(t('td_title'))}<span class="dot">.</span></h2><a class="btn btn-w" href="/test-drive">${esc(t('book_td'))} ${ICON.arrow}</a></div></section>`;
@@ -64,17 +76,25 @@ function modelPage(ctx) {
   const v0 = (m.variants || [])[0];
   const price = v0 ? safe(() => svc.catalog.getOnRoadPrice(v0.id, city, { accessories: false }), null) : null;
   const colors = m.colors || [];
-  const hero = m.hero_image || imgUrl(m.slug, m.body_type, colors[0] && colors[0].hex);
-  const sw = colors.map((c, i) => `<button type="button" class="sw${i ? '' : ' on'}" data-color="${esc(String(c.hex).replace('#', ''))}" style="--c:${esc(c.hex)}" aria-pressed="${i ? 'false' : 'true'}" aria-label="${esc(L(c, 'name', lang))}" title="${esc(L(c, 'name', lang))}"></button>`).join('');
-  const gal = (m.gallery || []).map(g => `<li>${img(g.url, L(g, 'alt', lang) || m.name)}</li>`).join('');
+  const hx0 = colors[0] && colors[0].hex;
+  const heroP = M.car(m.slug, 'hero', m.body_type, hx0), sideP = M.car(m.slug, 'side', m.body_type, hx0);
+  const heroI = m.hero_image && !String(m.hero_image).startsWith('/img/car/') ? { src: m.hero_image, w: 1600, h: 900, photo: true } : (heroP.photo ? heroP : sideP);
+  const hero = heroI.src;
+  const sw = colors.map((c, i) => `<button type="button" class="sw${i ? '' : ' on'}" data-color="${esc(String(c.hex).replace('#', ''))}"${M.carColour(m.slug, c.name_en) ? ` data-src="${esc(M.carColour(m.slug, c.name_en))}"` : ''} style="--c:${esc(c.hex)}" aria-pressed="${i ? 'false' : 'true'}" aria-label="${esc(L(c, 'name', lang))}" title="${esc(L(c, 'name', lang))}"></button>`).join('');
+  const extra = []; ['side', 'rear', 'interior'].forEach(k => { const c = M.car(m.slug, k, m.body_type, hx0); if (c.photo && c.src !== hero) extra.push({ url: c.src, alt: m.name + ' ' + k, w: c.w, h: c.h }); });
+  const gal = extra.map(g => `<li>${img(g.url, g.alt, { w: g.w, h: g.h })}</li>`).join('') + (m.gallery || []).map(g => `<li>${img(g.url, L(g, 'alt', lang) || m.name)}</li>`).join('');
+  const tr = [...new Set((m.variants || []).map(v => v.transmission))].join(' / ');
+  const sp = (re) => { const x = (m.specs || []).find(z => re.test(String(z.label_en))); return x ? [L(x, 'label', lang), x.value] : null; };
+  const strip = [[ICON.fuel, t('spec_fuel'), (m.fuel_types || []).join(' / ')], [ICON.gear, t('spec_trans'), tr], [ICON.car, t('spec_body'), t(m.body_type)], [ICON.seat, t('spec_variants'), (m.variants || []).length]].concat([sp(/mileage|efficien/i), sp(/power|engine/i)].filter(Boolean).map(x => [ICON.bolt, x[0], x[1]])).filter(x => x[2]);
+  const stripHtml = `<div class="specstrip">${strip.map(x => `<div>${x[0]}<small>${esc(x[1])}</small><b>${esc(x[2])}</b></div>`).join('')}</div>`;
   const variants = (m.variants || []).map(v => `<tr><th scope="row">${esc(v.name)}<small>${esc(v.fuel)} · ${esc(v.transmission)}</small></th><td>${esc(inr(v.ex_showroom))}</td><td><details><summary>${esc(t('features'))}</summary><ul class="ticks">${(lang === 'hi' && v.features_hi && v.features_hi.length ? v.features_hi : v.features_en || []).map(f => `<li>${ICON.check}${esc(f)}</li>`).join('')}</ul></details></td></tr>`).join('');
   const specs = {}; (m.specs || []).forEach(s => { const g = L(s, 'group', lang); (specs[g] = specs[g] || []).push(s); });
   const specHtml = Object.keys(specs).map(g => `<div class="spec"><h3>${esc(g)}</h3><dl>${specs[g].map(s => `<div><dt>${esc(L(s, 'label', lang))}</dt><dd>${esc(s.value)}</dd></div>`).join('')}</dl></div>`).join('');
   const hl = (m.highlights || []).map(h => `<div class="why reveal"><h3>${esc(L(h, 'title', lang))}</h3><p>${esc(L(h, 'body', lang))}</p></div>`).join('');
   const offers = (m.offers || []).map(o => `<article class="offer"><span class="badge">${esc(t('offers'))}</span><h3>${esc(L(o, 'title', lang))}</h3><p>${esc(L(o, 'body', lang))}</p></article>`).join('');
   const body = `${crumbsHtml([[t('new_cars'), '/new-cars'], [m.name, '/new-cars/' + m.slug]], t)}
-<section class="pdp wrap"><div class="pdp-media"><div class="stage">${img(hero, m.name, { eager: true, cls: 'stage-img' })}</div>${sw ? `<div class="swatches" role="group" aria-label="${esc(t('colours'))}">${sw}</div>` : ''}${gal ? `<ul class="gal">${gal}</ul>` : ''}</div>
-<div class="pdp-info"><p class="eyebrow-s">${esc(t(m.body_type) || m.body_type)}</p><h1 class="h1">${esc(m.name)}<span class="dot">.</span></h1><p class="lead">${esc(L(m, 'tagline', lang))}</p><p>${esc(L(m, 'description', lang))}</p>
+<section class="pdp wrap"><div class="pdp-media"><div class="stage">${img(hero, m.name, { eager: true, cls: 'stage-img', w: heroI.w, h: heroI.h })}<img class="xf" alt="" width="${heroI.w}" height="${heroI.h}" style="opacity:0"></div>${sw ? `<div class="swatches" role="group" aria-label="${esc(t('colours'))}">${sw}</div>` : ''}${gal ? `<ul class="gal">${gal}</ul>` : ''}</div>
+<div class="pdp-info"><p class="eyebrow-s">${esc(t(m.body_type) || m.body_type)}</p><h1 class="h1">${esc(m.name)}<span class="dot">.</span></h1><p class="lead">${esc(L(m, 'tagline', lang))}</p><p>${esc(L(m, 'description', lang))}</p>${stripHtml}
 <div class="pricebox" data-onroad data-slug="${esc(m.slug)}" data-model="${esc(m.id)}"><div class="pb-h"><h2>${esc(t('on_road'))}</h2></div>
 <div class="pb-f"><div class="field"><label for="pb-city">${esc(t('city'))}</label><select id="pb-city" name="city">${cities.map(c => `<option value="${esc(c.slug)}"${c.slug === city ? ' selected' : ''}>${esc(L(c, 'name', lang))}</option>`).join('')}</select></div>
 <div class="field"><label for="pb-var">${esc(t('variant'))}</label><select id="pb-var" name="variant">${(m.variants || []).map(v => `<option value="${esc(v.id)}">${esc(v.name)} · ${esc(v.fuel)} ${esc(v.transmission)}</option>`).join('')}</select></div></div>
@@ -127,7 +147,7 @@ function usedPage(ctx) {
   const photos = (u.photos && u.photos.length ? u.photos : [C.usedImage(u, bm)]);
   const title = u.title || [u.year, u.model, u.variant].filter(Boolean).join(' ');
   const insp = u.inspection || { sections: [] };
-  const inspHtml = (insp.sections || []).map(s => `<details class="insp"><summary>${esc(L(s, 'name', lang))} <span class="muted">${(s.items || []).filter(i => i.status === 'ok').length}/${(s.items || []).length}</span></summary><ul>${(s.items || []).map(i => `<li class="${i.status === 'ok' ? 'ok' : 'warn'}"><span class="st">${esc(i.status === 'ok' ? t('inspection_pass') : t('inspection_attn'))}</span> ${esc(L(i, 'label', lang))}${i.note ? ` <small class="muted">${esc(i.note)}</small>` : ''}</li>`).join('')}</ul></details>`).join('');
+  const inspHtml = (insp.sections || []).map(s => `<details class="insp"><summary>${esc(L(s, 'name', lang))} <span class="insp-bar" aria-hidden="true"><i style="width:${Math.round((s.items || []).filter(i => i.status === 'ok').length * 100 / Math.max(1, (s.items || []).length))}%"></i></span><span class="muted">${(s.items || []).filter(i => i.status === 'ok').length}/${(s.items || []).length}</span></summary><ul>${(s.items || []).map(i => `<li class="${i.status === 'ok' ? 'ok' : 'warn'}"><span class="st">${esc(i.status === 'ok' ? t('inspection_pass') : t('inspection_attn'))}</span> ${esc(L(i, 'label', lang))}${i.note ? ` <small class="muted">${esc(i.note)}</small>` : ''}</li>`).join('')}</ul></details>`).join('');
   const sold = u.status !== 'available';
   const facts = [[t('year'), u.year], [t('km'), Number(u.km || 0).toLocaleString('en-IN')], [t('fuel'), u.fuel], [t('transmission'), u.transmission], [t('owners'), u.owners], [t('reg'), u.reg_masked], [t('colours'), u.color], [t('city'), u.location]].filter(x => x[1] !== undefined && x[1] !== null && x[1] !== '');
   const model = safe(() => svc.catalog.getModel(String(u.model || '').toLowerCase().replace(/\s+/g, '-')), null);
@@ -138,7 +158,7 @@ function usedPage(ctx) {
 <dl class="facts">${facts.map(f => `<div><dt>${esc(f[0])}</dt><dd>${esc(f[1])}</dd></div>`).join('')}</dl>
 ${(u.warranty_en || u.warranty_hi) ? `<p class="note">${ICON.shield} <span><strong>${esc(t('warranty'))}:</strong> ${esc(L(u, 'warranty', lang))}</span></p>` : ''}
 <div class="cta-row"><a class="btn" href="/test-drive${model ? '?model=' + esc(model.slug) : ''}">${esc(t('book_td'))} ${ICON.arrow}</a><a class="btn btn-o" href="#reserve">${esc(t('reserve'))}</a></div></div></section>
-${(insp.sections || []).length ? `<section class="sec sec-grey"><div class="wrap"><div class="sec-h"><h2 class="h2">${esc(t('inspection'))}<span class="dot">.</span></h2><div class="score" aria-label="${esc(t('score'))}"><strong>${esc(insp.score)}</strong><span>/100</span></div></div>${inspHtml}</div></section>` : ''}
+${(insp.sections || []).length ? `<section class="sec sec-grey"><div class="wrap"><div class="sec-h"><h2 class="h2">${esc(t('inspection'))}<span class="dot">.</span></h2><div class="ring" data-score="${esc(insp.score || 0)}" role="img" aria-label="${esc(t('inspection_score'))}: ${esc(insp.score || 0)}/100"><svg viewBox="0 0 150 150" width="150" height="150" aria-hidden="true"><circle class="bg" cx="75" cy="75" r="65"/><circle class="fg" cx="75" cy="75" r="65"/></svg><b>${esc(insp.score || 0)}</b></div></div>${inspHtml}</div></section>` : ''}
 <section class="sec"><div class="wrap two"><div><h2 class="h2">${esc(t('emi_calc'))}<span class="dot">.</span></h2>${C.emiWidget(t, { price: u.price })}</div><div id="reserve"><h2 class="h2">${esc(t('reserve'))}<span class="dot">.</span></h2><p class="muted">${esc(t('reserve_note'))}</p>${C.leadForm(t, { source: 'website', type: 'used', usedId: u.id, id: 'u', btn: t('reserve'), message: '' })}</div></div></section>
 <div class="sticky-cta"><div><small>${esc(title)}</small><strong>${esc(inr(u.price))}</strong></div><a class="btn" href="#reserve">${esc(t('reserve'))} ${ICON.arrow}</a></div>`;
   const ld = { '@context': 'https://schema.org', '@type': 'Car', name: title, brand: { '@type': 'Brand', name: 'Brand X' }, model: u.model, vehicleModelDate: String(u.year), mileageFromOdometer: { '@type': 'QuantitativeValue', value: u.km, unitCode: 'KMT' }, fuelType: u.fuel, vehicleTransmission: u.transmission, color: u.color, image: photos.map(p => BASE() + p),
@@ -165,6 +185,9 @@ function testDrive(ctx) {
   return ctx.html(page({ ctx, title: t('td_title'), desc: t('td_title') + ' - Company A Motors', body, jsonld: [crumbsLd([['Home', '/'], [t('td_title'), '/test-drive']])], scripts: ['/js/forms.js', '/js/book.js'] }));
 }
 
+function callbackBox(t) {
+  return `<aside class="callback" id="callback"><h3 class="h3">${esc(t('callback_t'))}</h3><p>${esc(t('callback_b'))}</p>${C.leadForm(t, { source: 'callback', type: 'callback', id: 'cb', btn: t('callback_btn'), message: 'Service call back request' })}</aside>`;
+}
 function servicePage(ctx) {
   const t = ctxT(ctx); const lang = ctx.lang;
   const ws = safe(() => svc.sales.listWorkshops(), []); const models = safe(() => svc.catalog.listModels(), []);
@@ -179,8 +202,25 @@ ${field(t, { name: 'model', label: t('car_model'), type: 'select', required: tru
 ${field(t, { name: 'serviceType', label: t('service_type'), type: 'select', options: types.map(x => [x[0], t(x[1])]) })}
 <label class="chk"><input type="checkbox" name="pickupDrop" value="1"><span>${esc(t('pickup'))}</span></label>
 ${field(t, { name: 'notes', label: t('message'), type: 'textarea' })}${consentField(t, 'c-sv')}<div class="form-msg" role="status" aria-live="polite"></div>
-<button class="btn" type="submit">${esc(t('confirm_booking'))} ${ICON.arrow}</button></form><div class="done" data-done hidden></div></div></section>`;
+<button class="btn" type="submit">${esc(t('confirm_booking'))} ${ICON.arrow}</button></form><div class="done" data-done hidden></div>${callbackBox(t)}</div></section>`;
   return ctx.html(page({ ctx, title: t('sv_title'), desc: t('sv_title') + ' - Company A Motors', body, jsonld: [crumbsLd([['Home', '/'], [t('sv_title'), '/service']])], scripts: ['/js/forms.js', '/js/book.js'] }));
+}
+
+function comparePage(ctx) {
+  const t = ctxT(ctx); const lang = ctx.lang;
+  const slugs = String(ctx.query.m || '').split(',').map(x => x.trim()).filter(Boolean).slice(0, 3);
+  const ms = slugs.map(sl => safe(() => svc.catalog.getModel(sl), null)).filter(Boolean);
+  let inner;
+  if (ms.length < 1) inner = `<p class="empty">${esc(t('compare_empty'))} <a class="btn btn-o" href="/new-cars">${esc(t('nav_new'))}</a></p>`;
+  else {
+    const labels = []; ms.forEach(m => (m.specs || []).forEach(x => { if (!labels.includes(x.label_en)) labels.push(x.label_en); }));
+    const val = (m, lab) => { const x = (m.specs || []).find(z => z.label_en === lab); return x ? x.value : '-'; };
+    const row = (lab, f) => `<tr><th scope="row">${esc(lab)}</th>${ms.map(m => `<td>${f(m)}</td>`).join('')}</tr>`;
+    const rng = (m) => { const p = (m.variants || []).map(v => v.ex_showroom); return p.length ? esc(lakh(Math.min.apply(null, p))) + (p.length > 1 ? ' - ' + esc(lakh(Math.max.apply(null, p))) : '') : '-'; };
+    inner = `<div class="tbl-w"><table class="cmp-t"><thead><tr><th></th>${ms.map(m => `<th scope="col"><a href="/new-cars/${esc(m.slug)}">${C.carHero(m, {})}<br><strong>${esc(m.name)}</strong></a></th>`).join('')}</tr></thead><tbody>${row(t('ex_showroom'), rng)}${row(t('spec_body'), m => esc(t(m.body_type)))}${row(t('fuel'), m => esc((m.fuel_types || []).join(', ')))}${row(t('transmission'), m => esc([...new Set((m.variants || []).map(v => v.transmission))].join(', ')))}${row(t('variants'), m => esc((m.variants || []).length))}${labels.map(lab => { const sx = ms.map(m => (m.specs || []).find(z => z.label_en === lab)).find(Boolean); return row(L(sx, 'label', lang), m => esc(val(m, lab))); }).join('')}${row('', m => `<a class="btn btn-sm" href="/test-drive?model=${esc(m.slug)}">${esc(t('book_td'))}</a>`)}</tbody></table></div>`;
+  }
+  const body = `${crumbsHtml([[t('compare_title'), '/compare']], t)}${C.hdr({ title: esc(t('compare_title')) })}<section class="sec tight"><div class="wrap">${inner}</div></section>`;
+  return ctx.html(page({ ctx, path: '/compare', title: t('compare_title'), desc: t('st2b'), body, noindex: ms.length > 0, scripts: [] }));
 }
 
 function emiPage(ctx) {
@@ -202,7 +242,7 @@ function contact(ctx) {
   const sh = safe(() => svc.sales.listShowrooms(), []); const ws = safe(() => svc.sales.listWorkshops(), []);
   const card = (s) => `<article class="loc reveal"><h3>${esc(L(s, 'name', lang))}</h3><p>${esc(L(s, 'address', lang))}</p>${s.hours ? `<p class="muted">${esc(t('hours'))}: ${esc(typeof s.hours === 'string' ? s.hours : JSON.stringify(s.hours))}</p>` : ''}<div class="cta-row">${s.phone ? `<a class="btn btn-sm" href="tel:${esc(String(s.phone).replace(/[^\d+]/g, ''))}">${esc(t('call'))} ${esc(s.phone)}</a>` : ''}${s.lat ? `<a class="btn btn-sm btn-o" target="_blank" rel="noopener" href="https://www.google.com/maps/search/?api=1&amp;query=${esc(s.lat)},${esc(s.lng)}">${esc(t('directions'))}</a>` : ''}</div></article>`;
   const body = `${crumbsHtml([[t('contact_title'), '/contact']], t)}${C.hdr({ title: esc(t('contact_title')) })}<section class="sec tight"><div class="wrap"><h2 class="h3">${esc(t('showrooms'))}</h2><div class="grid g3">${sh.map(card).join('')}</div><h2 class="h3 mt">${esc(t('workshops'))}</h2><div class="grid g3">${ws.map(card).join('')}</div></div></section>
-<section class="sec sec-grey"><div class="wrap narrow"><h2 class="h2">${esc(t('enquiry'))}<span class="dot">.</span></h2>${C.leadForm(t, { source: 'website', type: 'enquiry', id: 'c' })}</div></section>`;
+<section class="sec sec-grey"><div class="wrap two"><div><h2 class="h2">${esc(t('enquiry'))}<span class="dot">.</span></h2>${C.leadForm(t, { source: 'website', type: 'enquiry', id: 'c' })}</div>${callbackBox(t)}</div></section>`;
   return ctx.html(page({ ctx, title: t('contact_title'), desc: t('contact_title') + ' - Company A Motors Lucknow', body, jsonld: [V.dealerLd(sh, lang), crumbsLd([['Home', '/'], [t('contact_title'), '/contact']])], scripts: ['/js/forms.js'] }));
 }
 
@@ -241,7 +281,7 @@ function thanks(ctx, msg, extra) {
 
 function notFound(ctx) {
   const t = ctxT(ctx);
-  const body = `<section class="sec"><div class="wrap narrow center"><p class="eyebrow-s">404</p><h1 class="h1">${esc(t('nf_title'))}<span class="dot">.</span></h1><p class="lead">${esc(t('nf_body'))}</p><p><a class="btn" href="/">${esc(t('go_home'))} ${ICON.arrow}</a> <a class="btn btn-o" href="/new-cars">${esc(t('nav_new'))}</a></p></div></section>`;
+  const body = `<section class="nf"><div class="ghost" aria-hidden="true">404</div><div class="wrap narrow"><p class="script">${esc(t('script_tag'))}</p><h1 class="h1 xl">${esc(t('nf_title'))}<span class="dot">.</span></h1><p class="lead" style="margin-inline:auto">${esc(t('nf_body'))}</p>${img(imgUrl('model-s', 'suv', '1c1c1f'), '', { w: 800, h: 400 })}<p><a class="btn" href="/">${esc(t('go_home'))} ${ICON.arrow}</a> <a class="btn btn-o" href="/new-cars">${esc(t('nav_new'))}</a></p></div></section>`;
   return ctx.html(page({ ctx, title: t('nf_title'), body, noindex: true }), 404);
 }
 function serverError(ctx) {
@@ -313,7 +353,7 @@ function wrap(fn) { return async (ctx) => { try { return await fn(ctx); } catch 
 module.exports = { register(router) {
   const g = (p, fn) => router.get(p, wrap(fn));
   g('/', home); g('/new-cars', newCars); g('/new-cars/:slug', modelPage); g('/used-cars', usedList); g('/used-cars/:slug', usedPage);
-  g('/test-drive', testDrive); g('/service', servicePage); g('/emi', emiPage); g('/trade-in', tradeIn); g('/contact', contact); g('/privacy', privacy); g('/opt-out', optOut);
+  g('/test-drive', testDrive); g('/service', servicePage); g('/emi', emiPage); g('/compare', comparePage); g('/trade-in', tradeIn); g('/contact', contact); g('/privacy', privacy); g('/opt-out', optOut);
   g('/sitemap.xml', sitemap); g('/robots.txt', robots); g('/img/car/:file', carImage); g('/ui/onroad', onroadFragment);
   router.post('/forms/lead', wrap(formLead)); router.post('/forms/test-drive', wrap(formTD)); router.post('/forms/service', wrap(formService)); router.post('/forms/optout', wrap(formOptOut));
   router.notFound = wrap(notFound);

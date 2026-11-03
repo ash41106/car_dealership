@@ -1,6 +1,7 @@
 'use strict';
 const V = require('../views/layout');
 const { esc, inr, lakh, L, ICON, imgUrl, img } = V;
+const M = require('../views/media');
 
 let catalog, used, sales, seo;
 const lazy = (n) => require('../services/' + n);
@@ -26,26 +27,33 @@ function usedBody(u, bm) {
 }
 function usedImage(u, bm, idx) {
   const p = (u.photos && u.photos[idx || 0]) || u.photo || u.image;
-  return p || imgUrl(u.slug || u.stock_id || 'used', usedBody(u, bm), colorHex(u.color));
+  if (p && !String(p).startsWith('/img/car/')) return p;
+  const ph = M.used(u.stock_id);
+  if (ph && !idx) return ph;
+  const bt = usedBody(u, bm), hx = colorHex(u.color);
+  const sd = M.car(String(u.model || '').toLowerCase().replace(/\s+/g, '-'), 'side', bt, hx);
+  return sd.photo ? sd.src : imgUrl(u.slug || u.stock_id || 'used', bt, hx);
 }
 
-function carHero(m, o) { // model image honours uploaded hero
-  const src = m.hero_image || imgUrl(m.slug, m.body_type, m.colors && m.colors[0] && m.colors[0].hex);
-  return img(src, m.name, o);
+function carHero(m, o) { // card/hero image: uploaded hero > photo > svg
+  o = o || {};
+  if (m.hero_image && !String(m.hero_image).startsWith('/img/car/')) return img(m.hero_image, m.name, o);
+  const c = M.car(m.slug, o.kind || 'side', m.body_type, m.colors && m.colors[0] && m.colors[0].hex);
+  return img(c.src, m.name, Object.assign({ w: c.w, h: c.h }, o));
 }
 
 function modelCard(m, t, lang) {
   const fuels = (m.fuel_types || []).map(f => `<span class="chip">${esc(f)}</span>`).join('');
-  return `<article class="card mcard reveal"><a class="card-img" href="/new-cars/${esc(m.slug)}" tabindex="-1" aria-hidden="true">${carHero(m, {})}</a>
+  return `<article class="card mcard reveal" data-tilt><a class="card-img" href="/new-cars/${esc(m.slug)}" tabindex="-1" aria-hidden="true">${carHero(m, {})}</a>
 <div class="card-b"><div class="chips">${fuels}</div><h3><a href="/new-cars/${esc(m.slug)}">${esc(m.name)}</a></h3><p class="muted">${esc(L(m, 'tagline', lang))}</p>
-<div class="card-f"><div><small>${esc(t('from'))} ${esc(t('ex_showroom'))}</small><strong class="price">${esc(lakh(m.from_price))}</strong></div><a class="circ" href="/new-cars/${esc(m.slug)}" aria-label="${esc(t('view_details') + ': ' + m.name)}">${ICON.arrow}</a></div></div></article>`;
+<label class="cmp"><input type="checkbox" data-cmp="${esc(m.slug)}" data-name="${esc(m.name)}"><span>${esc(t('compare'))}</span></label><div class="card-f"><div><small>${esc(t('from'))} ${esc(t('ex_showroom'))}</small><strong class="price">${esc(lakh(m.from_price))}</strong></div><a class="circ" href="/new-cars/${esc(m.slug)}" aria-label="${esc(t('view_details') + ': ' + m.name)}">${ICON.arrow}</a></div></div></article>`;
 }
 
 function usedCard(u, t, lang, bm) {
   const sold = u.status === 'booked' || u.status === 'sold';
   const badge = sold ? `<span class="badge badge-dark">${esc(t(u.status))}</span>` : (u.featured ? `<span class="badge">${esc(t('featured'))}</span>` : `<span class="badge badge-line">${esc(t('verified'))}</span>`);
   const title = u.title || [u.year, u.model, u.variant].filter(Boolean).join(' ');
-  return `<article class="card ucard reveal"><a class="card-img" href="/used-cars/${esc(u.slug)}" tabindex="-1" aria-hidden="true">${img(usedImage(u, bm), title)}</a>${badge}
+  return `<article class="card ucard reveal" data-tilt><a class="card-img" href="/used-cars/${esc(u.slug)}" tabindex="-1" aria-hidden="true">${img(usedImage(u, bm), title)}</a>${badge}
 <button class="heart" type="button" data-save="${esc(u.slug)}" aria-pressed="false" aria-label="${esc(t('save') + ': ' + title)}">${ICON.heart}</button>
 <div class="card-b"><h3><a href="/used-cars/${esc(u.slug)}">${esc(title)}</a></h3><p class="muted">${esc([u.variant, u.transmission].filter(Boolean).join(' · '))}</p>
 <ul class="meta"><li>${esc(u.year)}</li><li>${esc(u.fuel)}</li><li>${esc(Number(u.km || 0).toLocaleString('en-IN'))} ${esc(t('km'))}</li></ul>
@@ -55,8 +63,11 @@ function usedCard(u, t, lang, bm) {
 function breakup(p, t, lang) {
   if (!p) return `<p class="muted">${esc(t('price_updating'))}</p>`;
   if (p.expired) return `<div class="notice"><p><strong>${esc(t('price_updating'))}</strong></p><a class="btn" href="/test-drive">${esc(t('request_quote'))} ${ICON.arrow}</a></div>`;
+  const grp = { ex_showroom: 'a', road_tax: 'b', tcs: 'b', registration: 'b', insurance: 'c', handling: 'd', fastag: 'd', accessories: 'd' }; const seg = { a: 0, b: 0, c: 0, d: 0 }; (p.lines || []).forEach(l => { if (l.kind === 'add') seg[grp[l.key] || 'd'] += l.amount; }); const tot = seg.a + seg.b + seg.c + seg.d || 1;
+  const names = { a: t('ex_showroom'), b: t('seg_tax'), c: t('seg_ins'), d: t('seg_other') };
+  const bar = `<div class="seg" role="img" aria-label="${esc(t('price_breakup'))}">${['a', 'b', 'c', 'd'].map(k => seg[k] ? `<i class="s-${k}" style="flex:${seg[k] / tot}" title="${esc(names[k])}"></i>` : '').join('')}</div><ul class="seg-l">${['a', 'b', 'c', 'd'].map(k => seg[k] ? `<li><i class="s-${k}"></i>${esc(names[k])} <b>${Math.round(seg[k] / tot * 100)}%</b></li>` : '').join('')}</ul>`;
   const rows = (p.lines || []).map(l => `<tr class="${l.kind === 'total' ? 'tot' : ''}"><th scope="row">${esc(L(l, 'label', lang))}</th><td>${l.kind === 'less' ? '− ' : ''}${esc(inr(Math.abs(l.amount)))}</td></tr>`).join('');
-  return `<table class="bk"><caption class="sr">${esc(t('price_breakup'))}</caption><tbody>${rows}</tbody></table>
+  return `${bar}<table class="bk"><caption class="sr">${esc(t('price_breakup'))}</caption><tbody>${rows}</tbody></table>
 <p class="valid">${esc(t('valid_until'))}: <time datetime="${esc(p.valid_until)}">${esc(p.valid_until)}</time></p><p class="muted small">${esc(L(p, 'note', lang) || t('price_note'))}</p>`;
 }
 

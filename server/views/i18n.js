@@ -200,6 +200,43 @@ const S = {
   select: { en: 'Select', hi: 'चुनें' },
   accessibility_gallery: { en: 'Photo', hi: 'फ़ोटो' },
   share: { en: 'Share', hi: 'शेयर' },
+  compare: { en: "Compare", hi: "तुलना करें" },
+  close: { en: "Close", hi: "बंद करें" },
+  seg_tax: { en: "Taxes and fees", hi: "टैक्स और शुल्क" },
+  seg_ins: { en: "Insurance", hi: "बीमा" },
+  seg_other: { en: "Other charges", hi: "अन्य शुल्क" },
+  story_a: { en: "Four steps to", hi: "चार कदम में" },
+  story_b: { en: "your drive", hi: "आपकी ड्राइव" },
+  st1: { en: "Find", hi: "खोजें" },
+  st1b: { en: "Browse four body styles and see the real on-road price for your city before you walk in.", hi: "चार बॉडी स्टाइल देखें और आने से पहले अपने शहर की असली ऑन-रोड कीमत जानें।" },
+  st2: { en: "Compare", hi: "तुलना" },
+  st2b: { en: "Put up to three models side by side: price, specs, variants and EMI.", hi: "तीन मॉडल तक आमने-सामने रखें: कीमत, स्पेक्स, वेरिएंट और EMI।" },
+  st3: { en: "Book", hi: "बुक" },
+  st3b: { en: "Pick a real test-drive slot. If it is shown, it is free.", hi: "असली टेस्ट ड्राइव स्लॉट चुनें। जो दिख रहा है, वह खाली है।" },
+  st4: { en: "Drive", hi: "ड्राइव" },
+  st4b: { en: "Your consultant confirms everything. Then the keys are yours.", hi: "आपके कंसल्टेंट सब कुछ पक्का करेंगे। फिर चाबी आपकी।" },
+  mq1: { en: "Transparent on-road pricing", hi: "पारदर्शी ऑन-रोड कीमत" },
+  mq2: { en: "100-point inspected used cars", hi: "100-पॉइंट जाँचीं पुरानी कारें" },
+  mq3: { en: "Reply within 5 minutes", hi: "5 मिनट में जवाब" },
+  mq4: { en: "Test drive at your doorstep", hi: "घर पर टेस्ट ड्राइव" },
+  mq5: { en: "Easy EMI options", hi: "आसान EMI विकल्प" },
+  mq6: { en: "Genuine service, real slots", hi: "असली सर्विस, असली स्लॉट" },
+  visit_t: { en: "Come and feel it", hi: "आइए, खुद महसूस करें" },
+  visit_b: { en: "Three showrooms, two workshops, one standard of honesty.", hi: "तीन शोरूम, दो वर्कशॉप, ईमानदारी का एक ही पैमाना।" },
+  signin: { en: "Sign in", hi: "साइन इन" },
+  account: { en: "My account", hi: "मेरा खाता" },
+  compare_title: { en: "Compare models", hi: "मॉडल तुलना" },
+  compare_empty: { en: "Choose up to three models from the new cars page.", hi: "नई कारें पेज से तीन मॉडल तक चुनें।" },
+  callback_t: { en: "Request a call back", hi: "कॉल बैक माँगें" },
+  callback_b: { en: "Tell us when to call. A service advisor will ring you back.", hi: "बताएँ कब कॉल करें। सर्विस एडवाइज़र आपको कॉल करेगा।" },
+  callback_btn: { en: "Call me back", hi: "मुझे कॉल करें" },
+  nearest: { en: "Our locations", hi: "हमारे स्थान" },
+  inspection_score: { en: "Inspection score", hi: "जाँच स्कोर" },
+  points_ok: { en: "points ok", hi: "पॉइंट ठीक" },
+  spec_fuel: { en: "Fuel", hi: "ईंधन" },
+  spec_trans: { en: "Gearbox", hi: "गियरबॉक्स" },
+  spec_body: { en: "Body", hi: "बॉडी" },
+  spec_variants: { en: "Variants", hi: "वेरिएंट" },
   grievance: { en: 'Grievance officer', hi: 'शिकायत अधिकारी' }
 };
 
@@ -210,7 +247,7 @@ function make(lang) {
   return t;
 }
 // subset of strings shipped to client JS
-const CLIENT_KEYS = ['loading', 'error_generic', 'retry', 'err_name', 'err_phone', 'err_email', 'err_consent', 'err_required', 'sending', 'submit', 'slot_taken', 'no_slots', 'slot_conflict', 'thanks', 'thanks_lead', 'your_consultant', 'booking_done', 'remaining', 'full', 'select', 'ex_showroom', 'on_road', 'valid_until', 'price_updating', 'request_quote', 'price_note', 'per_month', 'optout_done', 'inspection_pass', 'inspection_attn', 'step', 'continue', 'confirm_booking', 'choose_slot'];
+const CLIENT_KEYS = ['loading', 'error_generic', 'retry', 'err_name', 'err_phone', 'err_email', 'err_consent', 'err_required', 'sending', 'submit', 'slot_taken', 'no_slots', 'slot_conflict', 'thanks', 'thanks_lead', 'your_consultant', 'booking_done', 'remaining', 'full', 'select', 'ex_showroom', 'on_road', 'valid_until', 'price_updating', 'request_quote', 'price_note', 'per_month', 'optout_done', 'inspection_pass', 'inspection_attn', 'step', 'continue', 'confirm_booking', 'choose_slot', 'compare', 'close'];
 function client(lang) {
   const t = make(lang); const o = {};
   CLIENT_KEYS.forEach(k => { o[k] = t(k); });
