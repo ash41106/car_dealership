@@ -5,7 +5,7 @@ Roles: Manager (orchestrates), Researcher, Backend Dev, Frontend Dev, Tester. Ta
 | # | Task | Owner | Status |
 |---|------|-------|--------|
 | 1 | Project setup, contract, run.bat, repo | Manager | done |
-| 2 | Research: ideas + GitHub repos | Researcher | in progress |
+| 2 | Research: ideas + GitHub repos (docs/RESEARCH.md) | Researcher | done |
 | 3 | Backend: DB, seed, services, API, auth, AI, tests | Backend | in progress |
 | 4 | Frontend: design system, SSR pages, staff/admin UI | Frontend | in progress |
 | 5 | Integration + QA round 1 | Tester | pending |
