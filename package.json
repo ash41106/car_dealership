@@ -1,0 +1,13 @@
+{
+  "name": "company-a-motors",
+  "version": "1.0.0",
+  "private": true,
+  "description": "Company A Motors - Brand X dealership website (Lucknow)",
+  "main": "server/server.js",
+  "engines": { "node": ">=22.13" },
+  "scripts": {
+    "start": "node server/server.js",
+    "seed": "node server/seed.js",
+    "test": "node --test tests/api"
+  }
+}
