@@ -1,0 +1,2419 @@
+[
+ {
+  "section": "SEO/pages",
+  "name": "/ 200",
+  "ok": true,
+  "info": 200
+ },
+ {
+  "section": "SEO/pages",
+  "name": "/ has title",
+  "ok": true
+ },
+ {
+  "section": "SEO/pages",
+  "name": "/ has description",
+  "ok": true
+ },
+ {
+  "section": "SEO/pages",
+  "name": "/ canonical",
+  "ok": true
+ },
+ {
+  "section": "SEO/pages",
+  "name": "/ hreflang",
+  "ok": true
+ },
+ {
+  "section": "SEO/pages",
+  "name": "/ og:title",
+  "ok": true
+ },
+ {
+  "section": "SEO/pages",
+  "name": "/ no robots noindex",
+  "ok": true,
+  "info": "noindex found"
+ },
+ {
+  "section": "SEO/pages",
+  "name": "/ JSON-LD present",
+  "ok": true
+ },
+ {
+  "section": "SEO/pages",
+  "name": "/ html lang",
+  "ok": true
+ },
+ {
+  "section": "SEO/pages",
+  "name": "/ viewport",
+  "ok": true
+ },
+ {
+  "section": "SEO/pages",
+  "name": "/ imgs have alt",
+  "ok": true
+ },
+ {
+  "section": "SEO/pages",
+  "name": "/ imgs have width/height",
+  "ok": true
+ },
+ {
+  "section": "SEO/pages",
+  "name": "/ no external scripts",
+  "ok": true
+ },
+ {
+  "section": "SEO/pages",
+  "name": "/new-cars 200",
+  "ok": true,
+  "info": 200
+ },
+ {
+  "section": "SEO/pages",
+  "name": "/new-cars has title",
+  "ok": true
+ },
+ {
+  "section": "SEO/pages",
+  "name": "/new-cars has description",
+  "ok": true
+ },
+ {
+  "section": "SEO/pages",
+  "name": "/new-cars canonical",
+  "ok": true
+ },
+ {
+  "section": "SEO/pages",
+  "name": "/new-cars hreflang",
+  "ok": true
+ },
+ {
+  "section": "SEO/pages",
+  "name": "/new-cars og:title",
+  "ok": true
+ },
+ {
+  "section": "SEO/pages",
+  "name": "/new-cars no robots noindex",
+  "ok": true,
+  "info": "noindex found"
+ },
+ {
+  "section": "SEO/pages",
+  "name": "/new-cars JSON-LD present",
+  "ok": true
+ },
+ {
+  "section": "SEO/pages",
+  "name": "/new-cars html lang",
+  "ok": true
+ },
+ {
+  "section": "SEO/pages",
+  "name": "/new-cars viewport",
+  "ok": true
+ },
+ {
+  "section": "SEO/pages",
+  "name": "/new-cars imgs have alt",
+  "ok": true
+ },
+ {
+  "section": "SEO/pages",
+  "name": "/new-cars imgs have width/height",
+  "ok": true
+ },
+ {
+  "section": "SEO/pages",
+  "name": "/new-cars no external scripts",
+  "ok": true
+ },
+ {
+  "section": "SEO/pages",
+  "name": "/new-cars/model-h 200",
+  "ok": true,
+  "info": 200
+ },
+ {
+  "section": "SEO/pages",
+  "name": "/new-cars/model-h has title",
+  "ok": true
+ },
+ {
+  "section": "SEO/pages",
+  "name": "/new-cars/model-h has description",
+  "ok": true
+ },
+ {
+  "section": "SEO/pages",
+  "name": "/new-cars/model-h canonical",
+  "ok": true
+ },
+ {
+  "section": "SEO/pages",
+  "name": "/new-cars/model-h hreflang",
+  "ok": true
+ },
+ {
+  "section": "SEO/pages",
+  "name": "/new-cars/model-h og:title",
+  "ok": true
+ },
+ {
+  "section": "SEO/pages",
+  "name": "/new-cars/model-h no robots noindex",
+  "ok": true,
+  "info": "noindex found"
+ },
+ {
+  "section": "SEO/pages",
+  "name": "/new-cars/model-h JSON-LD present",
+  "ok": true
+ },
+ {
+  "section": "SEO/pages",
+  "name": "/new-cars/model-h html lang",
+  "ok": true
+ },
+ {
+  "section": "SEO/pages",
+  "name": "/new-cars/model-h viewport",
+  "ok": true
+ },
+ {
+  "section": "SEO/pages",
+  "name": "/new-cars/model-h imgs have alt",
+  "ok": true
+ },
+ {
+  "section": "SEO/pages",
+  "name": "/new-cars/model-h imgs have width/height",
+  "ok": true
+ },
+ {
+  "section": "SEO/pages",
+  "name": "/new-cars/model-h no external scripts",
+  "ok": true
+ },
+ {
+  "section": "SEO/pages",
+  "name": "/new-cars/model-c 200",
+  "ok": true,
+  "info": 200
+ },
+ {
+  "section": "SEO/pages",
+  "name": "/new-cars/model-c has title",
+  "ok": true
+ },
+ {
+  "section": "SEO/pages",
+  "name": "/new-cars/model-c has description",
+  "ok": true
+ },
+ {
+  "section": "SEO/pages",
+  "name": "/new-cars/model-c canonical",
+  "ok": true
+ },
+ {
+  "section": "SEO/pages",
+  "name": "/new-cars/model-c hreflang",
+  "ok": true
+ },
+ {
+  "section": "SEO/pages",
+  "name": "/new-cars/model-c og:title",
+  "ok": true
+ },
+ {
+  "section": "SEO/pages",
+  "name": "/new-cars/model-c no robots noindex",
+  "ok": true,
+  "info": "noindex found"
+ },
+ {
+  "section": "SEO/pages",
+  "name": "/new-cars/model-c JSON-LD present",
+  "ok": true
+ },
+ {
+  "section": "SEO/pages",
+  "name": "/new-cars/model-c html lang",
+  "ok": true
+ },
+ {
+  "section": "SEO/pages",
+  "name": "/new-cars/model-c viewport",
+  "ok": true
+ },
+ {
+  "section": "SEO/pages",
+  "name": "/new-cars/model-c imgs have alt",
+  "ok": true
+ },
+ {
+  "section": "SEO/pages",
+  "name": "/new-cars/model-c imgs have width/height",
+  "ok": true
+ },
+ {
+  "section": "SEO/pages",
+  "name": "/new-cars/model-c no external scripts",
+  "ok": true
+ },
+ {
+  "section": "SEO/pages",
+  "name": "/new-cars/model-s 200",
+  "ok": true,
+  "info": 200
+ },
+ {
+  "section": "SEO/pages",
+  "name": "/new-cars/model-s has title",
+  "ok": true
+ },
+ {
+  "section": "SEO/pages",
+  "name": "/new-cars/model-s has description",
+  "ok": true
+ },
+ {
+  "section": "SEO/pages",
+  "name": "/new-cars/model-s canonical",
+  "ok": true
+ },
+ {
+  "section": "SEO/pages",
+  "name": "/new-cars/model-s hreflang",
+  "ok": true
+ },
+ {
+  "section": "SEO/pages",
+  "name": "/new-cars/model-s og:title",
+  "ok": true
+ },
+ {
+  "section": "SEO/pages",
+  "name": "/new-cars/model-s no robots noindex",
+  "ok": true,
+  "info": "noindex found"
+ },
+ {
+  "section": "SEO/pages",
+  "name": "/new-cars/model-s JSON-LD present",
+  "ok": true
+ },
+ {
+  "section": "SEO/pages",
+  "name": "/new-cars/model-s html lang",
+  "ok": true
+ },
+ {
+  "section": "SEO/pages",
+  "name": "/new-cars/model-s viewport",
+  "ok": true
+ },
+ {
+  "section": "SEO/pages",
+  "name": "/new-cars/model-s imgs have alt",
+  "ok": true
+ },
+ {
+  "section": "SEO/pages",
+  "name": "/new-cars/model-s imgs have width/height",
+  "ok": true
+ },
+ {
+  "section": "SEO/pages",
+  "name": "/new-cars/model-s no external scripts",
+  "ok": true
+ },
+ {
+  "section": "SEO/pages",
+  "name": "/new-cars/model-v 200",
+  "ok": true,
+  "info": 200
+ },
+ {
+  "section": "SEO/pages",
+  "name": "/new-cars/model-v has title",
+  "ok": true
+ },
+ {
+  "section": "SEO/pages",
+  "name": "/new-cars/model-v has description",
+  "ok": true
+ },
+ {
+  "section": "SEO/pages",
+  "name": "/new-cars/model-v canonical",
+  "ok": true
+ },
+ {
+  "section": "SEO/pages",
+  "name": "/new-cars/model-v hreflang",
+  "ok": true
+ },
+ {
+  "section": "SEO/pages",
+  "name": "/new-cars/model-v og:title",
+  "ok": true
+ },
+ {
+  "section": "SEO/pages",
+  "name": "/new-cars/model-v no robots noindex",
+  "ok": true,
+  "info": "noindex found"
+ },
+ {
+  "section": "SEO/pages",
+  "name": "/new-cars/model-v JSON-LD present",
+  "ok": true
+ },
+ {
+  "section": "SEO/pages",
+  "name": "/new-cars/model-v html lang",
+  "ok": true
+ },
+ {
+  "section": "SEO/pages",
+  "name": "/new-cars/model-v viewport",
+  "ok": true
+ },
+ {
+  "section": "SEO/pages",
+  "name": "/new-cars/model-v imgs have alt",
+  "ok": true
+ },
+ {
+  "section": "SEO/pages",
+  "name": "/new-cars/model-v imgs have width/height",
+  "ok": true
+ },
+ {
+  "section": "SEO/pages",
+  "name": "/new-cars/model-v no external scripts",
+  "ok": true
+ },
+ {
+  "section": "SEO/pages",
+  "name": "/used-cars 200",
+  "ok": true,
+  "info": 200
+ },
+ {
+  "section": "SEO/pages",
+  "name": "/used-cars has title",
+  "ok": true
+ },
+ {
+  "section": "SEO/pages",
+  "name": "/used-cars has description",
+  "ok": true
+ },
+ {
+  "section": "SEO/pages",
+  "name": "/used-cars canonical",
+  "ok": true
+ },
+ {
+  "section": "SEO/pages",
+  "name": "/used-cars hreflang",
+  "ok": true
+ },
+ {
+  "section": "SEO/pages",
+  "name": "/used-cars og:title",
+  "ok": true
+ },
+ {
+  "section": "SEO/pages",
+  "name": "/used-cars no robots noindex",
+  "ok": true,
+  "info": "noindex found"
+ },
+ {
+  "section": "SEO/pages",
+  "name": "/used-cars JSON-LD present",
+  "ok": true
+ },
+ {
+  "section": "SEO/pages",
+  "name": "/used-cars html lang",
+  "ok": true
+ },
+ {
+  "section": "SEO/pages",
+  "name": "/used-cars viewport",
+  "ok": true
+ },
+ {
+  "section": "SEO/pages",
+  "name": "/used-cars imgs have alt",
+  "ok": true
+ },
+ {
+  "section": "SEO/pages",
+  "name": "/used-cars imgs have width/height",
+  "ok": true
+ },
+ {
+  "section": "SEO/pages",
+  "name": "/used-cars no external scripts",
+  "ok": true
+ },
+ {
+  "section": "SEO/pages",
+  "name": "/used-cars/uc-1182-model-c-vx-2022 200",
+  "ok": true,
+  "info": 200
+ },
+ {
+  "section": "SEO/pages",
+  "name": "/used-cars/uc-1182-model-c-vx-2022 has title",
+  "ok": true
+ },
+ {
+  "section": "SEO/pages",
+  "name": "/used-cars/uc-1182-model-c-vx-2022 has description",
+  "ok": true
+ },
+ {
+  "section": "SEO/pages",
+  "name": "/used-cars/uc-1182-model-c-vx-2022 canonical",
+  "ok": true
+ },
+ {
+  "section": "SEO/pages",
+  "name": "/used-cars/uc-1182-model-c-vx-2022 hreflang",
+  "ok": true
+ },
+ {
+  "section": "SEO/pages",
+  "name": "/used-cars/uc-1182-model-c-vx-2022 og:title",
+  "ok": true
+ },
+ {
+  "section": "SEO/pages",
+  "name": "/used-cars/uc-1182-model-c-vx-2022 no robots noindex",
+  "ok": true,
+  "info": "noindex found"
+ },
+ {
+  "section": "SEO/pages",
+  "name": "/used-cars/uc-1182-model-c-vx-2022 JSON-LD present",
+  "ok": true
+ },
+ {
+  "section": "SEO/pages",
+  "name": "/used-cars/uc-1182-model-c-vx-2022 html lang",
+  "ok": true
+ },
+ {
+  "section": "SEO/pages",
+  "name": "/used-cars/uc-1182-model-c-vx-2022 viewport",
+  "ok": true
+ },
+ {
+  "section": "SEO/pages",
+  "name": "/used-cars/uc-1182-model-c-vx-2022 imgs have alt",
+  "ok": true
+ },
+ {
+  "section": "SEO/pages",
+  "name": "/used-cars/uc-1182-model-c-vx-2022 imgs have width/height",
+  "ok": true
+ },
+ {
+  "section": "SEO/pages",
+  "name": "/used-cars/uc-1182-model-c-vx-2022 no external scripts",
+  "ok": true
+ },
+ {
+  "section": "SEO/pages",
+  "name": "/used-cars/uc-1190-model-s-lx-2021 200",
+  "ok": true,
+  "info": 200
+ },
+ {
+  "section": "SEO/pages",
+  "name": "/used-cars/uc-1190-model-s-lx-2021 has title",
+  "ok": true
+ },
+ {
+  "section": "SEO/pages",
+  "name": "/used-cars/uc-1190-model-s-lx-2021 has description",
+  "ok": true
+ },
+ {
+  "section": "SEO/pages",
+  "name": "/used-cars/uc-1190-model-s-lx-2021 canonical",
+  "ok": true
+ },
+ {
+  "section": "SEO/pages",
+  "name": "/used-cars/uc-1190-model-s-lx-2021 hreflang",
+  "ok": true
+ },
+ {
+  "section": "SEO/pages",
+  "name": "/used-cars/uc-1190-model-s-lx-2021 og:title",
+  "ok": true
+ },
+ {
+  "section": "SEO/pages",
+  "name": "/used-cars/uc-1190-model-s-lx-2021 no robots noindex",
+  "ok": true,
+  "info": "noindex found"
+ },
+ {
+  "section": "SEO/pages",
+  "name": "/used-cars/uc-1190-model-s-lx-2021 JSON-LD present",
+  "ok": true
+ },
+ {
+  "section": "SEO/pages",
+  "name": "/used-cars/uc-1190-model-s-lx-2021 html lang",
+  "ok": true
+ },
+ {
+  "section": "SEO/pages",
+  "name": "/used-cars/uc-1190-model-s-lx-2021 viewport",
+  "ok": true
+ },
+ {
+  "section": "SEO/pages",
+  "name": "/used-cars/uc-1190-model-s-lx-2021 imgs have alt",
+  "ok": true
+ },
+ {
+  "section": "SEO/pages",
+  "name": "/used-cars/uc-1190-model-s-lx-2021 imgs have width/height",
+  "ok": true
+ },
+ {
+  "section": "SEO/pages",
+  "name": "/used-cars/uc-1190-model-s-lx-2021 no external scripts",
+  "ok": true
+ },
+ {
+  "section": "SEO/pages",
+  "name": "/test-drive 200",
+  "ok": true,
+  "info": 200
+ },
+ {
+  "section": "SEO/pages",
+  "name": "/test-drive has title",
+  "ok": true
+ },
+ {
+  "section": "SEO/pages",
+  "name": "/test-drive has description",
+  "ok": true
+ },
+ {
+  "section": "SEO/pages",
+  "name": "/test-drive canonical",
+  "ok": true
+ },
+ {
+  "section": "SEO/pages",
+  "name": "/test-drive hreflang",
+  "ok": true
+ },
+ {
+  "section": "SEO/pages",
+  "name": "/test-drive og:title",
+  "ok": true
+ },
+ {
+  "section": "SEO/pages",
+  "name": "/test-drive no robots noindex",
+  "ok": true,
+  "info": "noindex found"
+ },
+ {
+  "section": "SEO/pages",
+  "name": "/test-drive JSON-LD present",
+  "ok": true
+ },
+ {
+  "section": "SEO/pages",
+  "name": "/test-drive html lang",
+  "ok": true
+ },
+ {
+  "section": "SEO/pages",
+  "name": "/test-drive viewport",
+  "ok": true
+ },
+ {
+  "section": "SEO/pages",
+  "name": "/test-drive imgs have alt",
+  "ok": true
+ },
+ {
+  "section": "SEO/pages",
+  "name": "/test-drive imgs have width/height",
+  "ok": true
+ },
+ {
+  "section": "SEO/pages",
+  "name": "/test-drive no external scripts",
+  "ok": true
+ },
+ {
+  "section": "SEO/pages",
+  "name": "/service 200",
+  "ok": true,
+  "info": 200
+ },
+ {
+  "section": "SEO/pages",
+  "name": "/service has title",
+  "ok": true
+ },
+ {
+  "section": "SEO/pages",
+  "name": "/service has description",
+  "ok": true
+ },
+ {
+  "section": "SEO/pages",
+  "name": "/service canonical",
+  "ok": true
+ },
+ {
+  "section": "SEO/pages",
+  "name": "/service hreflang",
+  "ok": true
+ },
+ {
+  "section": "SEO/pages",
+  "name": "/service og:title",
+  "ok": true
+ },
+ {
+  "section": "SEO/pages",
+  "name": "/service no robots noindex",
+  "ok": true,
+  "info": "noindex found"
+ },
+ {
+  "section": "SEO/pages",
+  "name": "/service JSON-LD present",
+  "ok": true
+ },
+ {
+  "section": "SEO/pages",
+  "name": "/service html lang",
+  "ok": true
+ },
+ {
+  "section": "SEO/pages",
+  "name": "/service viewport",
+  "ok": true
+ },
+ {
+  "section": "SEO/pages",
+  "name": "/service imgs have alt",
+  "ok": true
+ },
+ {
+  "section": "SEO/pages",
+  "name": "/service imgs have width/height",
+  "ok": true
+ },
+ {
+  "section": "SEO/pages",
+  "name": "/service no external scripts",
+  "ok": true
+ },
+ {
+  "section": "SEO/pages",
+  "name": "/emi 200",
+  "ok": true,
+  "info": 200
+ },
+ {
+  "section": "SEO/pages",
+  "name": "/emi has title",
+  "ok": true
+ },
+ {
+  "section": "SEO/pages",
+  "name": "/emi has description",
+  "ok": true
+ },
+ {
+  "section": "SEO/pages",
+  "name": "/emi canonical",
+  "ok": true
+ },
+ {
+  "section": "SEO/pages",
+  "name": "/emi hreflang",
+  "ok": true
+ },
+ {
+  "section": "SEO/pages",
+  "name": "/emi og:title",
+  "ok": true
+ },
+ {
+  "section": "SEO/pages",
+  "name": "/emi no robots noindex",
+  "ok": true,
+  "info": "noindex found"
+ },
+ {
+  "section": "SEO/pages",
+  "name": "/emi JSON-LD present",
+  "ok": true
+ },
+ {
+  "section": "SEO/pages",
+  "name": "/emi html lang",
+  "ok": true
+ },
+ {
+  "section": "SEO/pages",
+  "name": "/emi viewport",
+  "ok": true
+ },
+ {
+  "section": "SEO/pages",
+  "name": "/emi imgs have alt",
+  "ok": true
+ },
+ {
+  "section": "SEO/pages",
+  "name": "/emi imgs have width/height",
+  "ok": true
+ },
+ {
+  "section": "SEO/pages",
+  "name": "/emi no external scripts",
+  "ok": true
+ },
+ {
+  "section": "SEO/pages",
+  "name": "/trade-in 200",
+  "ok": true,
+  "info": 200
+ },
+ {
+  "section": "SEO/pages",
+  "name": "/trade-in has title",
+  "ok": true
+ },
+ {
+  "section": "SEO/pages",
+  "name": "/trade-in has description",
+  "ok": true
+ },
+ {
+  "section": "SEO/pages",
+  "name": "/trade-in canonical",
+  "ok": true
+ },
+ {
+  "section": "SEO/pages",
+  "name": "/trade-in hreflang",
+  "ok": true
+ },
+ {
+  "section": "SEO/pages",
+  "name": "/trade-in og:title",
+  "ok": true
+ },
+ {
+  "section": "SEO/pages",
+  "name": "/trade-in no robots noindex",
+  "ok": true,
+  "info": "noindex found"
+ },
+ {
+  "section": "SEO/pages",
+  "name": "/trade-in JSON-LD present",
+  "ok": true
+ },
+ {
+  "section": "SEO/pages",
+  "name": "/trade-in html lang",
+  "ok": true
+ },
+ {
+  "section": "SEO/pages",
+  "name": "/trade-in viewport",
+  "ok": true
+ },
+ {
+  "section": "SEO/pages",
+  "name": "/trade-in imgs have alt",
+  "ok": true
+ },
+ {
+  "section": "SEO/pages",
+  "name": "/trade-in imgs have width/height",
+  "ok": true
+ },
+ {
+  "section": "SEO/pages",
+  "name": "/trade-in no external scripts",
+  "ok": true
+ },
+ {
+  "section": "SEO/pages",
+  "name": "/contact 200",
+  "ok": true,
+  "info": 200
+ },
+ {
+  "section": "SEO/pages",
+  "name": "/contact has title",
+  "ok": true
+ },
+ {
+  "section": "SEO/pages",
+  "name": "/contact has description",
+  "ok": true
+ },
+ {
+  "section": "SEO/pages",
+  "name": "/contact canonical",
+  "ok": true
+ },
+ {
+  "section": "SEO/pages",
+  "name": "/contact hreflang",
+  "ok": true
+ },
+ {
+  "section": "SEO/pages",
+  "name": "/contact og:title",
+  "ok": true
+ },
+ {
+  "section": "SEO/pages",
+  "name": "/contact no robots noindex",
+  "ok": true,
+  "info": "noindex found"
+ },
+ {
+  "section": "SEO/pages",
+  "name": "/contact JSON-LD present",
+  "ok": true
+ },
+ {
+  "section": "SEO/pages",
+  "name": "/contact html lang",
+  "ok": true
+ },
+ {
+  "section": "SEO/pages",
+  "name": "/contact viewport",
+  "ok": true
+ },
+ {
+  "section": "SEO/pages",
+  "name": "/contact imgs have alt",
+  "ok": true
+ },
+ {
+  "section": "SEO/pages",
+  "name": "/contact imgs have width/height",
+  "ok": true
+ },
+ {
+  "section": "SEO/pages",
+  "name": "/contact no external scripts",
+  "ok": true
+ },
+ {
+  "section": "SEO/pages",
+  "name": "/privacy 200",
+  "ok": true,
+  "info": 200
+ },
+ {
+  "section": "SEO/pages",
+  "name": "/privacy has title",
+  "ok": true
+ },
+ {
+  "section": "SEO/pages",
+  "name": "/privacy has description",
+  "ok": true
+ },
+ {
+  "section": "SEO/pages",
+  "name": "/privacy canonical",
+  "ok": true
+ },
+ {
+  "section": "SEO/pages",
+  "name": "/privacy hreflang",
+  "ok": true
+ },
+ {
+  "section": "SEO/pages",
+  "name": "/privacy og:title",
+  "ok": true
+ },
+ {
+  "section": "SEO/pages",
+  "name": "/privacy no robots noindex",
+  "ok": true,
+  "info": "noindex found"
+ },
+ {
+  "section": "SEO/pages",
+  "name": "/privacy JSON-LD present",
+  "ok": false
+ },
+ {
+  "section": "SEO/pages",
+  "name": "/privacy html lang",
+  "ok": true
+ },
+ {
+  "section": "SEO/pages",
+  "name": "/privacy viewport",
+  "ok": true
+ },
+ {
+  "section": "SEO/pages",
+  "name": "/privacy imgs have alt",
+  "ok": true
+ },
+ {
+  "section": "SEO/pages",
+  "name": "/privacy imgs have width/height",
+  "ok": true
+ },
+ {
+  "section": "SEO/pages",
+  "name": "/privacy no external scripts",
+  "ok": true
+ },
+ {
+  "section": "SEO/pages",
+  "name": "/opt-out 200",
+  "ok": true,
+  "info": 200
+ },
+ {
+  "section": "SEO/pages",
+  "name": "/opt-out has title",
+  "ok": true
+ },
+ {
+  "section": "SEO/pages",
+  "name": "/opt-out has description",
+  "ok": true
+ },
+ {
+  "section": "SEO/pages",
+  "name": "/opt-out canonical",
+  "ok": true
+ },
+ {
+  "section": "SEO/pages",
+  "name": "/opt-out hreflang",
+  "ok": true
+ },
+ {
+  "section": "SEO/pages",
+  "name": "/opt-out og:title",
+  "ok": true
+ },
+ {
+  "section": "SEO/pages",
+  "name": "/opt-out no robots noindex",
+  "ok": true,
+  "info": "noindex found"
+ },
+ {
+  "section": "SEO/pages",
+  "name": "/opt-out JSON-LD present",
+  "ok": false
+ },
+ {
+  "section": "SEO/pages",
+  "name": "/opt-out html lang",
+  "ok": true
+ },
+ {
+  "section": "SEO/pages",
+  "name": "/opt-out viewport",
+  "ok": true
+ },
+ {
+  "section": "SEO/pages",
+  "name": "/opt-out imgs have alt",
+  "ok": true
+ },
+ {
+  "section": "SEO/pages",
+  "name": "/opt-out imgs have width/height",
+  "ok": true
+ },
+ {
+  "section": "SEO/pages",
+  "name": "/opt-out no external scripts",
+  "ok": true
+ },
+ {
+  "section": "SEO/pages",
+  "name": "used page JSON-LD Vehicle/Product+Offer",
+  "ok": true
+ },
+ {
+  "section": "SEO/pages",
+  "name": "home JSON-LD AutoDealer",
+  "ok": true
+ },
+ {
+  "section": "SEO/pages",
+  "name": "robots.txt",
+  "ok": true
+ },
+ {
+  "section": "SEO/pages",
+  "name": "sitemap has used+new",
+  "ok": true
+ },
+ {
+  "section": "SEO/pages",
+  "name": "every sitemap URL 200",
+  "ok": true,
+  "info": ""
+ },
+ {
+  "section": "SEO/pages",
+  "name": "sitemap excludes sold car UC-1203",
+  "ok": true
+ },
+ {
+  "section": "SEO/pages",
+  "name": "404 page is HTML + 404",
+  "ok": true
+ },
+ {
+  "section": "SEO/pages",
+  "name": "unknown used 404",
+  "ok": true
+ },
+ {
+  "section": "SEO/pages",
+  "name": "unknown model 404",
+  "ok": true
+ },
+ {
+  "section": "SEO/pages",
+  "name": "malformed URL not 500",
+  "ok": true,
+  "info": 404
+ },
+ {
+  "section": "SEO/pages",
+  "name": "weird query not 500",
+  "ok": true,
+  "info": 200
+ },
+ {
+  "section": "SEO/pages",
+  "name": "weird query no raw script",
+  "ok": true
+ },
+ {
+  "section": "SEO/pages",
+  "name": "/hi not exposed",
+  "ok": true
+ },
+ {
+  "section": "Performance",
+  "name": "/ gzip served",
+  "ok": true
+ },
+ {
+  "section": "Performance",
+  "name": "/ html gz < 60KB",
+  "ok": true,
+  "info": 30918
+ },
+ {
+  "section": "Performance",
+  "name": "/ TTFB<500ms local",
+  "ok": true,
+  "info": 6
+ },
+ {
+  "section": "Performance",
+  "name": "/new-cars/model-h gzip served",
+  "ok": true
+ },
+ {
+  "section": "Performance",
+  "name": "/new-cars/model-h html gz < 60KB",
+  "ok": true,
+  "info": 18947
+ },
+ {
+  "section": "Performance",
+  "name": "/new-cars/model-h TTFB<500ms local",
+  "ok": true,
+  "info": 6
+ },
+ {
+  "section": "Performance",
+  "name": "/used-cars gzip served",
+  "ok": true
+ },
+ {
+  "section": "Performance",
+  "name": "/used-cars html gz < 60KB",
+  "ok": true,
+  "info": 24285
+ },
+ {
+  "section": "Performance",
+  "name": "/used-cars TTFB<500ms local",
+  "ok": true,
+  "info": 8
+ },
+ {
+  "section": "Performance",
+  "name": "/css/app.css ok & cacheable",
+  "ok": true,
+  "info": "200 public, max-age=86400"
+ },
+ {
+  "section": "Performance",
+  "name": "/css/app.css gz<40KB",
+  "ok": true,
+  "info": 23712
+ },
+ {
+  "section": "Performance",
+  "name": "/js/app.js ok & cacheable",
+  "ok": true,
+  "info": "200 public, max-age=86400"
+ },
+ {
+  "section": "Performance",
+  "name": "/js/app.js gz<40KB",
+  "ok": true,
+  "info": 6190
+ },
+ {
+  "section": "Performance",
+  "name": "/js/leads.js ok & cacheable",
+  "ok": true,
+  "info": "200 public, max-age=86400"
+ },
+ {
+  "section": "Performance",
+  "name": "/js/leads.js gz<40KB",
+  "ok": true,
+  "info": 11478
+ },
+ {
+  "section": "Performance",
+  "name": "security headers",
+  "ok": true,
+  "info": "cache-control,connection,content-encoding,content-length,content-security-policy,content-type,cross-origin-opener-policy,date,etag,keep-alive,permissions-policy,referrer-policy,vary,x-content-type-options,x-frame-options"
+ },
+ {
+  "section": "On-road",
+  "name": "admin login",
+  "ok": true,
+  "info": 200
+ },
+ {
+  "section": "On-road",
+  "name": "NEW-H-02 exists",
+  "ok": true
+ },
+ {
+  "section": "On-road",
+  "name": "NEW-H-02 ex-showroom 1245000 automatic petrol",
+  "ok": true,
+  "info": "{\"id\":2,\"model_id\":1,\"code\":\"NEW-H-02\",\"name\":\"ZX Automatic\",\"fuel\":\"Petrol\",\"transmission\":\"Automatic\",\"ex_showroom\":1245000,\"features_en\":[\"6 airbags\",\"Sunroof\",\"360 camera\",\"Wireless charger\",\"Cruise control\"],\"features_hi\":[\"6 एयरबैग\",\"सनरूफ\",\"360 कैमरा\",\"वायरलेस चार्जर\",\"क्रूज़ कंट्रोल\"],\"active\":1}"
+ },
+ {
+  "section": "On-road",
+  "name": "on-road math matches rules for all city x variant",
+  "ok": true,
+  "info": ""
+ },
+ {
+  "section": "On-road",
+  "name": "on-road has valid_until + note",
+  "ok": true
+ },
+ {
+  "section": "On-road",
+  "name": "accessories toggle changes total or line",
+  "ok": true,
+  "info": "1430645 vs 1412145"
+ },
+ {
+  "section": "On-road",
+  "name": "unknown city handled (4xx)",
+  "ok": true,
+  "info": 404
+ },
+ {
+  "section": "On-road",
+  "name": "unknown variant handled (4xx)",
+  "ok": true,
+  "info": 404
+ },
+ {
+  "section": "On-road",
+  "name": "sqli onroad no 500",
+  "ok": true,
+  "info": 404
+ },
+ {
+  "section": "On-road",
+  "name": "model page shows on-road SSR (Lucknow)",
+  "ok": true
+ },
+ {
+  "section": "On-road",
+  "name": "/ui/onroad works",
+  "ok": true,
+  "info": 200
+ },
+ {
+  "section": "On-road",
+  "name": "admin PUT price rule",
+  "ok": true,
+  "info": "200{\"id\":1,\"city_id\":1,\"model_id\":null,\"road_tax_pct\":8,\"road_tax_pct_high\":10,\"road_tax_threshold\":100"
+ },
+ {
+  "section": "On-road",
+  "name": "price rule edit changes on-road by +10000",
+  "ok": true,
+  "info": 10000
+ },
+ {
+  "section": "On-road",
+  "name": "rule edit reflected in HTML helper",
+  "ok": true,
+  "info": "₹10,95,935"
+ },
+ {
+  "section": "On-road",
+  "name": "expired rule -> expired:true",
+  "ok": true,
+  "info": "{\"variant\":{\"id\":1,\"name\":\"LX\",\"model_name\":\"Model H\"},\"city\":{\"id\":1,\"slug\":\"lucknow\",\"name_en\":\"Lu"
+ },
+ {
+  "section": "On-road",
+  "name": "expired page shows \"being updated\" fallback",
+  "ok": true
+ },
+ {
+  "section": "On-road",
+  "name": "expired ui helper shows fallback",
+  "ok": true,
+  "info": "<div class=\"notice\"><p><strong>Price being updated. Please request a quote.</str"
+ },
+ {
+  "section": "On-road",
+  "name": "rule restored",
+  "ok": true
+ },
+ {
+  "section": "Used cars / masking",
+  "name": "UC-1182 values",
+  "ok": true,
+  "info": "{\"id\":4,\"stock_id\":\"UC-1182\",\"slug\":\"uc-1182-model-c-vx-2022\",\"model\":\"Model C\",\"variant\":\"VX\",\"title\":\"2022 Model C VX\",\"year\":2022,\"km\":41200,\"owners\":1,\"fuel\":\"Diesel\",\"transmission\":\"Manual\",\"colo"
+ },
+ {
+  "section": "Used cars / masking",
+  "name": "UC-1190 values",
+  "ok": true,
+  "info": "{\"id\":8,\"stock_id\":\"UC-1190\",\"slug\":\"uc-1190-model-s-lx-2021\",\"model\":\"Model S\",\"variant\":\"LX\",\"title\":\"2021 Model S LX\",\"year\":2021,\"km\":58600,\"owners\":1,\"fuel\":\"Petrol\",\"transmission\":\"Manual\",\"colo"
+ },
+ {
+  "section": "Used cars / masking",
+  "name": "admin API has full reg numbers (for leak search)",
+  "ok": true,
+  "info": "{\"id\":15,\"stock_id\":\"UC-1203\",\"slug\":\"uc-1203-model-s-zx-2018\",\"model\":\"Model S\",\"variant\":\"ZX\",\"year\":2018,\"km\":99500,\"owners\":2,\"fuel\":\"Diesel\",\"transmission\":\"Automatic\",\"color\":\"Black\",\"price\":745"
+ },
+ {
+  "section": "Used cars / masking",
+  "name": "full registration never appears on public surfaces",
+  "ok": true,
+  "info": ""
+ },
+ {
+  "section": "Used cars / masking",
+  "name": "masked middle chars absent",
+  "ok": true,
+  "info": ""
+ },
+ {
+  "section": "Used cars / masking",
+  "name": "masked format shown",
+  "ok": true
+ },
+ {
+  "section": "Used cars / masking",
+  "name": "JSON-LD has no raw reg",
+  "ok": true
+ },
+ {
+  "section": "Used cars / masking",
+  "name": "consultant lead list has no full regs",
+  "ok": true
+ },
+ {
+  "section": "Used cars / masking",
+  "name": "anon blocked from AI suggestion",
+  "ok": true,
+  "info": 401
+ },
+ {
+  "section": "Used cars / masking",
+  "name": "consultant blocked from AI suggestion",
+  "ok": true,
+  "info": 403
+ },
+ {
+  "section": "Used cars / masking",
+  "name": "used_manager sees suggestion",
+  "ok": true,
+  "info": "200{\"low\":555000,\"mid\":575000,\"high\":630000,\"comps\":6,\"basis\":\"same model, year ±1, km within ±15,000\","
+ },
+ {
+  "section": "Used cars / masking",
+  "name": "admin sees suggestion",
+  "ok": true,
+  "info": 200
+ },
+ {
+  "section": "Used cars / masking",
+  "name": "public used JSON has no AI fields",
+  "ok": true
+ },
+ {
+  "section": "Used cars / masking",
+  "name": "consultant blocked from admin used list",
+  "ok": true,
+  "info": 403
+ },
+ {
+  "section": "Used cars / masking",
+  "name": "public list excludes/handles sold",
+  "ok": true,
+  "info": 14
+ },
+ {
+  "section": "Used cars / masking",
+  "name": "filters work",
+  "ok": true,
+  "info": 3
+ },
+ {
+  "section": "Used cars / masking",
+  "name": "sqli used filters no 500",
+  "ok": true,
+  "info": 200
+ },
+ {
+  "section": "Used cars / masking",
+  "name": "used table still intact after sqli",
+  "ok": true
+ },
+ {
+  "section": "Auth / RBAC / CSRF",
+  "name": "anon blocked /api/staff/leads",
+  "ok": true,
+  "info": 401
+ },
+ {
+  "section": "Auth / RBAC / CSRF",
+  "name": "anon blocked /api/staff/leads/stats",
+  "ok": true,
+  "info": 401
+ },
+ {
+  "section": "Auth / RBAC / CSRF",
+  "name": "anon blocked /api/staff/consultants",
+  "ok": true,
+  "info": 401
+ },
+ {
+  "section": "Auth / RBAC / CSRF",
+  "name": "anon blocked /api/staff/bookings",
+  "ok": true,
+  "info": 401
+ },
+ {
+  "section": "Auth / RBAC / CSRF",
+  "name": "anon blocked /api/admin/models",
+  "ok": true,
+  "info": 401
+ },
+ {
+  "section": "Auth / RBAC / CSRF",
+  "name": "anon blocked /api/admin/users",
+  "ok": true,
+  "info": 401
+ },
+ {
+  "section": "Auth / RBAC / CSRF",
+  "name": "anon blocked /api/admin/price-rules",
+  "ok": true,
+  "info": 401
+ },
+ {
+  "section": "Auth / RBAC / CSRF",
+  "name": "anon blocked /api/admin/export/dms.csv",
+  "ok": true,
+  "info": 401
+ },
+ {
+  "section": "Auth / RBAC / CSRF",
+  "name": "anon blocked /api/admin/audit",
+  "ok": true,
+  "info": 401
+ },
+ {
+  "section": "Auth / RBAC / CSRF",
+  "name": "anon blocked /api/admin/dashboard",
+  "ok": true,
+  "info": 401
+ },
+ {
+  "section": "Auth / RBAC / CSRF",
+  "name": "anon blocked /api/me",
+  "ok": true,
+  "info": 401
+ },
+ {
+  "section": "Auth / RBAC / CSRF",
+  "name": "anon blocked /api/admin/settings",
+  "ok": true,
+  "info": 401
+ },
+ {
+  "section": "Auth / RBAC / CSRF",
+  "name": "consultant blocked /api/admin/users",
+  "ok": true,
+  "info": 403
+ },
+ {
+  "section": "Auth / RBAC / CSRF",
+  "name": "consultant blocked /api/admin/price-rules",
+  "ok": true,
+  "info": 403
+ },
+ {
+  "section": "Auth / RBAC / CSRF",
+  "name": "consultant blocked /api/admin/models",
+  "ok": true,
+  "info": 403
+ },
+ {
+  "section": "Auth / RBAC / CSRF",
+  "name": "consultant blocked /api/admin/offers",
+  "ok": true,
+  "info": 403
+ },
+ {
+  "section": "Auth / RBAC / CSRF",
+  "name": "consultant blocked /api/admin/showrooms",
+  "ok": true,
+  "info": 403
+ },
+ {
+  "section": "Auth / RBAC / CSRF",
+  "name": "consultant blocked /api/admin/export/dms.csv",
+  "ok": true,
+  "info": 403
+ },
+ {
+  "section": "Auth / RBAC / CSRF",
+  "name": "consultant blocked /api/admin/dashboard",
+  "ok": true,
+  "info": 403
+ },
+ {
+  "section": "Auth / RBAC / CSRF",
+  "name": "consultant blocked /api/admin/audit",
+  "ok": true,
+  "info": 403
+ },
+ {
+  "section": "Auth / RBAC / CSRF",
+  "name": "consultant blocked /api/admin/settings",
+  "ok": true,
+  "info": 403
+ },
+ {
+  "section": "Auth / RBAC / CSRF",
+  "name": "service advisor cannot read leads",
+  "ok": true
+ },
+ {
+  "section": "Auth / RBAC / CSRF",
+  "name": "service advisor can read bookings",
+  "ok": true
+ },
+ {
+  "section": "Auth / RBAC / CSRF",
+  "name": "used_manager cannot edit price rules",
+  "ok": true
+ },
+ {
+  "section": "Auth / RBAC / CSRF",
+  "name": "consultant cannot create user",
+  "ok": true
+ },
+ {
+  "section": "Auth / RBAC / CSRF",
+  "name": "consultant cannot PUT price rule",
+  "ok": true
+ },
+ {
+  "section": "Auth / RBAC / CSRF",
+  "name": "CSRF: text/plain POST rejected",
+  "ok": true,
+  "info": 403
+ },
+ {
+  "section": "Auth / RBAC / CSRF",
+  "name": "CSRF: urlencoded POST without header rejected",
+  "ok": true,
+  "info": 403
+ },
+ {
+  "section": "Auth / RBAC / CSRF",
+  "name": "bad login 401",
+  "ok": true,
+  "info": 401
+ },
+ {
+  "section": "Auth / RBAC / CSRF",
+  "name": "sqli login rejected",
+  "ok": true,
+  "info": 401
+ },
+ {
+  "section": "Auth / RBAC / CSRF",
+  "name": "object login payload not 500",
+  "ok": true,
+  "info": 401
+ },
+ {
+  "section": "Auth / RBAC / CSRF",
+  "name": "session cookie HttpOnly+SameSite",
+  "ok": true,
+  "info": "sid=eyJ1IjoxLCJlIjoxNzkzNzQ2NzQ0MzI4fQ.79DT6N30wwYVWfz74lBIwyA0Y7jpoImLvfr7b5o62Xs; Path=/; SameSite=Lax; HttpOnly; Max-Age=28800"
+ },
+ {
+  "section": "Auth / RBAC / CSRF",
+  "name": "forged cookie rejected",
+  "ok": true
+ },
+ {
+  "section": "Auth / RBAC / CSRF",
+  "name": "staff pages redirect anon",
+  "ok": true
+ },
+ {
+  "section": "Auth / RBAC / CSRF",
+  "name": "consultant HTML /admin/prices denied",
+  "ok": true,
+  "info": 302
+ },
+ {
+  "section": "Auth / RBAC / CSRF",
+  "name": "consultant HTML /admin/users denied",
+  "ok": true,
+  "info": 302
+ },
+ {
+  "section": "Auth / RBAC / CSRF",
+  "name": "logout invalidates",
+  "ok": true
+ },
+ {
+  "section": "Auth / RBAC / CSRF",
+  "name": "login brute-force lockout (429)",
+  "ok": true
+ },
+ {
+  "section": "Auth / RBAC / CSRF",
+  "name": "consultant lead scope limited",
+  "ok": true,
+  "info": "me.showroom=1"
+ },
+ {
+  "section": "Auth / RBAC / CSRF",
+  "name": "consultant cannot open other showroom lead",
+  "ok": true,
+  "info": 3
+ },
+ {
+  "section": "Auth / RBAC / CSRF",
+  "name": "consultants list has no password hashes",
+  "ok": true
+ },
+ {
+  "section": "Auth / RBAC / CSRF",
+  "name": "admin users list has no password hashes",
+  "ok": true
+ },
+ {
+  "section": "Leads / consent / assignment",
+  "name": "lead without consent rejected 422",
+  "ok": true,
+  "info": 422
+ },
+ {
+  "section": "Leads / consent / assignment",
+  "name": "lead missing consent rejected",
+  "ok": true,
+  "info": 422
+ },
+ {
+  "section": "Leads / consent / assignment",
+  "name": "consent \"false\" string rejected",
+  "ok": true,
+  "info": 422
+ },
+ {
+  "section": "Leads / consent / assignment",
+  "name": "bad phone rejected",
+  "ok": true
+ },
+ {
+  "section": "Leads / consent / assignment",
+  "name": "phone starting 5 rejected",
+  "ok": true
+ },
+ {
+  "section": "Leads / consent / assignment",
+  "name": "+91 phone accepted & normalised",
+  "ok": true,
+  "info": "201{\"lead\":{\"id\":61,\"source\":\"website\",\"type\":\"enquiry\",\"status\":\"new\",\"created_at\":\"2026-11-03T14:59:04.688Z\",\"due_at\":\"20"
+ },
+ {
+  "section": "Leads / consent / assignment",
+  "name": "short name rejected",
+  "ok": true
+ },
+ {
+  "section": "Leads / consent / assignment",
+  "name": "bad email rejected",
+  "ok": true
+ },
+ {
+  "section": "Leads / consent / assignment",
+  "name": "xss lead accepted (stored raw)",
+  "ok": true,
+  "info": 201
+ },
+ {
+  "section": "Leads / consent / assignment",
+  "name": "lead created 201 with due_at 5 min",
+  "ok": true,
+  "info": "{\"lead\":{\"id\":63,\"source\":\"website\",\"type\":\"enquiry\",\"status\":\"new\",\"created_at\":\"2026-11-03T14:59:04.694Z\",\"due_at\":\"2026-11-03T15:04:04.694Z\"},\"assignee\":{\"name\":\"Neha Singh\",\"phone\":\"9810000005\"}}"
+ },
+ {
+  "section": "Leads / consent / assignment",
+  "name": "assignee present",
+  "ok": true
+ },
+ {
+  "section": "Leads / consent / assignment",
+  "name": "assignee belongs to showroom 2",
+  "ok": true,
+  "info": "{\"id\":5,\"name\":\"Neha Singh\",\"role\":\"consultant\",\"showroom_id\":2,\"phone\":\"9810000005\",\"showroom_name\":\"Company A Motors - Aliganj\",\"open_leads\":11}"
+ },
+ {
+  "section": "Leads / consent / assignment",
+  "name": "assignment spreads across showroom consultants",
+  "ok": true,
+  "info": "INFO {\"Priya Sharma\":8}"
+ },
+ {
+  "section": "Leads / consent / assignment",
+  "name": "lead without showroom still assigned",
+  "ok": true,
+  "info": "{\"lead\":{\"id\":72,\"source\":\"website\",\"type\":\"enquiry\",\"status\":\"new\",\"created_at\":\"2026-11-03T14:59:04.712Z\",\"due_at\":\"2026-11-03T15:04:04.712Z\"},\"assi"
+ },
+ {
+  "section": "Leads / consent / assignment",
+  "name": "lead detail has events/messages/ai",
+  "ok": true,
+  "info": "lead,events,messages,ai"
+ },
+ {
+  "section": "Leads / consent / assignment",
+  "name": "ack message queued",
+  "ok": true,
+  "info": 1
+ },
+ {
+  "section": "Leads / consent / assignment",
+  "name": "SLA status new (not breached)",
+  "ok": true,
+  "info": "{\"due_at\":\"2026-11-03T15:04:04.694Z\",\"responded\":false,\"breached\":false,\"remaining_sec\":300,\"response_sec\":null}"
+ },
+ {
+  "section": "Leads / consent / assignment",
+  "name": "breached filter works",
+  "ok": true
+ },
+ {
+  "section": "Leads / consent / assignment",
+  "name": "stats shape",
+  "ok": true,
+  "info": "total,by_status,responded,pct_within_5min,breached,avg_response_min,per_consultant"
+ },
+ {
+  "section": "Leads / consent / assignment",
+  "name": "PATCH status contacted",
+  "ok": true,
+  "info": "200{\"id\":63,\"source\":\"website\",\"type\":\"enquiry\",\"name\":\"QA Tester\",\"phone\":\"9248948501\",\"email\":null,\"c"
+ },
+ {
+  "section": "Leads / consent / assignment",
+  "name": "first_response_at set after status change",
+  "ok": true,
+  "info": ""
+ },
+ {
+  "section": "Leads / consent / assignment",
+  "name": "invalid status rejected",
+  "ok": true
+ },
+ {
+  "section": "Leads / consent / assignment",
+  "name": "reassign OK",
+  "ok": true,
+  "info": "200{\"id\":63,\"source\":\"website\",\"type\":\"enquiry\",\"name\":\"QA Tester\",\"phone\":\"9248948501\",\"email\":null,\"c"
+ },
+ {
+  "section": "Leads / consent / assignment",
+  "name": "reply with discount rejected",
+  "ok": true,
+  "info": 422
+ },
+ {
+  "section": "Leads / consent / assignment",
+  "name": "reply without confirmed_edit rejected",
+  "ok": true,
+  "info": 422
+ },
+ {
+  "section": "Leads / consent / assignment",
+  "name": "clean reply sent",
+  "ok": true,
+  "info": "200{\"message\":{\"id\":13,\"status\":\"sent\"},\"blocked\":false}"
+ },
+ {
+  "section": "Leads / consent / assignment",
+  "name": "AI draft strips discount language",
+  "ok": true,
+  "info": "\"I would be glad to help you with details and arrange a test drive. Could you tell me a convenient time today or tomorrow to speak?\""
+ },
+ {
+  "section": "Leads / consent / assignment",
+  "name": "opt-out ok",
+  "ok": true,
+  "info": "201{\"updated\":1}"
+ },
+ {
+  "section": "Leads / consent / assignment",
+  "name": "lead flagged opted out",
+  "ok": true
+ },
+ {
+  "section": "Leads / consent / assignment",
+  "name": "reply to opted-out blocked/not sent",
+  "ok": true,
+  "info": "200{\"message\":{\"id\":15,\"status\":\"blocked_optout\"},\"blocked\":true}"
+ },
+ {
+  "section": "Leads / consent / assignment",
+  "name": "new lead of opted-out phone: no ack message sent",
+  "ok": true,
+  "info": "[{\"id\":16,\"channel\":\"whatsapp\",\"template\":\"ack_lead\",\"body\":\"Hi QA, thank you for contacting Company A Motors. Priya Sharma will call you within 5 minutes. Reply STOP to opt out.\",\"direction\":\"out\",\"status\":\"blocked_optout\",\"created_at\":\"2026-11-03T14:59:04.764Z\"}]"
+ },
+ {
+  "section": "Leads / consent / assignment",
+  "name": "stored xss only returned as JSON data",
+  "ok": true
+ },
+ {
+  "section": "Test drive / service capacity",
+  "name": "slots list",
+  "ok": true,
+  "info": "[{\"time\":\"10:00\",\"available\":true,\"demoCarId\":1},{\"time\":\"11:00\",\"available\":true,\"demoCarId\":1},{\"t"
+ },
+ {
+  "section": "Test drive / service capacity",
+  "name": "test drive booked",
+  "ok": true,
+  "info": "201{\"booking\":{\"id\":9,\"ref\":\"TD-00009\",\"type\":\"test_drive\",\"date\":\"2026-11-06\",\"time\":\"10:00\",\"status\":\"booked\",\"showroom\":{\"id\":1,\"name_en\":\"Company A M"
+ },
+ {
+  "section": "Test drive / service capacity",
+  "name": "double-booking => 409 once demo cars exhausted",
+  "ok": true,
+  "info": "booked 2 demo cars=2"
+ },
+ {
+  "section": "Test drive / service capacity",
+  "name": "slot now unavailable",
+  "ok": true
+ },
+ {
+  "section": "Test drive / service capacity",
+  "name": "concurrent booking cannot exceed demo cars",
+  "ok": true,
+  "info": "ok=2 cars=2"
+ },
+ {
+  "section": "Test drive / service capacity",
+  "name": "past date rejected",
+  "ok": true,
+  "info": 422
+ },
+ {
+  "section": "Test drive / service capacity",
+  "name": "test drive requires consent",
+  "ok": true,
+  "info": 422
+ },
+ {
+  "section": "Test drive / service capacity",
+  "name": "service slots with remaining",
+  "ok": true,
+  "info": "{\"time\":\"09:00\",\"capacity\":6,\"remaining\":6}"
+ },
+ {
+  "section": "Test drive / service capacity",
+  "name": "service bay capacity enforced (409 after capacity)",
+  "ok": true,
+  "info": "n=6 cap=6"
+ },
+ {
+  "section": "Test drive / service capacity",
+  "name": "remaining=0 after full",
+  "ok": true,
+  "info": 0
+ },
+ {
+  "section": "CSV import",
+  "name": "import dryRun ok",
+  "ok": true,
+  "info": "200{\"created\":2,\"duplicates\":1,\"errors\":[{\"row\":5,\"message\":\"Invalid phone number\"}],\"preview\":[{\"row\":2,\"name\":\"Sharma, Rajesh\",\"phone\":\"9876511111\",\"model\":\"Model H\",\"status\":\"ok\"},{\"row\":3,\"name\":\"<sc"
+ },
+ {
+  "section": "CSV import",
+  "name": "dry run creates nothing",
+  "ok": true,
+  "info": "{\"created\":2,\"duplicates\":1,\"errors\":[{\"row\":5,\"message\":\"Invalid phone number\"}],\"preview\":[{\"row\":2,\"name\":\"Sharma, Rajesh\",\"phone\":\"9876511111\",\"model\":\"Model H\",\"status\":\"ok\"},{\"row\":3,\"name\":\"<script>alert(1)</script>\",\"phone\":\"9876522222\",\"model\":\"Model S\",\"status\":\"ok\"},{\"row\":4,\"name\":\"Dup O"
+ },
+ {
+  "section": "CSV import",
+  "name": "import real ok",
+  "ok": true,
+  "info": "200{\"created\":2,\"duplicates\":1,\"errors\":[{\"row\":5,\"message\":\"Invalid phone number\"}],\"preview\":[{\"row\":2,\"name\":\"Sharma, Rajesh\",\"phone\":\"9876511111\",\"model\":\"Model H\",\"status\":\"ok\",\"lead_id\":79,\"assignee\":\"Priya Sharma\"},{\"row\":3,\"name\":\"<script>alert(1)</script>\",\"phone\":\"9876522222\",\"model\":\"Model S"
+ },
+ {
+  "section": "CSV import",
+  "name": "import mapped messy headers (>=2 created)",
+  "ok": true,
+  "info": "{\"created\":2,\"duplicates\":1,\"errors\":[{\"row\":5,\"message\":\"Invalid phone number\"}],\"preview\":[{\"row\":2,\"name\":\"Sharma, Rajesh\",\"phone\":\"9876511111\",\"model\":\"Model H\",\"status\":\"ok\",\"lead_id\":79,\"assignee\":\"Priya Sharma\"},{\"row\":3,\"name\":\"<script>alert(1)</script>\",\"phone\":\"9876522222\",\"model\":\"Model S"
+ },
+ {
+  "section": "CSV import",
+  "name": "import flags dup + bad phone",
+  "ok": true,
+  "info": "{\"created\":2,\"duplicates\":1,\"errors\":[{\"row\":5,\"message\":\"Invalid phone number\"}],\"preview\":[{\"row\":2,\"name\":\"Sharma, Rajesh\",\"phone\":\"9876511111\",\"model\":\"Model H\",\"status\":\"ok\",\"lead_id\":79,\"assignee\":\"Priya Sharma\"},{\"row\":3,\"name\":\"<script>alert(1)</script>\",\"phone\":\"9876522222\",\"model\":\"Model S"
+ },
+ {
+  "section": "CSV import",
+  "name": "re-import yields 0 new (dedupe)",
+  "ok": true,
+  "info": "{\"created\":0,\"duplicates\":3,\"errors\":[{\"row\":5,\"message\":\"Invalid phone number\"}],\"preview\":[{\"row\":2,\"name\":\"Sharma, Rajesh\",\"phone\":\"9876511111\",\"model\":\"Model H\",\"status\":\"duplicate\"},{\"row\":3,\"nam"
+ },
+ {
+  "section": "CSV import",
+  "name": "quoted comma name preserved",
+  "ok": true,
+  "info": "[\"Sharma, Rajesh\"]"
+ },
+ {
+  "section": "CSV import",
+  "name": "newline in quoted field preserved",
+  "ok": true,
+  "info": "Wants \"best\" deal\nsecond line"
+ },
+ {
+  "section": "CSV import",
+  "name": "imported phone normalised to 10 digits",
+  "ok": true,
+  "info": "9876511111"
+ },
+ {
+  "section": "CSV import",
+  "name": "import junk not 500",
+  "ok": true
+ },
+ {
+  "section": "CSV import",
+  "name": "empty csv 4xx",
+  "ok": true,
+  "info": 400
+ },
+ {
+  "section": "CSV import",
+  "name": "bad source not 500",
+  "ok": true,
+  "info": 422
+ },
+ {
+  "section": "CSV import",
+  "name": "anon import blocked",
+  "ok": true
+ },
+ {
+  "section": "Output escaping (XSS)",
+  "name": "no reflected raw script: /used-cars?model=%3Cscript%3Ealert(1)%3C/script%3E",
+  "ok": true,
+  "info": 200
+ },
+ {
+  "section": "Output escaping (XSS)",
+  "name": "no reflected raw script: /test-drive?model=%3Cscript%3Ealert(1)%3C/script%3E",
+  "ok": true,
+  "info": 200
+ },
+ {
+  "section": "Output escaping (XSS)",
+  "name": "no reflected raw script: /contact?x=%3Cscript%3Ealert(1)%3C/script%3E",
+  "ok": true,
+  "info": 200
+ },
+ {
+  "section": "Output escaping (XSS)",
+  "name": "no reflected raw script: /opt-out?err=%3Cscript%3Ealert(1)%3C/script%3E",
+  "ok": true,
+  "info": 200
+ },
+ {
+  "section": "Output escaping (XSS)",
+  "name": "no reflected raw script: /test-drive?err=%3Cimg%20src=x%20onerror=alert(1)%3E&ok=1",
+  "ok": true,
+  "info": 200
+ },
+ {
+  "section": "Output escaping (XSS)",
+  "name": "no reflected raw script: /new-cars/model-h?city=%3Cscript%3E",
+  "ok": true,
+  "info": 200
+ },
+ {
+  "section": "Output escaping (XSS)",
+  "name": "no reflected raw script: /emi?price=%22%3E%3Cscript%3Ealert(1)%3C/script%3E",
+  "ok": true,
+  "info": 200
+ },
+ {
+  "section": "Output escaping (XSS)",
+  "name": "no reflected raw script: /trade-in?err=%3Cscript%3Ealert(1)%3C/script%3E",
+  "ok": true,
+  "info": 200
+ },
+ {
+  "section": "Output escaping (XSS)",
+  "name": "malicious lang cookie not reflected",
+  "ok": true
+ },
+ {
+  "section": "Output escaping (XSS)",
+  "name": "plain form POST fallback no 500",
+  "ok": true,
+  "info": 200
+ },
+ {
+  "section": "Output escaping (XSS)",
+  "name": "open redirect via _next blocked",
+  "ok": true,
+  "info": null
+ },
+ {
+  "section": "Output escaping (XSS)",
+  "name": "open redirect //host blocked",
+  "ok": true,
+  "info": null
+ },
+ {
+  "section": "Output escaping (XSS)",
+  "name": "CRLF in _next safe",
+  "ok": false,
+  "info": 500
+ },
+ {
+  "section": "Output escaping (XSS)",
+  "name": ">5MB body rejected",
+  "ok": true,
+  "info": 413
+ },
+ {
+  "section": "Output escaping (XSS)",
+  "name": "bad JSON => 400 not 500",
+  "ok": true,
+  "info": 400
+ },
+ {
+  "section": "Output escaping (XSS)",
+  "name": "static path traversal blocked",
+  "ok": true
+ },
+ {
+  "section": "Output escaping (XSS)",
+  "name": "uploads traversal blocked",
+  "ok": true,
+  "info": 404
+ },
+ {
+  "section": "Output escaping (XSS)",
+  "name": "/data not exposed",
+  "ok": true
+ },
+ {
+  "section": "Output escaping (XSS)",
+  "name": "/server not exposed",
+  "ok": true
+ },
+ {
+  "section": "Output escaping (XSS)",
+  "name": "upload of html disguised rejected or served safely",
+  "ok": true,
+  "info": "422{\"error\":\"dataUrl must be a base64 PNG, JPEG, WebP or GIF image\"}"
+ },
+ {
+  "section": "i18n",
+  "name": "lang=hi sets cookie",
+  "ok": true,
+  "info": "{\"lang\":\"hi\"}"
+ },
+ {
+  "section": "i18n",
+  "name": "lang=hi html lang attr",
+  "ok": true
+ },
+ {
+  "section": "i18n",
+  "name": "Hindi page has Devanagari >150 chars & differs: /",
+  "ok": true,
+  "info": "hi=1314 en=6"
+ },
+ {
+  "section": "i18n",
+  "name": "Hindi page has no untranslated key UI strings: /",
+  "ok": true,
+  "info": null
+ },
+ {
+  "section": "i18n",
+  "name": "Hindi page has Devanagari >150 chars & differs: /new-cars",
+  "ok": true,
+  "info": "hi=483 en=6"
+ },
+ {
+  "section": "i18n",
+  "name": "Hindi page has no untranslated key UI strings: /new-cars",
+  "ok": true,
+  "info": null
+ },
+ {
+  "section": "i18n",
+  "name": "Hindi page has Devanagari >150 chars & differs: /new-cars/model-h",
+  "ok": true,
+  "info": "hi=1591 en=6"
+ },
+ {
+  "section": "i18n",
+  "name": "Hindi page has no untranslated key UI strings: /new-cars/model-h",
+  "ok": true,
+  "info": null
+ },
+ {
+  "section": "i18n",
+  "name": "Hindi page has Devanagari >150 chars & differs: /used-cars",
+  "ok": true,
+  "info": "hi=701 en=6"
+ },
+ {
+  "section": "i18n",
+  "name": "Hindi page has no untranslated key UI strings: /used-cars",
+  "ok": true,
+  "info": null
+ },
+ {
+  "section": "i18n",
+  "name": "Hindi page has Devanagari >150 chars & differs: /used-cars/uc-1182-model-c-vx-2022",
+  "ok": true,
+  "info": "hi=3005 en=6"
+ },
+ {
+  "section": "i18n",
+  "name": "Hindi page has no untranslated key UI strings: /used-cars/uc-1182-model-c-vx-2022",
+  "ok": true,
+  "info": null
+ },
+ {
+  "section": "i18n",
+  "name": "Hindi page has Devanagari >150 chars & differs: /test-drive",
+  "ok": true,
+  "info": "hi=658 en=6"
+ },
+ {
+  "section": "i18n",
+  "name": "Hindi page has no untranslated key UI strings: /test-drive",
+  "ok": true,
+  "info": null
+ },
+ {
+  "section": "i18n",
+  "name": "Hindi page has Devanagari >150 chars & differs: /service",
+  "ok": true,
+  "info": "hi=657 en=6"
+ },
+ {
+  "section": "i18n",
+  "name": "Hindi page has no untranslated key UI strings: /service",
+  "ok": true,
+  "info": null
+ },
+ {
+  "section": "i18n",
+  "name": "Hindi page has Devanagari >150 chars & differs: /emi",
+  "ok": true,
+  "info": "hi=639 en=6"
+ },
+ {
+  "section": "i18n",
+  "name": "Hindi page has no untranslated key UI strings: /emi",
+  "ok": true,
+  "info": null
+ },
+ {
+  "section": "i18n",
+  "name": "Hindi page has Devanagari >150 chars & differs: /trade-in",
+  "ok": true,
+  "info": "hi=554 en=6"
+ },
+ {
+  "section": "i18n",
+  "name": "Hindi page has no untranslated key UI strings: /trade-in",
+  "ok": true,
+  "info": null
+ },
+ {
+  "section": "i18n",
+  "name": "Hindi page has Devanagari >150 chars & differs: /contact",
+  "ok": true,
+  "info": "hi=776 en=6"
+ },
+ {
+  "section": "i18n",
+  "name": "Hindi page has no untranslated key UI strings: /contact",
+  "ok": true,
+  "info": null
+ },
+ {
+  "section": "i18n",
+  "name": "Hindi page has Devanagari >150 chars & differs: /privacy",
+  "ok": true,
+  "info": "hi=856 en=6"
+ },
+ {
+  "section": "i18n",
+  "name": "Hindi page has no untranslated key UI strings: /privacy",
+  "ok": true,
+  "info": null
+ },
+ {
+  "section": "i18n",
+  "name": "Hindi page has Devanagari >150 chars & differs: /opt-out",
+  "ok": true,
+  "info": "hi=364 en=6"
+ },
+ {
+  "section": "i18n",
+  "name": "Hindi page has no untranslated key UI strings: /opt-out",
+  "ok": true,
+  "info": null
+ },
+ {
+  "section": "i18n",
+  "name": "Hindi on-road helper localised",
+  "ok": true,
+  "info": "<table class=\"bk\"><caption class=\"sr\">ऑन-रोड कीमत का विवरण</caption><tbody><tr class=\"\"><th scope=\"r"
+ },
+ {
+  "section": "i18n",
+  "name": "Hindi canonical stays stable",
+  "ok": true
+ },
+ {
+  "section": "i18n",
+  "name": "Hindi title localised",
+  "ok": true,
+  "info": "Model H ऑन-रोड कीमत | कंपनी A मोटर्स"
+ },
+ {
+  "section": "DPDP",
+  "name": "/test-drive: every personal-data form has unchecked consent + /privacy link",
+  "ok": true,
+  "info": "forms=1 withPhone=1"
+ },
+ {
+  "section": "DPDP",
+  "name": "/service: every personal-data form has unchecked consent + /privacy link",
+  "ok": true,
+  "info": "forms=1 withPhone=1"
+ },
+ {
+  "section": "DPDP",
+  "name": "/trade-in: every personal-data form has unchecked consent + /privacy link",
+  "ok": true,
+  "info": "forms=1 withPhone=1"
+ },
+ {
+  "section": "DPDP",
+  "name": "/contact: every personal-data form has unchecked consent + /privacy link",
+  "ok": true,
+  "info": "forms=1 withPhone=1"
+ },
+ {
+  "section": "DPDP",
+  "name": "/used-cars/uc-1182-model-c-vx-2022: every personal-data form has unchecked consent + /privacy link",
+  "ok": true,
+  "info": "forms=1 withPhone=1"
+ },
+ {
+  "section": "DPDP",
+  "name": "/new-cars/model-h: every personal-data form has unchecked consent + /privacy link",
+  "ok": true,
+  "info": "forms=1 withPhone=1"
+ },
+ {
+  "section": "DPDP",
+  "name": "privacy mentions rights/grievance/opt-out",
+  "ok": true
+ },
+ {
+  "section": "DPDP",
+  "name": "consent stored with ip hash",
+  "ok": true
+ },
+ {
+  "section": "Admin CRUD",
+  "name": "admin create offers",
+  "ok": true,
+  "info": "201{\"id\":5,\"title_en\":\"QA offer\",\"title_hi\":\"क्यूए\",\"body_en\":\"b\",\"body_hi\":\"b\",\"model_id\":null,\"type\":\"cash\",\"amount\":5000,\"show_in_onroad\":0,\"valid_unt"
+ },
+ {
+  "section": "Admin CRUD",
+  "name": "admin get offers",
+  "ok": true
+ },
+ {
+  "section": "Admin CRUD",
+  "name": "admin update offers",
+  "ok": true,
+  "info": "200{\"id\":5,\"title_en\":\"QA offer\",\"title_hi\":\"क्यूए\",\"body_en\":\"b\",\"body_hi\":\"b\",\"model_id\":null,\"type\":"
+ },
+ {
+  "section": "Admin CRUD",
+  "name": "admin delete offers",
+  "ok": true,
+  "info": "200{\"deleted\":true}"
+ },
+ {
+  "section": "Admin CRUD",
+  "name": "admin create banners",
+  "ok": true,
+  "info": "201{\"id\":4,\"title_en\":\"QA\",\"title_hi\":\"QA\",\"sub_en\":\"s\",\"sub_hi\":\"s\",\"image\":\"\",\"cta_label_en\":\"Go\",\"cta_label_hi\":\"Go\",\"cta_url\":\"/new-cars\",\"sort\":9,\"a"
+ },
+ {
+  "section": "Admin CRUD",
+  "name": "admin get banners",
+  "ok": true
+ },
+ {
+  "section": "Admin CRUD",
+  "name": "admin update banners",
+  "ok": true,
+  "info": "200{\"id\":4,\"title_en\":\"QA\",\"title_hi\":\"QA\",\"sub_en\":\"s\",\"sub_hi\":\"s\",\"image\":\"\",\"cta_label_en\":\"Go\",\"ct"
+ },
+ {
+  "section": "Admin CRUD",
+  "name": "admin delete banners",
+  "ok": true,
+  "info": "200{\"deleted\":true}"
+ },
+ {
+  "section": "Admin CRUD",
+  "name": "admin create cities",
+  "ok": true,
+  "info": "201{\"id\":7,\"slug\":\"qa-city\",\"name_en\":\"QA City\",\"name_hi\":\"QA\",\"default_showroom_id\":null,\"active\":1,\"sort\":0}"
+ },
+ {
+  "section": "Admin CRUD",
+  "name": "admin get cities",
+  "ok": true
+ },
+ {
+  "section": "Admin CRUD",
+  "name": "admin update cities",
+  "ok": true,
+  "info": "200{\"id\":7,\"slug\":\"qa-city\",\"name_en\":\"QA City\",\"name_hi\":\"QA\",\"default_showroom_id\":null,\"active\":1,\"s"
+ },
+ {
+  "section": "Admin CRUD",
+  "name": "admin delete cities",
+  "ok": true,
+  "info": "200{\"deleted\":true}"
+ },
+ {
+  "section": "Admin CRUD",
+  "name": "DMS export csv",
+  "ok": true,
+  "info": 200
+ },
+ {
+  "section": "Admin CRUD",
+  "name": "audit log has price change",
+  "ok": true
+ },
+ {
+  "section": "Admin CRUD",
+  "name": "dashboard has KPIs",
+  "ok": true
+ }
+]
