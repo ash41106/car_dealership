@@ -120,3 +120,21 @@ test('used cars: real photos only, every car has one, SVG URLs never exposed', a
   const c = await t.api('POST', '/api/admin/used', { model: 'Model H', variant: 'LX', year: 2020, km: 1000, fuel: 'Petrol', transmission: 'Manual', price: 300000 }, { cookie: admin });
   assert.equal(c.status, 201); assert.ok(c.json.photos.length === 1 && /\.jpg$/.test(c.json.photos[0]));
 });
+
+test('Hindi used-car data (note_hi, location_hi) exposed and round-trip safe; UC-1188 has a unique-looking photo', async () => {
+  const car = (await t.api('GET', '/api/used/UC-1182')).json;
+  assert.match(car.location_hi, /फैज़ाबाद/);
+  const items = car.inspection.sections.flatMap(s => s.items);
+  assert.ok(items.every(i => i.note_hi !== undefined && i.note_en !== undefined));
+  for (const i of items.filter(i => i.note)) assert.ok(i.note_hi && i.note_hi !== i.note_en, i.note);
+  assert.match((await t.api('GET', '/api/used?pageSize=60')).json.items.find(c => c.stock_id === 'UC-1182').location_hi, /[\u0900-\u097F]/);
+  const row = t.db.q.get("SELECT id FROM used_cars WHERE stock_id = 'UC-1182'");
+  const adm = (await t.api('GET', `/api/admin/used/${row.id}`, undefined, { cookie: admin })).json;
+  assert.equal(adm.location_hi, car.location_hi);
+  const put = await t.api('PUT', `/api/admin/used/${row.id}`, { inspection: adm.inspection, location_hi: adm.location_hi }, { cookie: admin });
+  assert.equal(put.status, 200);
+  assert.deepEqual((await t.api('GET', '/api/used/UC-1182')).json.inspection.sections, car.inspection.sections);
+  const p88 = (await t.api('GET', '/api/used/UC-1188')).json.photos[0];
+  const others = (await t.api('GET', '/api/used?pageSize=60')).json.items.filter(c => c.stock_id !== 'UC-1188').map(c => c.photo);
+  assert.ok(!others.includes(p88) && /\.jpg$/.test(p88));
+});

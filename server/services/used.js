@@ -13,10 +13,12 @@ const fs = require('node:fs');
 const path = require('node:path');
 const USED_DIR = path.join(__dirname, '..', '..', 'public', 'img', 'used');
 const FALLBACK = { 'model h': ['uc-1192', 'uc-1193'], 'model c': ['uc-1182', 'uc-1191', 'uc-1202'], 'model s': ['uc-1190', 'uc-1194', 'uc-1200'], 'model v': ['uc-1195', 'uc-1197', 'uc-1198'] };
+const OVERRIDE = { 'uc-1188': 'uc-1203' }; // unique-photo exception: the sold UC-1203 Model S photo is not shown in public lists
 const isSvg = u => /\.svg(\?|$)/i.test(String(u));
 /** Real photo URL for a used car: its own /img/used/<stock>.jpg if present, else a same-body-type photo. Never an SVG. */
 function photoFor(stockId, model) {
   const own = String(stockId || '').toLowerCase();
+  if (OVERRIDE[own] && fs.existsSync(path.join(USED_DIR, OVERRIDE[own] + '.jpg'))) return `/img/used/${OVERRIDE[own]}.jpg`;
   if (own && fs.existsSync(path.join(USED_DIR, own + '.jpg'))) return `/img/used/${own}.jpg`;
   const list = (FALLBACK[String(model || '').toLowerCase()] || Object.values(FALLBACK).flat()).filter(f => fs.existsSync(path.join(USED_DIR, f + '.jpg')));
   const n = parseInt(own.replace(/\D/g, ''), 10) || 0;
@@ -34,7 +36,7 @@ function card(r) {
   return {
     id: r.id, stock_id: r.stock_id, slug: r.slug, model: r.model, variant: r.variant, title: `${r.year} ${r.model} ${r.variant}`,
     year: r.year, km: r.km, owners: r.owners, fuel: r.fuel, transmission: r.transmission, color: r.color, price: r.price, status: r.status,
-    reg_masked: maskReg(r.reg_no), location: r.location, photo: photos[0] || null,
+    reg_masked: maskReg(r.reg_no), location: r.location, location_hi: r.location_hi || r.location, photo: photos[0] || null,
     inspection_score: (parseJson(r.inspection, {}) || {}).score ?? null, emi_from: emiFrom(r.price),
   };
 }
@@ -79,7 +81,7 @@ function getUsed(key) {
   return {
     id: r.id, stock_id: r.stock_id, slug: r.slug, model: r.model, variant: r.variant, title: `${r.year} ${r.model} ${r.variant}`,
     year: r.year, km: r.km, owners: r.owners, fuel: r.fuel, transmission: r.transmission, color: r.color, price: r.price, status: r.status,
-    reg_masked: maskReg(r.reg_no), location: r.location, highlights: parseJson(r.highlights, []),
+    reg_masked: maskReg(r.reg_no), location: r.location, location_hi: r.location_hi || r.location, highlights: parseJson(r.highlights, []),
     inspection: parseJson(r.inspection, { score: 0, sections: [] }), photos: photosOf(r),
     emi_from: emiFrom(r.price), warranty_en: r.warranty_en, warranty_hi: r.warranty_hi, updated_at: r.updated_at,
   };
@@ -87,4 +89,4 @@ function getUsed(key) {
 
 function makeSlug(stockId, model, variant, year) { return slugify(`${stockId}-${model}-${variant}-${year}`); }
 
-module.exports = { listUsed, getUsed, makeSlug, card, photoFor };
+module.exports = { listUsed, getUsed, makeSlug, card, photoFor, OVERRIDE };

@@ -158,6 +158,7 @@ CREATE TABLE service_callbacks (
   created_at TEXT NOT NULL, due_at TEXT NOT NULL, first_response_at TEXT, updated_at TEXT NOT NULL);
 CREATE INDEX idx_callbacks ON service_callbacks(status, created_at);
 ` },
+  { v: 3, sql: `ALTER TABLE used_cars ADD COLUMN location_hi TEXT;` },
 ];
 
 function open(file) {

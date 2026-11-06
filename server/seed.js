@@ -43,6 +43,10 @@ function reference(q, now) {
   return { sid, cid };
 }
 
+const NOTES_HI = { 'Minor wear, monitor': 'हल्की घिसावट, निगरानी रखें', 'Due at next service': 'अगली सर्विस पर देय', 'Cosmetic mark': 'ऊपरी निशान', 'Slight noise, recommended check': 'हल्की आवाज़, जांच की सलाह' };
+const noteOf = en => ({ note: en, note_en: en, note_hi: NOTES_HI[en] || en });
+const LOCATION_HI = { 'Faizabad Road Used Car Yard, Lucknow': 'फैज़ाबाद रोड यूज़्ड कार यार्ड, लखनऊ' };
+
 function seed() {
   const { q, tx } = db;
   db.open();
@@ -178,7 +182,7 @@ function seed() {
       const sections = SECT.map(s => ({ name_en: s[0], name_hi: s[1], items: s[2].flatMap(p => CHK.map(c => {
         const bad = rnd() < attn;
         if (!bad) ok++;
-        return { label_en: `${p[0]} - ${c[0]}`, label_hi: `${p[1]} - ${c[1]}`, status: bad ? 'attention' : 'ok', note: bad ? pick(['Minor wear, monitor', 'Due at next service', 'Cosmetic mark', 'Slight noise, recommended check']) : '' };
+        return { label_en: `${p[0]} - ${c[0]}`, label_hi: `${p[1]} - ${c[1]}`, status: bad ? 'attention' : 'ok', ...(bad ? noteOf(pick(Object.keys(NOTES_HI))) : { note: '', note_en: '', note_hi: '' }) };
       })) }));
       return { score: ok, total: 100, sections };
     };
@@ -273,6 +277,7 @@ function seed() {
     q.run("INSERT INTO saved_cars(customer_id,kind,ref,created_at) VALUES (?,?,?,?)", cust, 'used', makeSlug('UC-1182', 'Model C', 'VX', 2022), now);
     q.run("INSERT INTO saved_cars(customer_id,kind,ref,created_at) VALUES (?,?,?,?)", cust, 'new', 'model-s', now);
   });
+  fixups();
   return { skipped: false };
 }
 
@@ -290,10 +295,23 @@ function fixups() {
     const ms = slugify(model);
     q.run('UPDATE used_cars SET color = ?, model = ?, slug = ? WHERE id = ?', colour, model, makeSlug(stock, model, r.variant, r.year), r.id);
   }
+  // Hindi data: inspection note_hi / note_en and used-car location_hi
+  for (const r of q.all('SELECT id, location, location_hi, inspection FROM used_cars')) {
+    let ins; try { ins = JSON.parse(r.inspection); } catch { continue; }
+    let changed = false;
+    for (const sec of (ins && ins.sections) || []) for (const it of sec.items || []) {
+      if (it.note && !it.note_en) { it.note_en = it.note; changed = true; }
+      if (it.note && !it.note_hi) { it.note_hi = NOTES_HI[it.note] || it.note; changed = true; }
+      if (!it.note && it.note_hi === undefined) { it.note_en = ''; it.note_hi = ''; changed = true; }
+    }
+    if (changed) q.run('UPDATE used_cars SET inspection = ? WHERE id = ?', JSON.stringify(ins), r.id);
+    if (!r.location_hi && LOCATION_HI[r.location]) q.run('UPDATE used_cars SET location_hi = ? WHERE id = ?', LOCATION_HI[r.location], r.id);
+  }
   // real photos only: replace SVG/empty photo lists with the car's own (or a same-body-type) photo
   for (const r of q.all('SELECT id, stock_id, model, photos FROM used_cars')) {
     let list = []; try { list = JSON.parse(r.photos) || []; } catch {}
-    if (!list.length || list.some(u => /\.svg(\?|$)/i.test(u))) { const f = photoFor(r.stock_id, r.model); if (f) q.run('UPDATE used_cars SET photos = ? WHERE id = ?', JSON.stringify([f]), r.id); }
+    const ov = require('./services/used').OVERRIDE[String(r.stock_id).toLowerCase()];
+    if (ov || !list.length || list.some(u => /\.svg(\?|$)/i.test(u))) { const f = photoFor(r.stock_id, r.model); if (f) q.run('UPDATE used_cars SET photos = ? WHERE id = ?', JSON.stringify([f]), r.id); }
   }
   for (const [k, v] of Object.entries({ site_stats: J({ new_cars_per_year: 6000, used_cars_per_year: 900 }), contact: J({ phone: '0522 4001001', whatsapp: '919810000001', email: 'hello@companya.in', hours: 'Mon-Sat 9:30-19:30, Sun 10:00-17:00', city: 'Lucknow' }) }))
     q.run('INSERT OR IGNORE INTO settings(key,value) VALUES (?,?)', k, v);
