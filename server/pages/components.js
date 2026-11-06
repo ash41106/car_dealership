@@ -25,14 +25,27 @@ function usedBody(u, bm) {
   for (const k in bm) if (n.indexOf(k) === 0 || String(u.slug || '').indexOf(k.replace(/\s+/g, '-')) >= 0) return bm[k];
   return 'sedan';
 }
-function usedImage(u, bm, idx) {
-  const p = (u.photos && u.photos[idx || 0]) || u.photo || u.image;
-  if (p && !String(p).startsWith('/img/car/')) return p;
+// Real photos only: API photo URLs (non-generated) then img/used/<stock>.jpg. Never an SVG-generated or new-car stand-in.
+function usedPhotos(u) {
+  const out = (u.photos || []).filter(p => p && !String(p).startsWith('/img/car/') && !/\.svg(\?|$)/i.test(String(p)));
+  if (u.photo && !out.includes(u.photo) && !/\.svg/i.test(u.photo)) out.unshift(u.photo);
   const ph = M.used(u.stock_id);
-  if (ph && !idx) return ph;
-  const bt = usedBody(u, bm), hx = colorHex(u.color);
-  const sd = M.car(String(u.model || '').toLowerCase().replace(/\s+/g, '-'), 'side', bt, hx);
-  return sd.photo ? sd.src : imgUrl(u.slug || u.stock_id || 'used', bt, hx);
+  if (ph && !out.includes(ph)) out.unshift(ph);
+  return out;
+}
+// neutral state with the body-type silhouette (desaturated) only when a photo is truly missing
+function usedMedia(u, bm, t, o) {
+  o = o || {}; const ph = usedPhotos(u);
+  const title = u.title || [u.year, u.model, u.variant].filter(Boolean).join(' ');
+  if (ph.length) return img(ph[0], title, { w: 1200, h: 900, sizes: o.sizes, eager: o.eager });
+  return `<span class="ph" role="img" aria-label="${esc(t('photos_soon'))}"><img src="${esc(imgUrl(u.slug || 'used', usedBody(u, bm), '8b8d93'))}" alt="" width="800" height="400" loading="lazy" decoding="async"><b>${esc(t('photos_soon'))}</b></span>`;
+}
+function usedLocation(u, lang) {
+  if (lang === 'hi') {
+    if (u.location_hi) return u.location_hi;
+    try { const y = svc.sales.listYard && svc.sales.listYard(); if (y && u.location && /faizabad/i.test(u.location)) return L(y, 'name', 'hi') || u.location; } catch (e) { /* ignore */ }
+  }
+  return u.location;
 }
 
 function carHero(m, o) { // card/hero image: uploaded hero > photo > svg
@@ -53,7 +66,7 @@ function usedCard(u, t, lang, bm) {
   const sold = u.status === 'booked' || u.status === 'sold';
   const badge = sold ? `<span class="badge badge-dark">${esc(t(u.status))}</span>` : (u.featured ? `<span class="badge">${esc(t('featured'))}</span>` : `<span class="badge badge-line">${esc(t('verified'))}</span>`);
   const title = u.title || [u.year, u.model, u.variant].filter(Boolean).join(' ');
-  return `<article class="card ucard reveal" data-tilt><a class="card-img" href="/used-cars/${esc(u.slug)}" tabindex="-1" aria-hidden="true">${img(usedImage(u, bm), title)}</a>${badge}
+  return `<article class="card ucard reveal" data-tilt><a class="card-img" href="/used-cars/${esc(u.slug)}" tabindex="-1" aria-hidden="true">${usedMedia(u, bm, t, { sizes: '(min-width:1100px) 340px, (min-width:600px) 45vw, 100vw' })}</a>${badge}
 <button class="heart" type="button" data-save="${esc(u.slug)}" aria-pressed="false" aria-label="${esc(t('save') + ': ' + title)}">${ICON.heart}</button>
 <div class="card-b"><h3><a href="/used-cars/${esc(u.slug)}">${esc(title)}</a></h3><p class="muted">${esc([u.variant, u.transmission].filter(Boolean).join(' · '))}</p>
 <ul class="meta"><li>${esc(u.year)}</li><li>${esc(u.fuel)}</li><li>${esc(Number(u.km || 0).toLocaleString('en-IN'))} ${esc(t('km'))}</li></ul>
@@ -96,4 +109,4 @@ function hdr(o) { // page header
   return `<section class="phead"><div class="wrap"><h1 class="h1">${o.title}<span class="dot">.</span></h1>${o.sub ? `<p class="lead">${esc(o.sub)}</p>` : ''}</div></section>`;
 }
 
-module.exports = { svc, colorHex, bodyMap, usedBody, usedImage, carHero, modelCard, usedCard, breakup, emiWidget, leadForm, hdr };
+module.exports = { svc, colorHex, bodyMap, usedBody, usedPhotos, usedMedia, usedLocation, carHero, modelCard, usedCard, breakup, emiWidget, leadForm, hdr };

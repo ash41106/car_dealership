@@ -35,7 +35,7 @@
     roles.forEach(function (x) { orig[x.name] = (x.permissions || []).slice(); cur[x.name] = orig[x.name].slice(); });
     var keys = perms.map(function (p) { return p.perm; }), desc = {}; perms.forEach(function (p) { desc[p.perm] = p.description; });
     keys.sort(function (a, b) { var ga = GROUPS[a.split('.')[0]] || 'Other', gb = GROUPS[b.split('.')[0]] || 'Other'; return ga === gb ? (a < b ? -1 : 1) : (ga < gb ? -1 : 1); });
-    var head = '<thead><tr><th>Permission</th>' + roles.map(function (x) { return '<th scope="col">' + esc(x.label || x.name) + '</th>'; }).join('') + '</tr></thead>';
+    var head = '<thead><tr><th>Permission</th>' + roles.map(function (x) { return '<th scope="col" title="' + esc(x.label || x.name) + '">' + esc(x.label || x.name) + '</th>'; }).join('') + '</tr></thead>';
     var last = '', body = keys.map(function (k) {
       var g = GROUPS[k.split('.')[0]] || 'Other', row = g !== last ? '<tr class="grp"><td colspan="' + (roles.length + 1) + '">' + esc(g) + '</td></tr>' : ''; last = g;
       return row + '<tr><td><code>' + esc(k) + '</code><br><small class="muted">' + esc(desc[k] || '') + '</small></td>' + roles.map(function (x) { var on = orig[x.name].indexOf(k) >= 0, lock = x.name === 'admin' || x.name === 'customer'; return '<td><input type="checkbox" data-role="' + esc(x.name) + '" data-perm="' + esc(k) + '" aria-label="' + esc((x.label || x.name) + ': ' + k) + '"' + (on ? ' checked' : '') + (lock || !canEdit ? ' disabled' : '') + '></td>'; }).join('') + '</tr>';

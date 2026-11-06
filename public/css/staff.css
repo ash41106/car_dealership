@@ -74,3 +74,10 @@ td.saved input{border-color:#14822f}td.fail input{border-color:var(--red)}
 
 .savebar{position:fixed;left:50%;bottom:16px;transform:translateX(-50%);z-index:90;background:#0b0b0b;color:#fff;border-radius:999px;padding:8px 8px 8px 22px;display:flex;align-items:center;gap:12px;box-shadow:0 18px 50px rgba(0,0,0,.35)}.savebar[hidden]{display:none}.savebar .btn-o{color:#fff;border-color:#666}.savebar .btn:not(.btn-o){background:var(--red);border-color:var(--red)}
 .diff{list-style:none;padding:0;margin:0 0 8px;font-family:ui-monospace,monospace;font-size:.85rem}.diff .add{color:#0f5a2a}.diff .rem{color:#a10000}
+
+/* role matrix headers: horizontal, wrapped, tooltip carries the full name */
+.mx thead th{writing-mode:horizontal-tb;transform:none;height:auto;min-width:78px;max-width:96px;white-space:normal;vertical-align:bottom;font-size:.68rem;line-height:1.2;padding:8px 4px;text-align:center}
+.mx td{min-width:78px}
+/* SLA desk cards */
+.mini .rowf{grid-template-columns:minmax(0,1fr) auto}.mini select{min-width:0;width:100%;font-size:.85rem;padding-right:28px;text-overflow:ellipsis}
+.mx thead th{letter-spacing:0!important;font-size:.64rem}.mx td:first-child,.mx th:first-child{min-width:200px}

@@ -137,7 +137,7 @@ ${sel('maxPrice', t('max_price'), [500000, 800000, 1000000, 1500000, 2000000].ma
   const pages = Math.max(1, Math.ceil((r.total || 0) / pageSize));
   const plink = (p) => { const b = new URLSearchParams(base); b.set('page', p); return '/used-cars?' + b.toString(); };
   let pag = ''; if (pages > 1) { pag = `<nav class="pag" aria-label="${esc(t('page'))}">${pageN > 1 ? `<a class="pill" rel="prev" href="${esc(plink(pageN - 1))}">${esc(t('prev'))}</a>` : ''}`; for (let p = 1; p <= pages; p++) pag += `<a class="pill${p === pageN ? ' on' : ''}" href="${esc(plink(p))}"${p === pageN ? ' aria-current="page"' : ''}>${p}</a>`; pag += `${pageN < pages ? `<a class="pill" rel="next" href="${esc(plink(pageN + 1))}">${esc(t('next'))}</a>` : ''}</nav>`; }
-  const body = `${crumbsHtml([[t('used_cars'), '/used-cars']], t)}${C.hdr({ title: esc(t('used_cars')), sub: t('why2b') })}<section class="sec tight"><div class="wrap lay"><aside class="side"><button class="btn btn-o fl-t" type="button" data-toggle="#ufilters" aria-expanded="false">${esc(t('filters'))}</button>${filters}</aside>
+  const body = `${crumbsHtml([[t('used_cars'), '/used-cars']], t)}${C.hdr({ title: esc(t('used_cars')), sub: t('why2b') })}<section class="sec tight"><div class="wrap lay"><aside class="side"><button class="btn btn-o fl-t" type="button" data-filters aria-expanded="false">${esc(t('filters'))}</button>${filters}</aside>
 <div><div class="bar"><p><strong>${esc(r.total || 0)}</strong> ${esc(t('results'))}</p><form method="get" action="/used-cars" class="sortf">${['model', 'fuel', 'transmission', 'minYear', 'maxPrice', 'maxKm', 'owners'].map(k => q[k] ? `<input type="hidden" name="${k}" value="${esc(q[k])}">` : '').join('')}<label for="u-sort" class="sr">${esc(t('sort'))}</label><select id="u-sort" name="sort" data-autosubmit>${sorts.map(s => `<option value="${s[0]}"${(q.sort || 'new') === s[0] ? ' selected' : ''}>${esc(t(s[1]))}</option>`).join('')}</select><noscript><button class="btn btn-sm">${esc(t('apply'))}</button></noscript></form></div>
 ${(r.items || []).length ? `<div class="grid g3">${r.items.map(u => C.usedCard(u, t, lang, bm)).join('')}</div>` : `<p class="empty">${esc(t('no_results'))}</p>`}${pag}</div></div></section>`;
   const canonQ = pageN > 1 ? '' : '';
@@ -149,16 +149,15 @@ function usedPage(ctx) {
   const u = svc.used.getUsed(ctx.params.slug);
   if (!u) return notFound(ctx);
   const bm = C.bodyMap();
-  const realPhoto = M.used(u.stock_id);
-  const photos = realPhoto ? [realPhoto] : (u.photos && u.photos.length ? u.photos : [C.usedImage(u, bm)]);
+  const photos = C.usedPhotos(u);
   const title = u.title || [u.year, u.model, u.variant].filter(Boolean).join(' ');
   const insp = u.inspection || { sections: [] };
-  const inspHtml = (insp.sections || []).map(s => `<details class="insp"><summary>${esc(L(s, 'name', lang))} <span class="insp-bar" aria-hidden="true"><i style="width:${Math.round((s.items || []).filter(i => i.status === 'ok').length * 100 / Math.max(1, (s.items || []).length))}%"></i></span><span class="muted">${(s.items || []).filter(i => i.status === 'ok').length}/${(s.items || []).length}</span></summary><ul>${(s.items || []).map(i => `<li class="${i.status === 'ok' ? 'ok' : 'warn'}"><span class="st">${esc(i.status === 'ok' ? t('inspection_pass') : t('inspection_attn'))}</span> ${esc(L(i, 'label', lang))}${i.note ? ` <small class="muted">${esc(i.note)}</small>` : ''}</li>`).join('')}</ul></details>`).join('');
+  const inspHtml = (insp.sections || []).map(s => `<details class="insp"><summary>${esc(L(s, 'name', lang))} <span class="insp-bar" aria-hidden="true"><i style="width:${Math.round((s.items || []).filter(i => i.status === 'ok').length * 100 / Math.max(1, (s.items || []).length))}%"></i></span><span class="muted">${(s.items || []).filter(i => i.status === 'ok').length}/${(s.items || []).length}</span></summary><ul>${(s.items || []).map(i => `<li class="${i.status === 'ok' ? 'ok' : 'warn'}"><span class="st">${esc(i.status === 'ok' ? t('inspection_pass') : t('inspection_attn'))}</span> ${esc(L(i, 'label', lang))}${(lang === 'hi' ? i.note_hi : (i.note_en || i.note)) ? ` <small class="muted">${esc(lang === 'hi' ? i.note_hi : (i.note_en || i.note))}</small>` : ''}</li>`).join('')}</ul></details>`).join('');
   const sold = u.status !== 'available';
-  const facts = [[t('year'), u.year], [t('km'), Number(u.km || 0).toLocaleString('en-IN')], [t('fuel'), u.fuel], [t('transmission'), u.transmission], [t('owners'), u.owners], [t('reg'), u.reg_masked], [t('colours'), u.color], [t('city'), u.location]].filter(x => x[1] !== undefined && x[1] !== null && x[1] !== '');
+  const facts = [[t('year'), u.year], [t('km'), Number(u.km || 0).toLocaleString('en-IN')], [t('fuel'), u.fuel], [t('transmission'), u.transmission], [t('owners'), u.owners], [t('reg'), u.reg_masked], [t('colours'), V.colourName(u.color, lang)], [t('city'), C.usedLocation(u, lang)]].filter(x => x[1] !== undefined && x[1] !== null && x[1] !== '');
   const model = safe(() => svc.catalog.getModel(String(u.model || '').toLowerCase().replace(/\s+/g, '-')), null);
   const body = `${crumbsHtml([[t('used_cars'), '/used-cars'], [title, '/used-cars/' + u.slug]], t)}
-<section class="pdp wrap"><div class="pdp-media" data-nolb><div class="stage" style="cursor:default">${img(photos[0], title, { eager: true, cls: 'stage-img', w: realPhoto ? 1200 : 800, h: realPhoto ? 900 : 400 })}</div>${photos.length > 1 ? `<ul class="gal">${photos.slice(1).map((p, i) => `<li>${img(p, title + ' ' + (i + 2))}</li>`).join('')}</ul>` : ''}</div>
+<section class="pdp wrap"><div class="pdp-media" data-nolb><div class="stage" style="cursor:default">${photos.length ? img(photos[0], title, { eager: true, cls: 'stage-img', w: 1200, h: 900, sizes: '(min-width:960px) 55vw, 100vw' }) : C.usedMedia(u, bm, t, { eager: true })}</div>${photos.length > 1 ? `<ul class="gal">${photos.slice(1).map((p, i) => `<li>${img(p, title + ' ' + (i + 2))}</li>`).join('')}</ul>` : ''}</div>
 <div class="pdp-info"><p><span class="badge${sold ? ' badge-dark' : ''}">${esc(sold ? t(u.status) : t('verified'))}</span> <button class="btn btn-sm btn-o save-b" type="button" data-save="${esc(u.slug)}" aria-pressed="false">${ICON.heart} ${esc(t('save'))}</button></p><h1 class="h1">${esc(title)}<span class="dot">.</span></h1>
 <div class="pb-total"><strong class="price big">${esc(inr(u.price))}</strong>${u.emi_from ? `<small>${esc(t('emi_from'))} ${esc(inr(u.emi_from))}${esc(t('per_month'))}</small>` : ''}</div>
 <dl class="facts">${facts.map(f => `<div><dt>${esc(f[0])}</dt><dd>${esc(f[1])}</dd></div>`).join('')}</dl>
@@ -239,7 +238,7 @@ function credits(ctx) {
 
 function account(ctx) {
   const t = ctxT(ctx);
-  const body = `${crumbsHtml([[t('account'), '/account']], t)}${C.hdr({ title: esc(t('account')) })}<section class="sec tight"><div class="wrap"><div id="acc">${'<div class="skel row"></div>'}</div><noscript><p>JavaScript is required to sign in.</p></noscript></div></section>`;
+  const body = `${crumbsHtml([[t('account'), '/account']], t)}${C.hdr({ title: esc(t('account')) })}<section class="sec tight"><div class="wrap"><div id="acc">${'<div class="skel row"></div>'}</div><noscript><p>${esc(t('js_required'))}</p></noscript></div></section>`;
   return ctx.html(page({ ctx, title: t('account'), desc: t('account'), body, noindex: true, scripts: ['/js/forms.js', '/js/account.js'] }));
 }
 

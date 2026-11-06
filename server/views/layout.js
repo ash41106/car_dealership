@@ -52,6 +52,8 @@ function preloadTag(p) { // p: {src, sizes}
   if (!v) return `<link rel="preload" as="image" href="${esc(p.src)}" fetchpriority="high">`;
   return `<link rel="preload" as="image" type="image/webp" imagesrcset="${esc(M.vset(v, 'webp'))}" imagesizes="${esc(p.sizes || '100vw')}" fetchpriority="high">`;
 }
+const COL_HI = { pearl: 'मोती', white: 'सफेद', black: 'काला', silver: 'सिल्वर', grey: 'ग्रे', gray: 'ग्रे', red: 'लाल', blue: 'नीला', brown: 'भूरा', orange: 'नारंगी', green: 'हरा', beige: 'बेज', maroon: 'मैरून', metallic: 'मेटैलिक', flame: 'फ्लेम', steel: 'स्टील', ocean: 'ओशन', golden: 'सुनहरा', gold: 'सुनहरा', yellow: 'पीला', midnight: 'मिडनाइट' };
+function colourName(name, lang) { if (!name || lang !== 'hi') return name; return String(name).split(/\s+/).map(w => COL_HI[w.toLowerCase()] || w).join(' '); }
 function langHref(ctx, target) {
   const u = new URL(ctx.req.url, 'http://x');
   u.searchParams.set('lang', target);
@@ -71,13 +73,13 @@ function page(o) {
   const navHtml = nav.map(([p, k]) => `<a href="${p}"${cur(p) ? ' aria-current="page"' : ''}>${esc(t(k))}</a>`).join('');
   const other = lang === 'en' ? 'hi' : 'en';
   const ld = (o.jsonld || []).map(j => `<script type="application/ld+json">${jsonSafe(j)}</script>`).join('');
-  const scripts = ['/js/app.js', '/js/fx.js'].concat(o.scripts || []).map(s => `<script src="${s}?v=1" defer></script>`).join('');
+  const scripts = ['/js/app.js', '/js/fx.js'].concat(o.scripts || []).map(s => `<script src="${s}?v=4" defer></script>`).join('');
   return `<!doctype html><html lang="${lang}"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
 <title>${esc(title)}</title><meta name="description" content="${esc(desc)}">
 ${o.noindex ? '<meta name="robots" content="noindex,nofollow">' : `<link rel="canonical" href="${esc(canon)}"><link rel="alternate" hreflang="en" href="${esc(canon)}?lang=en"><link rel="alternate" hreflang="hi" href="${esc(canon)}?lang=hi"><link rel="alternate" hreflang="x-default" href="${esc(canon)}">`}
 <meta property="og:type" content="${o.ogType || 'website'}"><meta property="og:title" content="${esc(title)}"><meta property="og:description" content="${esc(desc)}"><meta property="og:url" content="${esc(canon)}"><meta property="og:image" content="${esc(og)}"><meta property="og:locale" content="${lang === 'hi' ? 'hi_IN' : 'en_IN'}"><meta name="twitter:card" content="summary_large_image">
 <meta name="theme-color" content="#0b0b0b"><link rel="icon" href="/img/favicon.svg" type="image/svg+xml">
-${o.preload ? preloadTag(o.preload) : ''}<link rel="stylesheet" href="/css/app.css?v=3"><link rel="stylesheet" href="/css/fx.css?v=3">${(o.css || []).map(c => `<link rel="stylesheet" href="${c}?v=1">`).join('')}${ld}</head>
+${o.preload ? preloadTag(o.preload) : ''}<link rel="stylesheet" href="/css/app.css?v=4"><link rel="stylesheet" href="/css/fx.css?v=4">${(o.css || []).map(c => `<link rel="stylesheet" href="${c}?v=1">`).join('')}${ld}</head>
 <body class="${esc(o.bodyClass || '')}"><div class="progress" id="progress" aria-hidden="true"></div>
 <a class="skip" href="#main">${esc(t('skip'))}</a>
 <header class="hdr" id="hdr"><div class="wrap hdr-in">
@@ -132,4 +134,4 @@ function personFields(t, v) {
 }
 function heading(a, b) { return `<h2 class="h2">${esc(a)} <em>${esc(b)}</em><span class="dot">.</span></h2>`; }
 
-module.exports = { esc, inr, lakh, L, jsonSafe, ICON, imgUrl, img, page, crumbsLd, crumbsHtml, dealerLd, consentField, field, personFields, heading, BASE, make, langHref };
+module.exports = { colourName, esc, inr, lakh, L, jsonSafe, ICON, imgUrl, img, page, crumbsLd, crumbsHtml, dealerLd, consentField, field, personFields, heading, BASE, make, langHref };

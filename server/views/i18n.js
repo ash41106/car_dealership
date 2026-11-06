@@ -241,6 +241,10 @@ const S = {
   credits_sub: { en: 'Photographs are from Wikimedia Commons under Creative Commons licences. Thank you to the photographers.', hi: 'तस्वीरें विकिमीडिया कॉमन्स से क्रिएटिव कॉमन्स लाइसेंस के तहत हैं। फ़ोटोग्राफ़रों का धन्यवाद।' },
   colours_avail: { en: 'Available colours', hi: 'उपलब्ध रंग' },
   photo_note: { en: 'Photo shows one colour for illustration. Ask us to see your colour in person.', hi: 'फ़ोटो में एक रंग उदाहरण के लिए है। अपना रंग देखने के लिए हमसे पूछें।' },
+  photos_soon: { en: 'Photos coming soon', hi: 'फ़ोटो जल्द आ रही हैं' },
+  js_required: { en: 'JavaScript is required to sign in.', hi: 'साइन इन करने के लिए JavaScript ज़रूरी है।' },
+  enlarge: { en: 'Enlarge photo', hi: 'फ़ोटो बड़ी करें' },
+  gallery_lbl: { en: 'Photo gallery', hi: 'फ़ोटो गैलरी' },
   grievance: { en: 'Grievance officer', hi: 'शिकायत अधिकारी' }
 };
 
@@ -251,7 +255,7 @@ function make(lang) {
   return t;
 }
 // subset of strings shipped to client JS
-const CLIENT_KEYS = ['loading', 'error_generic', 'retry', 'err_name', 'err_phone', 'err_email', 'err_consent', 'err_required', 'sending', 'submit', 'slot_taken', 'no_slots', 'slot_conflict', 'thanks', 'thanks_lead', 'your_consultant', 'booking_done', 'remaining', 'full', 'select', 'ex_showroom', 'on_road', 'valid_until', 'price_updating', 'request_quote', 'price_note', 'per_month', 'optout_done', 'inspection_pass', 'inspection_attn', 'step', 'continue', 'confirm_booking', 'choose_slot', 'compare', 'close', 'name', 'privacy'];
+const CLIENT_KEYS = ['loading', 'error_generic', 'retry', 'err_name', 'err_phone', 'err_email', 'err_consent', 'err_required', 'sending', 'submit', 'slot_taken', 'no_slots', 'slot_conflict', 'thanks', 'thanks_lead', 'your_consultant', 'booking_done', 'remaining', 'full', 'select', 'ex_showroom', 'on_road', 'valid_until', 'price_updating', 'request_quote', 'price_note', 'per_month', 'optout_done', 'inspection_pass', 'inspection_attn', 'step', 'continue', 'confirm_booking', 'choose_slot', 'compare', 'close', 'name', 'privacy', 'enlarge', 'prev', 'next', 'gallery_lbl'];
 function client(lang) {
   const t = make(lang); const o = {};
   CLIENT_KEYS.forEach(k => { o[k] = t(k); });
