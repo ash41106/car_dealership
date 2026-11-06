@@ -43,7 +43,8 @@ Permission-based RBAC: roles map to permissions (editable by admin at `/admin/ro
 | Area | Pages |
 |---|---|
 | Buyers | `/`, `/new-cars`, `/new-cars/:slug` (variants, colours, on-road price by city, EMI), `/used-cars` (filters), `/used-cars/:slug` (inspection report, masked reg no.), `/test-drive`, `/service`, `/emi`, `/trade-in`, `/contact`, `/privacy`, `/opt-out` |
-| Staff | `/staff/leads` (inbox, SLA timers, AI summary + draft reply, reassign), `/staff/import` (portal CSV), `/staff/bookings` |
+| Customer | `/account` (OTP sign-in; bookings, vehicles, saved cars, enquiries, privacy: export/delete/withdraw consent), `/compare`, `/credits` |
+| Staff | `/staff/leads` (inbox, SLA timers, AI summary + draft reply, reassign), `/staff/desk` (lead desk SLA monitor + assign), `/staff/service` (job-card board + call-back queue), `/staff/import` (portal CSV, lead desk/admin), `/staff/bookings`, `/exec` (read-only Dealer Principal dashboard) |
 | Admin | `/admin` dashboard, models/variants, **prices** (city × model price rules + live calculator), used stock (AI price band for used manager/admin only), offers, banners, showrooms, workshops, cities, demo cars, users |
 | Platform | `/sitemap.xml`, `/robots.txt`, `/healthz`, daily DMS CSV export `/api/admin/export/dms.csv` |
 

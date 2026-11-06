@@ -1,20 +1,21 @@
 # Progress Log
 
-Roles: Manager, Researcher, Backend Dev, Frontend Dev, Tester. Target: tester score > 85/100.
+Roles: Manager, Researcher, Backend Dev, Frontend Dev, Tester, Image sourcing/fix. Target: tester score > 85/100.
 
 | # | Task | Owner | Status |
 |---|------|-------|--------|
 | 1 | Project setup, contract, run.bat, repo | Manager | done |
-| 2 | Research: ideas + GitHub repos (docs/RESEARCH.md) | Researcher | done |
-| 3 | Backend: DB, seed, services, API, auth, AI, tests (27 passing) | Backend | done |
-| 4 | Frontend: design system (DriveX-style red/black/white), SSR pages, staff/admin UI | Frontend | done |
-| 5 | QA round 1: 79/100 (0 blocker, 1 major, 11 minor) | Tester | done |
-| 6 | Fixes for D-01..D-12 | Backend + Frontend | done (D-12 partly) |
-| 7 | QA round 2: **91/100** (0 blocker, 0 major, 3 minor) | Tester | done |
-| 8 | README, Dockerfile, run.bat | Manager | done |
+| 2 | Research (docs/RESEARCH.md) | Researcher | done |
+| 3 | Backend: DB, services, API, AI, tests | Backend | done |
+| 4 | Frontend: DriveX-style red/black/white UI, SSR pages, staff/admin | Frontend | done |
+| 5 | QA R1 79 -> fixes -> QA R2 **91** | Tester | done |
+| 6 | Auth/RBAC v2 (server sessions, 10 roles, customer OTP accounts, exec/desk/service boards) | Backend + Frontend | done |
+| 7 | Real photos (Wikimedia Commons, CC), plate masking, credits page | Image agents | done |
+| 8 | Premium redesign (cinematic hero, story, tilt, compare, responsive images) | Frontend | done |
+| 9 | QA R3 79 -> fixes -> QA R4 **87** (0 critical, 2 major, 5 minor) | Tester | done |
+| 10 | R4 fixes: prod bootstrap admin (no demo passwords), offer price-permission hole, a11y dialogs, used photos, Hindi | Backend + Frontend | in progress |
 
-## Open minor items
-- D-12: home-page stat figures (6,000+ / 900+) hard-coded; move to admin settings.
-- N-01: AI summary wording when no model chosen ("interested in not specified").
-- N-02: Dockerfile not yet built/verified on a machine with Docker.
-- Before go-live: see README checklist (passwords, price rules, real photos, WhatsApp provider).
+## Open items
+- R4-01 (Major, Manager): origin history still contains unmasked plate photos and a restricted-licence photo (commit b733cf3). Needs history rewrite + force-push (awaiting owner decision). Same rewrite would drop old "Co-Authored-By" trailers.
+- R4-05: stock photos show other makers' badges; replace with official Brand X press images + yard photos before launch.
+- N-02: Dockerfile not built (no Docker on dev machine).
