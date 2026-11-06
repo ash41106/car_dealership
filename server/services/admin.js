@@ -27,7 +27,9 @@ const ENTITIES = {
   'past-sales': { table: 'past_sales', read: ['used.read'], write: 'used.write', req: ['model', 'year', 'km', 'sold_price'], fields: { model: 's', variant: 's', year: 'i', km: 'i', fuel: 's', sold_price: 'i', sold_date: 'd' }, order: 'id DESC', audit: true },
 };
 /** Price-bearing fields: changing them needs `prices.write` (content editors may edit copy/images only). Used-car price needs used.write (used_manager/admin). */
-const PRICE_FIELDS = { models: ['accessories_amount'], offers: ['amount', 'type', 'show_in_onroad'], variants: ['ex_showroom'], 'price-rules': ['*'] };
+const PRICE_FIELDS = { models: ['accessories_amount', 'active'], offers: ['amount', 'type', 'show_in_onroad'], variants: ['ex_showroom'], 'price-rules': ['*'] };
+/** Any change to these fields of a cash offer alters on-road prices (an offer is price-bearing when it is, or becomes, type 'cash'). */
+const CASH_OFFER_FIELDS = ['active', 'model_id', 'valid_until', 'amount', 'type', 'show_in_onroad'];
 const AUDITED = new Set(['price-rules', 'variants', 'offers', 'users', 'used', 'past-sales', 'models']);
 
 function audit(user, action, entity, id, detail) {
@@ -68,8 +70,15 @@ function shapeRow(cfg, r) {
 }
 
 function checkPriceFields(user, name, out, existing) {
+  if (can(user, 'prices.write')) return;
+  if (name === 'offers' && ((existing && existing.type === 'cash') || out.type === 'cash')) {
+    for (const f of CASH_OFFER_FIELDS) {
+      if (out[f] === undefined) continue;
+      if (!existing || String(existing[f] ?? '') !== String(out[f] ?? '')) throw httpError(403, `Changing "${f}" of a cash offer requires the price permission`, { [f]: 'Requires prices.write' });
+    }
+  }
   const fields = PRICE_FIELDS[name];
-  if (!fields || can(user, 'prices.write')) return;
+  if (!fields) return;
   for (const f of fields === '*' ? Object.keys(out) : fields) {
     if (out[f] === undefined) continue;
     const same = existing ? String(existing[f] ?? '') === String(out[f] ?? '') : (out[f] === null || out[f] === 0 || out[f] === 'info' || out[f] === '');
@@ -116,7 +125,7 @@ function hooks(name, out, existing, errors) {
     out.updated_at = nowIso();
     if (!existing && !out.photos) {
       const m = q.get('SELECT slug FROM models WHERE lower(name) = lower(?)', merged.model);
-      out.photos = JSON.stringify([`/img/car/${m ? m.slug : 'model-h'}.svg?c=b3122d`]);
+      out.photos = JSON.stringify([require('./used').photoFor(out.stock_id, merged.model)].filter(Boolean));
     }
   }
 }
@@ -198,6 +207,7 @@ function remove(user, name, id) {
   const ex = q.get(`SELECT * FROM ${cfg.table} WHERE id = ?`, toInt(id));
   if (!ex) throw httpError(404, 'Not found');
   if (name === 'users' && ex.id === user.id) throw httpError(422, 'You cannot delete yourself');
+  if ((name === 'offers' && ex.type === 'cash') || name === 'models') { if (!can(user, 'prices.write')) throw httpError(403, 'Deleting this record requires the price permission'); }
   try { q.run(`DELETE FROM ${cfg.table} WHERE id = ?`, ex.id); } catch (e) { throw dbErr(e); }
   if (AUDITED.has(name)) audit(user, 'delete', name, ex.id, omit(ex));
   return { deleted: true };

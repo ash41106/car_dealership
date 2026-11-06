@@ -2,15 +2,46 @@
 /* Idempotent seed: `npm run seed` (use `--reset` to wipe the DB first). All prices/rates live in the DB tables created here. */
 const fs = require('node:fs');
 const db = require('./lib/db');
-const { hashPassword } = require('./lib/auth');
+const auth = require('./lib/auth');
+const { hashPassword } = auth;
 const perms = require('./lib/perms');
 const { nowIso, today, addDays, slugify } = require('./lib/util');
-const { makeSlug } = require('./services/used');
+const { makeSlug, photoFor } = require('./services/used');
 
 let seedN = 42;
 const rnd = () => { seedN = (seedN * 1664525 + 1013904223) % 4294967296; return seedN / 4294967296; };
 const pick = a => a[Math.floor(rnd() * a.length)];
 const J = JSON.stringify;
+
+/** Reference data needed by every deployment: settings, showrooms, workshops, cities (no catalog, users or demo data). */
+function reference(q, now) {
+  // ---- settings
+  for (const [k, v] of Object.entries({ emi_rate: '9.5', emi_months: '60', emi_down_pct: '20', td_slots: '10:00,11:00,12:00,14:00,15:00,16:00,17:00', svc_slots: '09:00,10:00,11:00,12:00,14:00,15:00,16:00',
+    site_stats: J({ new_cars_per_year: 6000, used_cars_per_year: 900 }),
+    contact: J({ phone: '0522 4001001', whatsapp: '919810000001', email: 'hello@companya.in', hours: 'Mon-Sat 9:30-19:30, Sun 10:00-17:00', city: 'Lucknow' }) }))
+    q.run('INSERT OR IGNORE INTO settings(key,value) VALUES (?,?)', k, v);
+
+  // ---- locations
+  const SR = [
+    ['gomti-nagar', 'showroom', 'Company A Motors - Gomti Nagar', 'कंपनी ए मोटर्स - गोमती नगर', 'Vibhuti Khand, Gomti Nagar, Lucknow 226010', 'विभूति खंड, गोमती नगर, लखनऊ 226010', '0522 4001001', 26.8530, 81.0100, 1],
+    ['aliganj', 'showroom', 'Company A Motors - Aliganj', 'कंपनी ए मोटर्स - अलीगंज', 'Sector H, Aliganj, Lucknow 226024', 'सेक्टर एच, अलीगंज, लखनऊ 226024', '0522 4001002', 26.8940, 80.9480, 0],
+    ['alambagh', 'showroom', 'Company A Motors - Alambagh (Kanpur Road)', 'कंपनी ए मोटर्स - आलमबाग (कानपुर रोड)', 'Kanpur Road, Alambagh, Lucknow 226005', 'कानपुर रोड, आलमबाग, लखनऊ 226005', '0522 4001003', 26.8100, 80.9000, 0],
+    ['faizabad-road-yard', 'yard', 'Company A Certified Used Cars - Faizabad Road', 'कंपनी ए सर्टिफाइड यूज़्ड कार - फैज़ाबाद रोड', 'Faizabad Road, Lucknow 226028', 'फैज़ाबाद रोड, लखनऊ 226028', '0522 4001004', 26.8800, 81.0300, 0],
+  ];
+  for (const s of SR) q.run('INSERT INTO showrooms(slug,kind,name_en,name_hi,address_en,address_hi,phone,lat,lng,hours,is_default) VALUES (?,?,?,?,?,?,?,?,?,?,?)', ...s.slice(0, 9), 'Mon-Sat 9:30-19:30, Sun 10:00-17:00', s[9]);
+  const WS = [
+    ['amausi', 'Company A Service - Amausi', 'कंपनी ए सर्विस - अमौसी', 'Amausi Industrial Area, Lucknow 226009', 'अमौसी औद्योगिक क्षेत्र, लखनऊ 226009', '0522 4002001', 26.7640, 80.8830, 6],
+    ['gomti-nagar-extension', 'Company A Service - Gomti Nagar Extension', 'कंपनी ए सर्विस - गोमती नगर एक्सटेंशन', 'Sector 4, Gomti Nagar Extension, Lucknow 226010', 'सेक्टर 4, गोमती नगर एक्सटेंशन, लखनऊ 226010', '0522 4002002', 26.8350, 81.0350, 4],
+  ];
+  for (const w of WS) q.run('INSERT INTO workshops(slug,name_en,name_hi,address_en,address_hi,phone,lat,lng,bays,hours) VALUES (?,?,?,?,?,?,?,?,?,?)', ...w, 'Mon-Sat 8:30-18:00');
+  const sid = Object.fromEntries(q.all('SELECT id, slug FROM showrooms').map(r => [r.slug, r.id]));
+
+  const CITIES = [['lucknow', 'Lucknow', 'लखनऊ', 'gomti-nagar'], ['kanpur', 'Kanpur', 'कानपुर', 'alambagh'], ['varanasi', 'Varanasi', 'वाराणसी', 'gomti-nagar'],
+    ['prayagraj', 'Prayagraj', 'प्रयागराज', 'gomti-nagar'], ['gorakhpur', 'Gorakhpur', 'गोरखपुर', 'aliganj'], ['delhi-ncr', 'Delhi NCR', 'दिल्ली एनसीआर', 'gomti-nagar']];
+  CITIES.forEach((c, i) => q.run('INSERT INTO cities(slug,name_en,name_hi,default_showroom_id,sort) VALUES (?,?,?,?,?)', c[0], c[1], c[2], sid[c[3]], i));
+  const cid = Object.fromEntries(q.all('SELECT id, slug FROM cities').map(r => [r.slug, r.id]));
+  return { sid, cid };
+}
 
 function seed() {
   const { q, tx } = db;
@@ -20,31 +51,7 @@ function seed() {
   const leads = require('./services/leads');
   tx(() => {
     const now = nowIso();
-    // ---- settings
-    for (const [k, v] of Object.entries({ emi_rate: '9.5', emi_months: '60', emi_down_pct: '20', td_slots: '10:00,11:00,12:00,14:00,15:00,16:00,17:00', svc_slots: '09:00,10:00,11:00,12:00,14:00,15:00,16:00',
-      site_stats: J({ new_cars_per_year: 6000, used_cars_per_year: 900 }),
-      contact: J({ phone: '0522 4001001', whatsapp: '919810000001', email: 'hello@companya.in', hours: 'Mon-Sat 9:30-19:30, Sun 10:00-17:00', city: 'Lucknow' }) }))
-      q.run('INSERT INTO settings(key,value) VALUES (?,?)', k, v);
-
-    // ---- locations
-    const SR = [
-      ['gomti-nagar', 'showroom', 'Company A Motors - Gomti Nagar', 'कंपनी ए मोटर्स - गोमती नगर', 'Vibhuti Khand, Gomti Nagar, Lucknow 226010', 'विभूति खंड, गोमती नगर, लखनऊ 226010', '0522 4001001', 26.8530, 81.0100, 1],
-      ['aliganj', 'showroom', 'Company A Motors - Aliganj', 'कंपनी ए मोटर्स - अलीगंज', 'Sector H, Aliganj, Lucknow 226024', 'सेक्टर एच, अलीगंज, लखनऊ 226024', '0522 4001002', 26.8940, 80.9480, 0],
-      ['alambagh', 'showroom', 'Company A Motors - Alambagh (Kanpur Road)', 'कंपनी ए मोटर्स - आलमबाग (कानपुर रोड)', 'Kanpur Road, Alambagh, Lucknow 226005', 'कानपुर रोड, आलमबाग, लखनऊ 226005', '0522 4001003', 26.8100, 80.9000, 0],
-      ['faizabad-road-yard', 'yard', 'Company A Certified Used Cars - Faizabad Road', 'कंपनी ए सर्टिफाइड यूज़्ड कार - फैज़ाबाद रोड', 'Faizabad Road, Lucknow 226028', 'फैज़ाबाद रोड, लखनऊ 226028', '0522 4001004', 26.8800, 81.0300, 0],
-    ];
-    for (const s of SR) q.run('INSERT INTO showrooms(slug,kind,name_en,name_hi,address_en,address_hi,phone,lat,lng,hours,is_default) VALUES (?,?,?,?,?,?,?,?,?,?,?)', ...s.slice(0, 9), 'Mon-Sat 9:30-19:30, Sun 10:00-17:00', s[9]);
-    const WS = [
-      ['amausi', 'Company A Service - Amausi', 'कंपनी ए सर्विस - अमौसी', 'Amausi Industrial Area, Lucknow 226009', 'अमौसी औद्योगिक क्षेत्र, लखनऊ 226009', '0522 4002001', 26.7640, 80.8830, 6],
-      ['gomti-nagar-extension', 'Company A Service - Gomti Nagar Extension', 'कंपनी ए सर्विस - गोमती नगर एक्सटेंशन', 'Sector 4, Gomti Nagar Extension, Lucknow 226010', 'सेक्टर 4, गोमती नगर एक्सटेंशन, लखनऊ 226010', '0522 4002002', 26.8350, 81.0350, 4],
-    ];
-    for (const w of WS) q.run('INSERT INTO workshops(slug,name_en,name_hi,address_en,address_hi,phone,lat,lng,bays,hours) VALUES (?,?,?,?,?,?,?,?,?,?)', ...w, 'Mon-Sat 8:30-18:00');
-    const sid = Object.fromEntries(q.all('SELECT id, slug FROM showrooms').map(r => [r.slug, r.id]));
-
-    const CITIES = [['lucknow', 'Lucknow', 'लखनऊ', 'gomti-nagar'], ['kanpur', 'Kanpur', 'कानपुर', 'alambagh'], ['varanasi', 'Varanasi', 'वाराणसी', 'gomti-nagar'],
-      ['prayagraj', 'Prayagraj', 'प्रयागराज', 'gomti-nagar'], ['gorakhpur', 'Gorakhpur', 'गोरखपुर', 'aliganj'], ['delhi-ncr', 'Delhi NCR', 'दिल्ली एनसीआर', 'gomti-nagar']];
-    CITIES.forEach((c, i) => q.run('INSERT INTO cities(slug,name_en,name_hi,default_showroom_id,sort) VALUES (?,?,?,?,?)', c[0], c[1], c[2], sid[c[3]], i));
-    const cid = Object.fromEntries(q.all('SELECT id, slug FROM cities').map(r => [r.slug, r.id]));
+    const { sid, cid } = reference(q, now);
 
     // ---- models & variants
     const COL = {
@@ -200,7 +207,7 @@ function seed() {
     ];
     for (const u of USED) {
       const ms = slugify(u[1]);
-      const photos = ['side', 'front', 'rear'].map(v => `/img/car/${ms}.svg?c=${u[9]}&v=${v}`);
+      const photos = [photoFor(u[0], u[1])].filter(Boolean);
       const ins = inspection(u[0] === 'UC-1182' ? 0.04 : 0.03 + rnd() * 0.07);
       q.run(`INSERT INTO used_cars(stock_id,slug,model,variant,year,km,owners,fuel,transmission,color,price,status,reg_no,location,highlights,inspection,photos,warranty_en,warranty_hi,created_at,updated_at)
              VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)`, u[0], makeSlug(u[0], u[1], u[2], u[3]), u[1], u[2], u[3], u[4], u[5], u[6], u[7], u[8], u[10], u[11], u[12],
@@ -276,25 +283,67 @@ const COLOUR_FIXES = [['UC-1182', 'White', 'f4f4f2', 'Model C'], ['UC-1190', 'Wh
   ['UC-1201', 'Charcoal Grey', '3b3e43', 'Model S'], ['UC-1202', 'Slate Grey', '6b7078', 'Model C'], ['UC-1203', 'Dark Blue', '1f2f55', 'Model S']];
 function fixups() {
   const { q } = db;
+  if (process.env.NODE_ENV === 'production') return; // demo corrections never touch a production database
   for (const [stock, colour, hex, model] of COLOUR_FIXES) {
     const r = q.get('SELECT * FROM used_cars WHERE stock_id = ?', stock);
     if (!r) continue;
     const ms = slugify(model);
-    const photos = String(r.photos).replace(/c=[0-9a-fA-F]{3,6}/g, 'c=' + hex).replace(/\/img\/car\/model-[a-z]\.svg/g, '/img/car/' + ms + '.svg');
-    q.run('UPDATE used_cars SET color = ?, model = ?, slug = ?, photos = ? WHERE id = ?', colour, model, makeSlug(stock, model, r.variant, r.year), photos, r.id);
+    q.run('UPDATE used_cars SET color = ?, model = ?, slug = ? WHERE id = ?', colour, model, makeSlug(stock, model, r.variant, r.year), r.id);
+  }
+  // real photos only: replace SVG/empty photo lists with the car's own (or a same-body-type) photo
+  for (const r of q.all('SELECT id, stock_id, model, photos FROM used_cars')) {
+    let list = []; try { list = JSON.parse(r.photos) || []; } catch {}
+    if (!list.length || list.some(u => /\.svg(\?|$)/i.test(u))) { const f = photoFor(r.stock_id, r.model); if (f) q.run('UPDATE used_cars SET photos = ? WHERE id = ?', JSON.stringify([f]), r.id); }
   }
   for (const [k, v] of Object.entries({ site_stats: J({ new_cars_per_year: 6000, used_cars_per_year: 900 }), contact: J({ phone: '0522 4001001', whatsapp: '919810000001', email: 'hello@companya.in', hours: 'Mon-Sat 9:30-19:30, Sun 10:00-17:00', city: 'Lucknow' }) }))
     q.run('INSERT OR IGNORE INTO settings(key,value) VALUES (?,?)', k, v);
 }
 
-module.exports = { seed, fixups };
+/**
+ * Production bootstrap: schema + reference data (settings, showrooms, workshops, cities, roles) and ONE admin who must change the password.
+ * No demo users, leads, customers or catalog. Password from env BOOTSTRAP_ADMIN_PASSWORD (must satisfy the policy) or generated and printed once.
+ */
+function bootstrap({ email, password } = {}) {
+  const { q, tx } = db;
+  db.open();
+  perms.ensure();
+  let result = { created: false };
+  tx(() => {
+    if (!q.get('SELECT 1 x FROM showrooms LIMIT 1')) reference(q, nowIso());
+    if (q.get("SELECT 1 x FROM users WHERE role = 'admin' AND active = 1")) return;
+    const em = String(email || 'admin@companya.in').trim().toLowerCase();
+    if (!/^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/.test(em)) throw new Error('BOOTSTRAP_ADMIN_EMAIL is not a valid email address');
+    const generated = !password;
+    const pw = password || auth.tempPassword();
+    try { auth.checkPolicy(pw, { email: em, name: 'Administrator' }); } catch (e) { throw new Error('BOOTSTRAP_ADMIN_PASSWORD rejected: ' + e.message); }
+    q.run("INSERT INTO users(name,email,password_hash,role,must_change_password,created_at) VALUES ('Administrator',?,?,'admin',1,?)", em, hashPassword(pw), nowIso());
+    result = { created: true, email: em, password: generated ? pw : undefined };
+  });
+  return result;
+}
+
+module.exports = { seed, fixups, bootstrap };
+
 
 if (require.main === module) {
-  if (process.argv.includes('--reset')) {
+  const arg = n => process.argv.includes(n);
+  const prod = process.env.NODE_ENV === 'production';
+  if (arg('--reset')) {
     const p = db.dbPath();
     for (const f of [p, p + '-wal', p + '-shm']) try { fs.rmSync(f); } catch {}
   }
-  const r = seed();
-  console.log(r.skipped ? 'Database already seeded (use --reset to rebuild).' : 'Seeded database at ' + db.dbPath());
+  try {
+    if (arg('--bootstrap')) {
+      const r = bootstrap({ email: process.env.BOOTSTRAP_ADMIN_EMAIL, password: process.env.BOOTSTRAP_ADMIN_PASSWORD });
+      if (r.created) console.log(`Bootstrap complete. Admin: ${r.email}` + (r.password ? `\nTemporary password (shown once, must be changed at first login): ${r.password}` : '\nUse BOOTSTRAP_ADMIN_PASSWORD to sign in; you must change it at first login.'));
+      else console.log('Bootstrap: an active admin already exists; nothing to do.');
+    } else if (arg('--demo') || !prod) {
+      const r = seed();
+      console.log(r.skipped ? 'Database already seeded (use --reset to rebuild).' : 'Seeded DEMO data (documented demo logins) at ' + db.dbPath());
+    } else {
+      console.error('Refusing to seed demo data in production. Use `node server/seed.js --bootstrap` (admin + reference data) or pass --demo explicitly.');
+      process.exitCode = 1;
+    }
+  } catch (e) { console.error('Seed failed:', e.message); process.exitCode = 1; }
   db.close();
 }

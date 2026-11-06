@@ -9,8 +9,28 @@ function emiFrom(price) {
   return emi({ principal: price, rate: d.rate, months: d.months, downPayment: down }).emi;
 }
 
+const fs = require('node:fs');
+const path = require('node:path');
+const USED_DIR = path.join(__dirname, '..', '..', 'public', 'img', 'used');
+const FALLBACK = { 'model h': ['uc-1192', 'uc-1193'], 'model c': ['uc-1182', 'uc-1191', 'uc-1202'], 'model s': ['uc-1190', 'uc-1194', 'uc-1200'], 'model v': ['uc-1195', 'uc-1197', 'uc-1198'] };
+const isSvg = u => /\.svg(\?|$)/i.test(String(u));
+/** Real photo URL for a used car: its own /img/used/<stock>.jpg if present, else a same-body-type photo. Never an SVG. */
+function photoFor(stockId, model) {
+  const own = String(stockId || '').toLowerCase();
+  if (own && fs.existsSync(path.join(USED_DIR, own + '.jpg'))) return `/img/used/${own}.jpg`;
+  const list = (FALLBACK[String(model || '').toLowerCase()] || Object.values(FALLBACK).flat()).filter(f => fs.existsSync(path.join(USED_DIR, f + '.jpg')));
+  const n = parseInt(own.replace(/\D/g, ''), 10) || 0;
+  return list.length ? `/img/used/${list[n % list.length]}.jpg` : null;
+}
+function photosOf(r) {
+  const own = parseJson(r.photos, []).filter(u => !isSvg(u));
+  if (own.length) return own;
+  const f = photoFor(r.stock_id, r.model);
+  return f ? [f] : [];
+}
+
 function card(r) {
-  const photos = parseJson(r.photos, []);
+  const photos = photosOf(r);
   return {
     id: r.id, stock_id: r.stock_id, slug: r.slug, model: r.model, variant: r.variant, title: `${r.year} ${r.model} ${r.variant}`,
     year: r.year, km: r.km, owners: r.owners, fuel: r.fuel, transmission: r.transmission, color: r.color, price: r.price, status: r.status,
@@ -60,11 +80,11 @@ function getUsed(key) {
     id: r.id, stock_id: r.stock_id, slug: r.slug, model: r.model, variant: r.variant, title: `${r.year} ${r.model} ${r.variant}`,
     year: r.year, km: r.km, owners: r.owners, fuel: r.fuel, transmission: r.transmission, color: r.color, price: r.price, status: r.status,
     reg_masked: maskReg(r.reg_no), location: r.location, highlights: parseJson(r.highlights, []),
-    inspection: parseJson(r.inspection, { score: 0, sections: [] }), photos: parseJson(r.photos, []),
+    inspection: parseJson(r.inspection, { score: 0, sections: [] }), photos: photosOf(r),
     emi_from: emiFrom(r.price), warranty_en: r.warranty_en, warranty_hi: r.warranty_hi, updated_at: r.updated_at,
   };
 }
 
 function makeSlug(stockId, model, variant, year) { return slugify(`${stockId}-${model}-${variant}-${year}`); }
 
-module.exports = { listUsed, getUsed, makeSlug, card };
+module.exports = { listUsed, getUsed, makeSlug, card, photoFor };

@@ -31,10 +31,17 @@ function createApp() {
   db.open();
   require('./lib/perms').ensure();
   require('./lib/auth').purgeSessions();
-  if (process.env.AUTO_SEED !== '0' && !db.q.get('SELECT 1 x FROM models LIMIT 1')) {
-    require('./seed').seed();
-  }
-  require('./seed').fixups();
+  const seedMod = require('./seed');
+  if (process.env.NODE_ENV === 'production') {
+    // Production never auto-seeds demo users/passwords. An admin must exist or be bootstrapped from env.
+    if (!db.q.get("SELECT 1 x FROM users WHERE role = 'admin' AND active = 1")) {
+      const email = process.env.BOOTSTRAP_ADMIN_EMAIL, password = process.env.BOOTSTRAP_ADMIN_PASSWORD;
+      if (!email || !password) throw new Error('No admin user exists and BOOTSTRAP_ADMIN_EMAIL / BOOTSTRAP_ADMIN_PASSWORD are not set. Run `node server/seed.js --bootstrap` once (or set both variables) to create the first admin. Demo data is never seeded in production.');
+      const r = seedMod.bootstrap({ email, password });
+      if (r.created) console.log(`Bootstrapped admin ${r.email} (must change password at first login).`);
+    }
+  } else if (process.env.AUTO_SEED !== '0' && !db.q.get('SELECT 1 x FROM models LIMIT 1')) seedMod.seed();
+  seedMod.fixups();
   const router = new Router();
   require('./api').register(router);
   const pagesIndex = path.join(__dirname, 'pages', 'index.js');
@@ -59,7 +66,8 @@ function createApp() {
 module.exports = { createApp };
 
 if (require.main === module) {
-  const app = createApp();
+  let app;
+  try { app = createApp(); } catch (e) { console.error('\nStartup failed: ' + e.message + '\n'); process.exit(1); }
   const port = parseInt(process.env.PORT || '3000', 10);
   app.server.listen(port, process.env.HOST || '0.0.0.0', () => console.log(`Company A Motors listening on http://localhost:${port}`));
   const stop = () => { console.log('Shutting down...'); app.server.close(() => { db.close(); process.exit(0); }); setTimeout(() => process.exit(0), 5000).unref(); };
