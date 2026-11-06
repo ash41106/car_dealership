@@ -307,7 +307,7 @@ const MASK_RE = /UP\s?32\s?[A-Z]{1,2}\s?\d{3,4}|UP32\s?[A-Z]{0,2}\s?\d{2,4}/;
   const ss2 = (await A.get(`/api/slots/service?workshop=${workshops[0].id}&date=${date}`)).json; T('remaining=0 after full', ss2[0].remaining === 0, ss2[0].remaining);
 
   section = 'CSV import';
-  const sa = new Client(); await sa.login('priya@companya.in', 'Sales@123');
+  const sa = new Client(); await sa.login('desk@companya.in', 'Desk@123');
   const csv = '﻿Customer Name,Mobile No.,E-mail ID,Car Model,City/Location,Remarks\r\n"Sharma, Rajesh",+91-98765 11111,raj@x.in,Model H,Lucknow,"Wants ""best"" deal\nsecond line"\r\n"<script>alert(1)</script>",9876522222,,Model S,Kanpur,=cmd|\' /C calc\'!A0\r\nDup One,9876511111,,Model H,Lucknow,dup of first\r\nBad Phone,12345,,Model C,Lucknow,x\r\n,,,,,\r\n';
   const dry = await sa.post('/api/staff/leads/import', { csv, source: 'cardekho', dryRun: true }); T('import dryRun ok', dry.status === 200, dry.status + dry.text.slice(0, 200));
   T('dry run creates nothing', dry.json && dry.json.created === 0 || dry.json && dry.json.preview, JSON.stringify(dry.json).slice(0, 300));

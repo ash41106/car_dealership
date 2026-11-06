@@ -69,6 +69,11 @@ docker run -d -p 3000:3000 -v companya-data:/app/data -e BASE_URL=https://www.ex
 **Render / Railway / Fly**: use the Dockerfile, mount a persistent volume at `/app/data`, set the env vars above.
 **Windows / VM**: install Node 22.13+, run `run.bat` (or `node server/server.js` under NSSM/pm2), put nginx or Caddy in front for HTTPS, and back up `data/app.db` (SQLite, WAL mode) daily.
 
+### Production first start (no demo accounts)
+With `NODE_ENV=production` the app never seeds demo users or passwords. Before the first start set `BOOTSTRAP_ADMIN_EMAIL` and `BOOTSTRAP_ADMIN_PASSWORD` (10+ characters, 3 of 4 character classes, no common words, name or email), or run `node server/seed.js --bootstrap` once (it prints a generated one-time password if none is given). This creates the schema, roles, showrooms, workshops, cities and **one admin who must change the password at first login** – no demo leads, customers or catalog. Remove `BOOTSTRAP_ADMIN_PASSWORD` from the environment afterwards, sign in at `/staff/login`, then enter models, variants, price rules, offers and used stock under `/admin`. Without an admin or the bootstrap variables the server exits with an explanatory message.
+Docker: `docker run --rm -v companya-data:/app/data -e BOOTSTRAP_ADMIN_EMAIL=you@example.in <image> node server/seed.js --bootstrap` once, then start normally.
+Demo data and the logins above are for development only (`npm run seed`, or `npm run seed -- --demo`).
+
 ### Before go-live checklist
 1. Change all seed passwords and set `SESSION_SECRET`.
 2. Verify the price rules (road tax %, insurance, TCS) with the Transport Dept / insurer – seed values are indicative.

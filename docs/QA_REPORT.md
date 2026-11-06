@@ -1,3 +1,65 @@
+# QA Report - Company A Motors (Round 4)
+
+Tester: QA lead. Fresh seeded DBs (ports 3500-3520, RATE_LIMIT_PUBLIC=5000), headless Edge via CDP, commit 20c1d96. No app code edited. Tests changed/added: `tests/e2e/run.js` (CSV-import block now really logs in as lead_desk; the round-3 note claiming this was done was wrong) and new `tests/e2e/browser4.js` (modes `perf`, `pages`, `a11y`, `misc`, `probe`). Note: run.js and rbac.js must each run against a fresh DB (login lock-outs carry over between suites).
+
+## Round 4 score: 87 / 100 (round 3: 79)
+
+| Area | Max | R4 | Why |
+|---|---|---|---|
+| Functionality vs brief | 30 | 28 | `npm test` 61/61, run.js 442/442, rbac.js 121/122 (the one fail is the mock-OTP expectation, by design), browser3 112/112, customer flow 11/11. Roles save bar + confirm dialog, sticky story, lightbox, compare tray, saved hearts, mobile nav verified in a browser. Deductions: UC-1188 has no photo (R4-06); lightbox is mouse-only (R4-04). |
+| Backend / security | 20 | 17 | R3-02/06/12 verified fixed; production OTP fail-closed verified (503, 123456 rejected, no dev_otp); upgrade from a round-2-era DB and seed idempotency OK. Deductions: production first boot auto-seeds Admin@123 etc. with no forced change and no bootstrap alternative (R4-02, Major); content_editor can still alter on-road price via offer active/model_id (R4-03). |
+| Frontend UX / design | 20 | 16 | Home, hero, story, staff shells look cohesive; no console errors, broken images or horizontal scroll on 12 public + 8 staff pages at 390 and 1440. Plates masked on all 31 photos inspected. Deductions: real OEM badges and mixed-make galleries (R4-05), clipped role-matrix headers / truncated desk select (R4-07), stale SVG on UC-1188 (R4-06). |
+| SEO / perf / a11y | 10 | 7 | Big win (numbers below). Deductions: desktop throttled LCP 2.2/2.6 s with one 10.4 s outlier; filters drawer has no focus move/trap/dialog role and lightbox is not keyboard-openable (R4-04). |
+| i18n + DPDP | 10 | 8 | Hindi complete on all new strings checked; leftovers in R4-08. DPDP flows pass. Deduction: unmasked plate photos remain in public git history (R4-01). |
+| Deployability / docs / tests | 10 | 8 | README login table and commands work as documented. Dockerfile reviewed statically: node:22-alpine, COPY paths exist, non-root user, VOLUME, HEALTHCHECK fine (not built, N-02). Deductions: R4-02, R4-09, Docker unbuilt. |
+| **Total** | **100** | **87** | |
+
+## Home page measurements (cache disabled; Fast 4G = 1.6 Mbps, 150 ms RTT, 4x CPU; 3 runs)
+| Viewport | Transferred, initial load | After scrolling whole page | LCP unthrottled | LCP throttled (3 runs) |
+|---|---|---|---|---|
+| Mobile 390 | 291 KB | 461 KB | 0.53-0.62 s | 1.26 / 1.35 / 1.59 s (LCP element = H1 text) |
+| Desktop 1440 | 454-829 KB (varies with hero timing) | 1,040 KB | 0.34-0.75 s | 2.24 / 2.60 / 10.39 s (hero IMG; the 10.4 s run is a real outlier) |
+
+Round 3 was 2.69 MB and 7.5 s, so R3-03 is fixed on mobile and mostly on desktop; the desktop worst case should be watched (preloading the first hero variant would stabilise it).
+
+## Status of earlier defects (each reproduced)
+| ID | Status |
+|---|---|
+| R3-01 fx.js crash | Fixed: 0 console errors on all pages; lightbox, drawer, ring init. |
+| R3-02 content_editor price edits | Fixed for amount/type/show_in_onroad/accessories (403 with clear message). Residual: R4-03. |
+| R3-03 home weight/LCP | Fixed on mobile; desktop outlier noted above. |
+| R3-04 sticky story | Fixed: story visual holds top=96 px while scrolling the section, releases at the end. |
+| R3-05 legible plates | Fixed: 15 used + 16 car photos inspected (contact sheets + 3x crops); responsive variants match the masked masters. Masks look like grey blur patches (cosmetic). |
+| R3-06 password policy | Fixed: min 10, 3 of 4 classes, common-password list, same-as-current rejected. |
+| R3-07 README/docs stale | Fixed (login table accurate); trivial gap R4-09. |
+| R3-08 /account 401 console error | Fixed. |
+| R3-09 duration format | Fixed: "Breached +25d 15h". |
+| R3-10 roles save/confirm | Fixed, browser-verified: "1 unsaved change / Discard / Review and save" bar; confirm dialog lists the diff. |
+| R3-11 branded/duplicated photos | Partly fixed: restricted hero-road replaced, duplicates gone; see R4-05. |
+| R3-12 assignable roles | Fixed: reassign to content_editor / service_advisor returns 422, to a consultant 200. |
+| D-12 hard-coded stats | Fixed: /api/settings/public drives the figures. |
+| N-02 Docker not built | Still open (Manager): no Docker available; static review only. |
+
+## New defects
+| ID | Sev | Owner | Description / repro |
+|---|---|---|---|
+| R4-01 | Major | Manager | Origin history still contains unmasked plate photos and the restricted `hero-road.jpg`: `git log --all --name-status -- public/img` shows them added in b733cf3 and only modified/deleted in 6f1f49b..20c1d96, so `git show b733cf3:public/img/used/uc-1182.jpg` yields the unmasked file. `docs/_originals_private` itself is untracked, git-ignored, never in history and returns 404 over HTTP (good). Needs a history rewrite (filter-repo) + force-push, or an explicit risk acceptance. |
+| R4-02 | Major | Backend | `NODE_ENV=production` on an empty DB (Dockerfile default) auto-seeds demo data including admin@companya.in / Admin@123 and the other published passwords, `must_change_password` not set. `AUTO_SEED=0` leaves no admin and there is no bootstrap (no ADMIN_EMAIL/ADMIN_PASSWORD). Add env-based first-admin bootstrap, skip demo seed in production, force change. |
+| R4-03 | Minor | Backend | content_editor `PUT /api/admin/offers/1 {"active":0}` or `{"model_id":null}` returns 200 and removes a cash offer from the on-road price (amount/type/show_in_onroad are blocked). Gate under the price permission or document. |
+| R4-04 | Minor | Frontend | A11y: used-cars filters drawer (390 px): focus does not move into it, Tab leaves it, no role="dialog"/aria-modal. Gallery lightbox opens by mouse only (image not focusable), focus is not restored on close, and the used-car detail page did not open a lightbox in my run. Esc, aria-expanded, burger, skip link, hearts (aria-pressed + persistence) pass. |
+| R4-05 | Minor | Manager | Stock photos show real OEM badges/signage (Kia, Hyundai, Tata, Skoda dealership, Honda "CITY") under a fictional "Brand X" dealer; galleries mix makes (Model H: Tata exterior + Suzuki interior; Model V: Suzuki exterior + Kia interior). Scenes are London, Scottish hills, B&W vintage car. Disclosed in credits/README, so Minor. |
+| R4-06 | Minor | Frontend | UC-1188 (Model S VX 2020) has no photo: the list card shows the new Model S stock photo (wrong colour), the detail page shows SVG illustrations (stale fallback); `/api/used` `image` fields are still `/img/car/*.svg`. |
+| R4-07 | Minor | Frontend | Role-matrix column headers clipped ("WORKSHOP MANA", "USED-CAR MANAG"); SLA desk consultant select text truncated ("Rahul Verma (2"). |
+| R4-08 | Trivial | Frontend | Hindi leftovers: /account noscript line, used-car inspection notes, yard address, colour "White". |
+| R4-09 | Trivial | Manager | README page table omits /staff/desk, /staff/service, /exec, /admin/roles. |
+
+## Other checks (no defect)
+Production OTP fail-closed; seed run twice leaves counts unchanged (17 users / 60 leads / 21 used); a round-2-era DB upgrades and serves pages (new colour/body-type photo alignment applies only to fresh seeds, as stated); `/docs/*`, `/server/*`, `/data/` return 404; reduced-motion leaves no infinite animations on home; compare tray, empty compare and no-results states are sensible; mobile nav toggles and closes on Esc; CSP/nosniff/X-Frame-Options present. One transient CDP timeout during a staff-page sweep did not reproduce.
+
+Defect counts: Critical 0, Major 2 (R4-01, R4-02), Minor 5 (R4-03..R4-07), Trivial 2 (R4-08, R4-09), plus N-02 (Manager, open).
+
+---
+
 # QA Report - Company A Motors (Round 3)
 
 Tester: QA lead. Fresh seeded DB, port 3400 (RATE_LIMIT_PUBLIC=5000), headless Edge via CDP. No app code edited. New/updated tests: `tests/e2e/rbac.js` (122 API checks: RBAC, sessions, OTP, CSRF, forced change), `tests/e2e/browser3.js` (visuals + perf), `browser3_customer.js` (account flow), `browser3_staff.js` (every role UI), `probe.js` (ad-hoc CDP probe); `run.js` CSV-import section now logs in as lead_desk (consultants lost `lead.import` by design). Rounds 2 and 1 follow unchanged.
