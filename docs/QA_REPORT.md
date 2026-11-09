@@ -1,3 +1,72 @@
+# QA Report - Company A Motors (Round 7: final verification)
+
+Tester: QA lead. Fresh DB (port 3800, RATE_LIMIT_PUBLIC=5000), headless Edge via CDP, HEAD ce4587d plus working tree. No app code edited. New helpers in `tests/e2e/`: `r7_a.js` (budget CTAs), `r7_b.js` (Hindi prices), `r7_c.js` (filters-sheet Tab trap, first-visit font/CLS), `r7_w.js` (waterfall), `r7_tbt.js` (TBT attribution by stripping CSS features at the network layer via Fetch interception). Screenshots in `%TEMP%\qa7-shots` (`M6_h390.png`, `M6_h1440.png`, `fout_*`, `wf_*`). Note: on Git Bash set `MSYS_NO_PATHCONV=1` when passing `/` paths to perf6.js.
+
+## Round 7 score: 88 / 100 (round 6: 84) - CLEARS 85, no Major defects open
+
+| Area | Max | R7 | Why |
+|---|---|---|---|
+| Functionality | 30 | 29 | npm test 67/67, run.js 442/442, rbac.js 121/122 (by-design OTP lockout), browser3 112/112, customer 11/11. R6-01, R6-02, R6-03, R5-13, R5-16 verified fixed. |
+| Backend / security | 20 | 17 | Not re-audited (UI-only commits); suites green. |
+| Frontend UX / design | 20 | 19 | Mobile void gone; rail, strip cards, budget, waterfall, EMI bar clean. Photography still partly stock-like (7/10). |
+| SEO / perf / a11y | 10 | 6 | CLS about 0, no console errors, no overflow, 0 small targets, contrast scan clean, all four keyboard traps pass. Stress-profile TBT still 0.5-2.0 s; some stress numbers slightly worse. |
+| i18n + DPDP | 10 | 9 | Devanagari lakh in prices (finder, filters, budget); residual Latin only for product names and terms (Model H, EMI, SUV). |
+| Deploy / docs / tests | 10 | 8 | Helpers added, no new deps. |
+| **Total** | **100** | **88** | |
+
+## Verification
+- R6-01 (mobile void): FIXED. 390x844 step-scroll (12 frames, scrollHeight 8,735) shows stats, rail slides H/C/S/V, budget, offers, finder, locations, CTA and footer in order with no black void; only about 120 px of empty band under the stats. 1440x900 (12 frames) also clean.
+- R5-16: FIXED. Cards visible on mobile; `r5_pages` reports no opacity-0 hidden elements on 15 pages x 2 viewports.
+- R6-02 / R5-06: FIXED. Slider min (Rs 8,000): "0 cars match", both CTAs `aria-disabled=true`, `tabindex=-1`, `pointer-events:none`, opacity 0.4. Mid/max: 8 cars, CTAs enabled, max price consistent (Rs 4.76 / 26.19 / 47.61 Lakh). ArrowRight adds 1,000. Same at 390 and 1440.
+- R5-13: FIXED. Waterfall total label clear of the bar; micro rows show visible markers.
+- R6-03: FIXED. Hindi (cookie lang=hi): Devanagari lakh in finder results and used filters; no Latin "Lakh/Crore" on home, new-cars, model, used pages.
+- Keyboard traps with real key events: finder dialog (14 Tabs stay inside), filters sheet (20 Tab + 6 Shift+Tab stay inside, Escape closes and returns focus to the trigger), lightbox (opens, focus inside), reserve sheet (focus inside dialog). Zero console errors.
+- First-visit typography with swap: no visible FOUT. Cold, cache off, Fast 4G: all fonts `loaded` by the first frame captured (about 250 ms); frame 1 vs 2 differs only by CTA fade-in and a 5 px button shift. Layout shifts 0.0006 (390) and 0.0076 (1440, nav/header text). The Instrument Serif italic accent now shows on first view.
+- Regression: 15 pages x 2 viewports: no horizontal scroll (1425 vs 1440 on desktop is the scrollbar), 0 targets under 44 px, contrast scan clean on 5 pages, no console errors.
+
+## Performance (cache off, 5 runs, run 1 discarded; median / worst of runs 2-5; localhost, Edge headless)
+| Profile | Page | LCP | TBT | CLS | KB |
+|---|---|---|---|---|---|
+| (a) Fast 4G, no CPU slowdown (primary) | Home 390 | 0.74 / 0.74 s | 15 / 16 ms | 0.0006 | 278 |
+| | Home 1440 | 1.41 / 1.44 s | 18 / 22 ms | 0.0076 | 398 |
+| | Model H 390 | 0.71 / 0.72 s | 26 / 27 ms | 0 | 152 |
+| | Model H 1440 | 0.94 / 0.95 s | 24 / 26 ms | 0.0006 | 166 |
+| (b) Fast 4G + 4x CPU (stress) | Home 390 | 1.33 / 1.46 s | 523 / 653 ms | 0 | 278 |
+| | Home 1440 | 2.54 / 3.26 s | 1342 / 1455 ms | 0.0002 | 398 |
+| | Model H 390 | 2.98 / 3.00 s | 2006 / 2109 ms | 0 | 152 |
+| | Model H 1440 | 2.54 / 2.86 s | 1569 / 1898 ms | 0.0006 | 166 |
+| (c) Slow 4G (0.4 Mbps, 400 ms), home | 390 | 2.12 / 2.12 s | 10 ms | 0.0023 | 338 |
+| | 1440 | 5.49 / 5.53 s | 18 ms | 0.008 | 416 |
+
+Versus R6: bytes down (mobile home 303 to 278 KB, desktop 469 to 398 KB), primary-4G LCP the same or better, Slow-4G mobile LCP 2.60 to 2.12 s and desktop 6.72 to 5.49 s. Stress TBT: mobile home slightly better (562 to 523), desktop home worse (1154 to 1342), model mobile worse (1716 to 2006), model desktop about the same (1759 to 1569); within lab noise.
+
+Brief "under 2.5 s on 4G": MET on Fast 4G with no CPU slowdown (worst LCP 1.44 s, TBT under 30 ms, CLS under 0.01) and on mobile Slow 4G (2.1 s). NOT met under 4x CPU on the model page (about 3.0 s mobile) or desktop home (2.5-3.3 s), nor Slow 4G desktop home (5.5 s). The 4x-CPU profile is a harsh lab proxy; treated as Minor (R5-02).
+
+### TBT attribution experiment: cause not found
+`r7_tbt.js`, mobile model page, Fast 4G + 4x CPU, CSS declarations stripped from every stylesheet/HTML response, 4 runs each, median TBT: base 1454-2025 ms (swing about +/-400 ms between batches); no backdrop-filter 1150 then 2111 (contradictory); no box-shadow 1846; no filter 1630; no text-wrap 1770; no transform-style/will-change 1582; no mask/clip-path 1592; content-visibility:auto on sections 1623; `@view-transition` at-rule removed 1544 / 2094; view-transition-name removed 1577; transitions+animations removed 472 once (first run 1334; not confirmed). One "all view-transition" run showed 228 ms but did not reproduce (1555 and 1886 on repeat, identical DOM), so it is discarded. Conclusion: no single CSS feature is a reproducible cause; it remains two cold full-document layouts (R6 trace). Side observation: with `about:blank` between loads (true first visit) base TBT is about 0.76-0.82 s, versus 1.45-2.0 s when navigating from a same-origin page, so most of the stress TBT appears on in-site navigations (old-page teardown plus new full layout, or a view-transition/bfcache interplay; untested hypothesis).
+
+## Photography: 7 / 10 (R6 6.5)
+Colour-normalised, with a shared dark lower-third gradient, so hero, rail and cards read as one set; the Model H detail photo is clean (white hatchback, plate masked). Remaining: a real OEM badge on the grille (Tata logo), the gold hatch shot at an auto show with bystanders and booth signs in the rail. Not Major.
+
+## Status of defects
+| ID | Sev | Owner | Status |
+|---|---|---|---|
+| R6-01 | Major | Frontend | Fixed |
+| R6-02 / R5-06 | Minor | Frontend | Fixed |
+| R6-03 | Minor | Frontend | Fixed |
+| R5-13, R5-16, R6-04 | Cosmetic/Info | Frontend | Fixed / verified |
+| R5-02 | Minor | Frontend | Open: stress TBT 0.5-2.0 s; inline critical CSS so layout runs once, lazy-render rail slides 2-4 and the finder dialog |
+| R5-14 | Minor (design) | Manager | Open: visible OEM badge, bystanders in rail photos |
+| R7-01 | Info | Frontend | Mobile home: about 120 px empty band after the stats before "Four ways to drive" |
+| R7-02 | Info | Frontend | Slow 4G desktop home LCP 5.5 s: serve the 800 px hero to desktop on slow connections |
+
+Open counts: Major 0, Minor 2 (R5-02, R5-14), Info 2. Backend 0.
+
+## Verdict
+YES: 88/100, clears 85 with no Major defects. Remaining: stress-profile TBT, desktop Slow-4G hero, photography.
+
+---
+
 # QA Report - Company A Motors (Round 6: final verification)
 
 Tester: QA lead. Fresh DBs (ports 3700-3702, RATE_LIMIT_PUBLIC=5000), headless Edge via CDP, commit 51fee4e. No app code edited. New helpers in `tests/e2e/`: `perf6.js` (profile x page x viewport, 5 runs, run 1 discarded), `trace6.js` (main-thread trace attribution), `layout6.js`, `montage6.js`, `imgsheet6.js`, `r6_void.js`, `r6_void2.js`, `r6_hi_a11y.js`. Screenshots in `%TEMP%\qa6-shots` (montages `M6_*.png`, `P_*.png`).
