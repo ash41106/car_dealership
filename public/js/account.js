@@ -20,7 +20,7 @@
     });
     f2.addEventListener('submit', function (ev) {
       ev.preventDefault(); var code = f2.elements.otp.value.trim(); if (!/^\d{6}$/.test(code)) { F.setErr(f2.elements.otp, T.otp); return; } F.setErr(f2.elements.otp, '');
-      A.post('/api/customer/otp/verify', { phone: f2._ph, otp: code, name: f2.elements.name.value.trim() || undefined }).then(function (r) { remember(r.customer); try { localStorage.setItem('custName', r.customer.name || ''); } catch (x) { } syncSaved().then(boot); })
+      A.post('/api/customer/otp/verify', { phone: f2._ph, otp: code, name: f2.elements.name.value.trim() || undefined }).then(function (r) { remember(r.customer); try { localStorage.setItem('custName', r.customer.name || ''); } catch (x) { } if (window.syncHdr) window.syncHdr(); syncSaved().then(boot); })
         .catch(function (x) { F.setErr(f2.elements.otp, x.message); });
     });
   }
@@ -86,7 +86,7 @@
   function boot() {
     var flag = false; try { flag = !!localStorage.getItem('cust'); } catch (x) { }
     if (!flag) { signin(); return; }
-    A.json('/api/customer/me').then(function (r) { me = r.customer || r; remember(me); try { localStorage.setItem('custName', me.name || me.phone || ''); } catch (x) { } dash(); }).catch(function () { try { localStorage.removeItem('cust'); localStorage.removeItem('custName'); } catch (x) { } signin(); });
+    A.json('/api/customer/me').then(function (r) { me = r.customer || r; remember(me); try { localStorage.setItem('custName', me.name || me.phone || ''); } catch (x) { } if (window.syncHdr) window.syncHdr(); dash(); }).catch(function () { try { localStorage.removeItem('cust'); localStorage.removeItem('custName'); } catch (x) { } if (window.syncHdr) window.syncHdr(); signin(); });
   }
   boot();
 })();

@@ -146,3 +146,7 @@ html[lang=hi] .split .w{padding-bottom:.25em;margin-bottom:-.25em}
 #acc{min-height:420px}
 
 .wf .t i{min-width:8px}.wf b{padding-left:10px}.wf li{column-gap:12px}.wf .tot b{padding-left:14px}.wf .t{margin-right:4px}
+
+/* Signed-in customer chip in the header (avatar initial + first name) */
+.hdr .signin.in{gap:8px;padding-left:8px}
+.hdr .signin .av{display:inline-grid;place-items:center;width:28px;height:28px;border-radius:50%;background:#b3122d;color:#fff;font-size:.8rem;font-weight:700;line-height:1}

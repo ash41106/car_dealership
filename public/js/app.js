@@ -85,8 +85,24 @@
 })();
 
 (function () {
-  try {
-    var nm = localStorage.getItem('custName'), si = document.querySelector('.hdr .signin');
-    if (nm && si) si.textContent = nm.split(' ')[0];
-  } catch (e) { }
+  /* Header account chip: avatar initial + first name when a customer is signed in, plain "Sign in" otherwise.
+     Exposed as window.syncHdr so /account can refresh it right after sign-in / sign-out. */
+  function syncHdr() {
+    var si = document.querySelector('.hdr .signin'); if (!si) return;
+    var nm = ''; try { nm = localStorage.getItem('custName') || ''; } catch (e) { }
+    var hi = document.documentElement.lang === 'hi';
+    if (!si.getAttribute('data-out')) si.setAttribute('data-out', si.textContent);
+    if (nm) {
+      var isNum = /^[\d+\s-]+$/.test(nm), first = isNum ? (hi ? 'खाता' : 'Account') : nm.split(' ')[0];
+      si.textContent = '';
+      var av = document.createElement('span'); av.className = 'av'; av.setAttribute('aria-hidden', 'true'); av.textContent = isNum ? '•' : first.charAt(0).toUpperCase();
+      var t = document.createElement('span'); t.textContent = first;
+      si.appendChild(av); si.appendChild(t);
+      si.setAttribute('aria-label', (hi ? 'मेरा खाता: ' : 'My account: ') + nm);
+      si.classList.add('in');
+    } else {
+      si.textContent = si.getAttribute('data-out'); si.removeAttribute('aria-label'); si.classList.remove('in');
+    }
+  }
+  window.syncHdr = syncHdr; syncHdr();
 })();

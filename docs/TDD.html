@@ -256,6 +256,7 @@ expired       = rule.valid_until is in the past  →  UI shows "price being upda
 <li><b>Mobile first.</b> Most buyers are on phones: 44-pixel touch targets, a swipeable model strip instead of the pinned desktop rail, a bottom-sheet filter, no custom cursor or tilt effects on touch devices.</li>
 <li><b>Motion with a purpose and a cost limit.</b> Scroll reveals, a pinned model rail and number tickers explain structure and draw the eye; all of it respects <code>prefers-reduced-motion</code>. Framer Motion's browser build is bundled locally (no CDN); only its 5 KB light build is used, for the matcher results, because the 61 KB full build would exceed the JavaScript budget.</li>
 <li><b>Staff screens are quiet.</b> The lead inbox, desk, service board and executive dashboard use the same type and tokens but little decoration: SLA chips go green / amber / red, and read-only roles see no edit controls at all.</li>
+<li><b>The header always shows who is signed in.</b> A signed-in customer sees a crimson avatar with their first name (with an accessible label, in English or Hindi) on every page, and it updates the moment they sign in or out; signed-out visitors see a plain "Sign in".</li>
 <li><b>Hindi and English</b> are first-class: a header toggle, a Devanagari font loaded only for Hindi, lakh/crore written in Devanagari. Hindi text is authored in-house and awaits native-speaker review <span class="tag">A11</span>.</li>
 </ul>
 
@@ -274,9 +275,9 @@ expired       = rule.valid_until is in the past  →  UI shows "price being upda
 <figure class="two"><img src="screens/10-lead-desk-sla.jpg" alt="Lead desk SLA monitor"><img src="screens/11-exec-dashboard.jpg" alt="Executive dashboard"></figure>
 <p class="small" style="margin-top:-4pt">Figures 12–13. Lead-desk SLA monitor; read-only executive dashboard for the Dealer Principal (SLA %, funnel, revenue at risk).</p>
 <figure class="two"><img src="screens/12-admin-prices.jpg" alt="Admin price rules"><img src="screens/13-account-portal.jpg" alt="Customer account"></figure>
-<p class="small" style="margin-top:-4pt">Figures 14–15. Admin price table with live calculator preview; the customer account (bookings, vehicles, saved cars, privacy actions).</p>
+<p class="small" style="margin-top:-4pt">Figures 14–15. Admin price table with live calculator preview; the customer account (bookings, vehicles, saved cars, privacy actions) with the signed-in header chip.</p>
 <figure class="two"><img src="screens/14-service-booking-mobile.jpg" alt="Service booking, mobile" style="max-width:24%"><img src="screens/15-hindi-model-page.jpg" alt="Hindi model page"></figure>
-<p class="small" style="margin-top:-4pt">Figures 16–17. Service booking against bay capacity on a phone; the Hindi model page.</p>
+<p class="small" style="margin-top:-4pt">Figures 16–17. Service booking against bay capacity on a phone; the Hindi model page (signed-out header shows "साइन इन").</p>
 
 <h2 class="pb"><span class="n">9</span>Testing and quality results</h2>
 <table>
@@ -284,7 +285,7 @@ expired       = rule.valid_until is in the past  →  UI shows "price being upda
 <tr><td><code>npm test</code> (node:test, temp databases)</td><td class="ok">67 passing: on-road math, slots and double-booking, assignment, SLA, CSV import, RBAC matrix (every role × endpoint), sessions, customer OTP, price permission, production bootstrap, consent, discount filter, masking</td></tr>
 <tr><td><code>tests/e2e/run.js</code> (HTTP)</td><td class="ok">442 / 442 on a fresh database</td></tr>
 <tr><td><code>tests/e2e/rbac.js</code></td><td>121 / 122 (the one miss is by design: the OTP lock-out check does not apply in mock mode)</td></tr>
-<tr><td>Browser suites (headless Edge/Chrome)</td><td class="ok">112 / 112 public and staff flows; 11 / 11 customer flow; no console errors, no horizontal scroll at 390 px, no touch targets under 44 px, contrast scan clean on the main pages</td></tr>
+<tr><td>Browser suites (headless Edge/Chrome)</td><td class="ok">112 / 112 public and staff flows; 11 / 11 customer flow; header sign-in state across pages, languages and sign-out (7 / 7); no console errors, no horizontal scroll at 390 px, no touch targets under 44 px, contrast scan clean on the main pages</td></tr>
 </table>
 <p><b>QA rounds.</b> Seven QA rounds, run by an automated QA agent rather than an independent human reviewer, were scored against a fixed rubric (functionality 30, backend and security 20, UX and design 20, SEO / performance / accessibility 10, language and DPDP 10, deployability and docs 10). Each defect was reproduced in the running app rather than found by reading code, and every report drove the next round of fixes. The scores are an internal quality metric, not an external grade:</p>
 <table style="width:100%">
