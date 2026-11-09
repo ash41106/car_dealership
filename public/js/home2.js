@@ -10,9 +10,10 @@
   /* ---- hero ---- */
   var hero = A.$('.hero3');
   if (hero) {
+    var ready = function () { hero.classList.add('ready'); }; if (d.readyState === 'complete') setTimeout(ready, 1200); else w.addEventListener('load', function () { setTimeout(ready, 1200); });
     var slides = A.$$('.h3-slide', hero), caps = A.$$('.h3-cap', hero), dots = A.$$('.dot-b', hero), idx = 0, timer, vis = true;
     var go = function (n) {
-      idx = (n + slides.length) % slides.length;
+      ready(); idx = (n + slides.length) % slides.length;
       slides.forEach(function (s, k) { s.classList.toggle('on', k === idx); });
       caps.forEach(function (c, k) { var on = k === idx; c.classList.toggle('on', on); if (on) { c.removeAttribute('aria-hidden'); c.removeAttribute('tabindex'); } else { c.setAttribute('aria-hidden', 'true'); c.setAttribute('tabindex', '-1'); } });
       dots.forEach(function (x, k) { x.classList.toggle('on', k === idx); });

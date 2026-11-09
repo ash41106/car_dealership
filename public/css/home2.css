@@ -108,3 +108,6 @@ dialog.fdlg[open]{animation:dlg var(--dur-3) var(--ease-out)}@keyframes dlg{from
 .night .chip{color:#d6d4d0;border-color:#4a4a54}
 @media(max-width:700px){.hero3{flex-direction:column;justify-content:flex-end;align-items:stretch;padding-bottom:1.5rem}.h3-foot{position:static;transform:none;width:auto;margin:1.4rem 16px 0;justify-content:center}.h3-caps{display:none}.h3-ghost{bottom:30%}}
 @media(max-width:700px){.bud-grid{display:flex;overflow-x:auto;scroll-snap-type:x mandatory;gap:12px;margin-inline:-16px;padding:0 16px 14px;scrollbar-width:none}.bud-grid::-webkit-scrollbar{display:none}.bud-grid .bi{flex:0 0 80vw;scroll-snap-align:center}}
+
+/* non-active hero slides stay out of layout (and out of the network) until the page is idle, so the LCP image has the bandwidth */
+.hero3:not(.ready) .h3-slide:not(.on){display:none}
