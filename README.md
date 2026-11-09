@@ -91,3 +91,7 @@ tests/   api/ (node:test), e2e/ (HTTP + headless browser QA)
 docs/    CONTRACT.md, RESEARCH.md, BACKEND_NOTES.md, FRONTEND_NOTES.md, QA_REPORT.md
 ```
 See `PROGRESS.md` for the build log.
+
+## Submission documents
+- `deployment.md` - run locally, deployment, environment variable names, demo logins for the reviewer.
+- `docs/Technical_Design_Document.pdf` (source: `docs/TDD.html`, screenshots in `docs/screens/`) - architecture, data model, flows, AI, UI decisions, cuts and next steps, assumptions register.

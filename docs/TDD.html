@@ -1,0 +1,360 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>Technical Design Document – Company A Motors</title>
+<style>
+  @page { size: A4; margin: 16mm 15mm 18mm; }
+  :root { --ink:#111; --mute:#5a5a62; --line:#dcdce0; --red:#b3122d; --bg:#f6f5f2; }
+  * { box-sizing: border-box; }
+  body { font: 10.2pt/1.5 "Segoe UI", Inter, Arial, sans-serif; color: var(--ink); margin: 0; }
+  h1 { font-size: 26pt; line-height: 1.1; margin: 0 0 4pt; letter-spacing: -.5pt; }
+  h1 em { font-style: normal; color: var(--red); }
+  h2 { font-size: 15pt; margin: 22pt 0 6pt; padding-bottom: 3pt; border-bottom: 2px solid var(--ink); break-after: avoid; }
+  h2 .n { color: var(--red); margin-right: 6pt; }
+  h3 { font-size: 11.5pt; margin: 14pt 0 4pt; break-after: avoid; }
+  p { margin: 0 0 7pt; }
+  ul, ol { margin: 0 0 8pt; padding-left: 16pt; } li { margin-bottom: 2pt; }
+  code { font: 9pt Consolas, "Courier New", monospace; background: var(--bg); padding: 0 3pt; border-radius: 3px; }
+  pre { font: 8.4pt/1.4 Consolas, "Courier New", monospace; background: var(--bg); padding: 8pt 10pt; border-radius: 6px; overflow: hidden; white-space: pre-wrap; margin: 4pt 0 8pt; break-inside: avoid; }
+  table { border-collapse: collapse; width: 100%; margin: 4pt 0 10pt; font-size: 9pt; }
+  th, td { border: 1px solid var(--line); padding: 3.5pt 6pt; vertical-align: top; text-align: left; }
+  th { background: var(--bg); font-weight: 600; }
+  tr { break-inside: avoid; }
+  .cover { padding: 6pt 0 10pt; border-bottom: 3px solid var(--red); margin-bottom: 10pt; }
+  .eyebrow { font-size: 8.5pt; letter-spacing: 2pt; text-transform: uppercase; color: var(--mute); margin-bottom: 6pt; }
+  .links { background: var(--bg); border-left: 4px solid var(--red); padding: 8pt 12pt; margin: 10pt 0; font-size: 10.5pt; }
+  .links b { display: inline-block; min-width: 78pt; }
+  .a { color: #7a4b00; font-weight: 600; } /* assumption tag */
+  .tag { display: inline-block; font-size: 8pt; font-weight: 700; padding: 0 4pt; border-radius: 3px; background: #fff3d6; color: #7a4b00; border: 1px solid #f0d28a; white-space: nowrap; }
+  .ok { color: #0a6b3a; font-weight: 600; } .warn { color: #8a5a00; font-weight: 600; } .bad { color: #9c1c1c; font-weight: 600; }
+  figure { margin: 8pt 0 10pt; break-inside: avoid; text-align: center; }
+  figure img { max-width: 100%; border: 1px solid var(--line); border-radius: 6px; }
+  figure.two { display: flex; gap: 10pt; align-items: flex-start; justify-content: center; }
+  figure.two img { max-width: 48%; }
+  figcaption { font-size: 8.6pt; color: var(--mute); margin-top: 3pt; text-align: left; }
+  svg text { font-family: "Segoe UI", Arial, sans-serif; }
+  .callout { border: 1px solid var(--line); border-left: 4px solid var(--ink); padding: 6pt 10pt; margin: 6pt 0 10pt; background: #fff; break-inside: avoid; }
+  .pb { break-before: page; }
+  .small { font-size: 8.8pt; color: var(--mute); }
+</style>
+</head>
+<body>
+
+<div class="cover">
+  <div class="eyebrow">Technical Design Document</div>
+  <h1>Company A Motors<em>.</em></h1>
+  <p style="font-size:12pt;margin:0">A dealership website, lead desk and admin CMS for Company A, Lucknow (authorised dealer of "Brand X")</p>
+  <p class="small" style="margin-top:6pt">Author: Ashpreet Singh Saini &nbsp;·&nbsp; Version 1.0 &nbsp;·&nbsp; 9 November 2026</p>
+</div>
+
+<div class="links">
+  <div><b>GitHub:</b> <a href="https://github.com/ash41106/car_dealership">https://github.com/ash41106/car_dealership</a> (public; full commit history kept)</div>
+  <div><b>Live app:</b> not deployed. It runs locally in one command and ships with a Dockerfile; see <code>deployment.md</code>. <span class="tag">A1</span></div>
+  <div><b>Run it:</b> <code>run.bat</code> (Windows) or <code>npm start</code> → http://localhost:3000. Demo logins are in <code>deployment.md</code>.</div>
+</div>
+
+<p><b>How to read this document.</b> The problem statement is the only source of requirements. Anything I had to decide that the statement does not say is tagged <span class="tag">A#</span> and listed in the assumptions register (section 11). "Brief" means the problem statement. I have tried to state plainly what works, what is simulated and what is missing (sections 9, 10 and 12).</p>
+
+<h2><span class="n">1</span>Summary</h2>
+<p>The client's website "looks like every other dealer's and does nothing", and leads, test drives and service bookings live in Excel and phone calls. The brief estimates the leak at <b>₹2.11 crore a year</b>: 1,350 of 4,500 monthly online leads are not called within 24 hours (₹1.62 crore) and 600 of 3,000 monthly service calls go unanswered (₹48.6 lakh).</p>
+<p>I built a working product, not a mock-up: a server-rendered public site (new cars with a city-wise on-road price breakup, certified used cars, EMI, test-drive and service booking with real slot capacity, trade-in), a lead inbox that auto-assigns every enquiry to a named consultant and runs a five-minute response timer, an admin CMS driven by editable price tables, role-based access for ten roles, and an AI assistant that summarises each buyer and drafts a first reply. Everything runs from seeded data (including the three sample rows in the brief), has 67 automated API tests plus end-to-end suites, and is documented for deployment.</p>
+<table>
+<tr><th style="width:34%">Success measure in the brief</th><th>What the product does about it</th><th style="width:26%">How it is measured in the product</th></tr>
+<tr><td>90% of web leads called within 5 minutes</td><td>Instant auto-assignment to a named consultant, SLA timer (<code>due_at</code> = created + 5 min), acknowledgement message, lead-desk monitor for unassigned / breaching leads</td><td>Lead desk SLA board; exec dashboard "first response ≤ 5 min %"</td></tr>
+<tr><td>400 online test-drive bookings a month within 6 months</td><td>Booking in a real slot without calling (calendar-style date rail, live availability, confirmation ticket with calendar file and WhatsApp share), prefilled for signed-in customers</td><td>Exec dashboard: test drives booked / completed</td></tr>
+<tr><td>Unanswered service calls from 20% to under 5%</td><td>Book a service online in about a minute against bay capacity; "request a call back" queue with a 15-minute SLA <span class="tag">A6</span></td><td>Call-back queue SLA; exec dashboard unanswered call-backs</td></tr>
+</table>
+
+<h2><span class="n">2</span>Scope: what was built and what the brief asked for</h2>
+<table>
+<tr><th style="width:36%">Brief requirement</th><th style="width:14%">Status</th><th>Notes</th></tr>
+<tr><td>Model and variant pages: photos, specs, colours, ex-showroom and on-road price by city from an admin price table</td><td class="ok">Built</td><td>Breakup, validity date, "may change" note; 6 cities <span class="tag">A2</span></td></tr>
+<tr><td>Certified used-car listings: filters, photos, inspection report, price; masked registration</td><td class="ok">Built</td><td>21 cars; 100-point inspection report; registration masked everywhere</td></tr>
+<tr><td>Test-drive booking by showroom and demo car; service booking by workshop bay capacity</td><td class="ok">Built</td><td>Transactional, double-booking impossible (tested incl. concurrency)</td></tr>
+<tr><td>EMI calculator and trade-in request form</td><td class="ok">Built</td><td>EMI on its own page, on model pages and as a "monthly budget" filter on the home page</td></tr>
+<tr><td>Lead inbox for web enquiries and portal CSV imports, auto-assigned by showroom and model, response timer and status</td><td class="ok">Built</td><td>CSV import with header mapping, dry-run, per-row errors, de-duplication</td></tr>
+<tr><td>Admin CMS: models, prices, offers, used stock, banners, user roles</td><td class="ok">Built</td><td>Some JSON-shaped fields (colours, specs, inspection) are edited as JSON text, not form widgets</td></tr>
+<tr><td>AI: buyer summary, first-reply draft, used-car price band</td><td class="warn">Built, with caveats</td><td>Deterministic by default; Claude optional and not exercised in my environment (section 7)</td></tr>
+<tr><td>Roles: buyer and sales consultant (core slice)</td><td class="ok">Built and extended</td><td>Ten roles <span class="tag">A7</span></td></tr>
+<tr><td>Hindi and English; DPDP consent and opt-out; indexable page per model and used car; load under 2.5 s on 4G</td><td class="ok">Built</td><td>Speed target met on a 4G profile; not under 4× CPU slowdown (section 9)</td></tr>
+<tr><td>Mock payments, messages and outside systems; seed from the sample data</td><td class="ok">As asked</td><td>Messaging is a mock adapter; DMS is a daily CSV export; no payments</td></tr>
+<tr><td>Out of scope: online payment, DMS integration, spare-parts e-commerce</td><td class="ok">Not built</td><td>The "Ai or automation" item in the brief's out-of-scope list sits above the detailed AI rules, so I read it as a heading, not an exclusion <span class="tag">A9</span></td></tr>
+</table>
+
+<h2 class="pb"><span class="n">3</span>Architecture and why</h2>
+<svg viewBox="0 0 720 330" width="100%" role="img" aria-label="Architecture diagram">
+  <defs><marker id="ar" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto"><path d="M0 0L10 5L0 10z" fill="#111"/></marker></defs>
+  <rect x="8" y="10" width="170" height="150" rx="10" fill="#f6f5f2" stroke="#111"/>
+  <text x="20" y="32" font-size="13" font-weight="700">Browsers</text>
+  <text x="20" y="54" font-size="11">Buyer / owner (mobile first)</text>
+  <text x="20" y="72" font-size="11">Sales consultant, lead desk,</text><text x="20" y="87" font-size="11">service advisor, managers,</text><text x="20" y="102" font-size="11">used-car manager, content</text><text x="20" y="117" font-size="11">editor, Dealer Principal, admin</text>
+  <text x="20" y="145" font-size="10" fill="#5a5a62">HTML + CSS + ~15 KB vanilla JS</text>
+  <rect x="236" y="10" width="300" height="310" rx="10" fill="#fff" stroke="#111" stroke-width="1.5"/>
+  <text x="250" y="32" font-size="13" font-weight="700">One Node.js process (no npm dependencies)</text>
+  <rect x="250" y="44" width="272" height="44" rx="6" fill="#f6f5f2" stroke="#999"/><text x="260" y="62" font-size="11" font-weight="600">Router (node:http)</text><text x="260" y="78" font-size="10">gzip · ETag · CSP · rate limit · static files</text>
+  <rect x="250" y="96" width="132" height="62" rx="6" fill="#f6f5f2" stroke="#999"/><text x="258" y="114" font-size="11" font-weight="600">Pages (SSR)</text><text x="258" y="129" font-size="10">templates · i18n EN/HI</text><text x="258" y="143" font-size="10">SEO · JSON-LD</text>
+  <rect x="390" y="96" width="132" height="62" rx="6" fill="#f6f5f2" stroke="#999"/><text x="398" y="114" font-size="11" font-weight="600">JSON API</text><text x="398" y="129" font-size="10">guard(permission)</text><text x="398" y="143" font-size="10">CSRF · validation</text>
+  <rect x="250" y="166" width="272" height="86" rx="6" fill="#fff" stroke="#b3122d" stroke-width="1.5"/><text x="260" y="184" font-size="11" font-weight="600" fill="#b3122d">Services (all business rules)</text>
+  <text x="260" y="200" font-size="10">catalog + on-road price engine · used · sales (slots, bookings)</text><text x="260" y="214" font-size="10">leads (assign, SLA, CSV import) · callbacks · customers (OTP)</text><text x="260" y="228" font-size="10">ai (summary, draft, price band) · messaging adapter · exec stats</text><text x="260" y="242" font-size="10">auth (sessions) + perms (RBAC) · audit</text>
+  <rect x="250" y="260" width="272" height="50" rx="6" fill="#f6f5f2" stroke="#999"/><text x="260" y="278" font-size="11" font-weight="600">SQLite (node:sqlite, WAL, foreign keys)</text><text x="260" y="294" font-size="10">single file data/app.db · migrations run on start</text>
+  <rect x="580" y="30" width="132" height="62" rx="8" fill="#fff" stroke="#999" stroke-dasharray="4 3"/><text x="590" y="50" font-size="11" font-weight="600">WhatsApp / SMS</text><text x="590" y="65" font-size="10">mock adapter by default;</text><text x="590" y="79" font-size="10">HTTP gateway via env</text>
+  <rect x="580" y="110" width="132" height="62" rx="8" fill="#fff" stroke="#999" stroke-dasharray="4 3"/><text x="590" y="130" font-size="11" font-weight="600">Claude API</text><text x="590" y="145" font-size="10">optional (API key);</text><text x="590" y="159" font-size="10">heuristics otherwise</text>
+  <rect x="580" y="190" width="132" height="62" rx="8" fill="#fff" stroke="#999" stroke-dasharray="4 3"/><text x="590" y="210" font-size="11" font-weight="600">DMS (out of scope)</text><text x="590" y="225" font-size="10">daily CSV export</text><text x="590" y="239" font-size="10">endpoint instead</text>
+  <line x1="178" y1="85" x2="236" y2="85" stroke="#111" marker-end="url(#ar)"/>
+  <line x1="522" y1="205" x2="580" y2="60" stroke="#999" marker-end="url(#ar)"/><line x1="522" y1="205" x2="580" y2="140" stroke="#999" marker-end="url(#ar)"/><line x1="522" y1="215" x2="580" y2="220" stroke="#999" marker-end="url(#ar)"/>
+</svg>
+<p class="small">Figure 1. One deployable unit. Dashed boxes are external systems that are optional, simulated or out of scope.</p>
+
+<h3>Key decisions and the trade-offs I accepted</h3>
+<table>
+<tr><th style="width:24%">Decision</th><th style="width:38%">Why</th><th>Cost / what I gave up</th></tr>
+<tr><td><b>Server-rendered HTML</b> with a little vanilla JS (no React or other framework)</td><td>The brief demands pages under 2.5 s on 4G and an indexable page per car. SSR gives crawlable HTML and a fast first paint with no client bundle; each page ships roughly 15 KB of JS.</td><td>No client-side routing; richer interactions are hand-written. Templates are plain strings (every interpolated value goes through an <code>esc()</code> helper).</td></tr>
+<tr><td><b>Zero runtime npm dependencies</b> (<code>node:http</code>, <code>node:sqlite</code>, <code>node:crypto</code>)</td><td>Nothing to install, nothing to audit or patch, a 4-line Dockerfile, and a reviewer can run it immediately.</td><td>I wrote a router, a CSV parser, session handling and a rate limiter myself. Requires Node ≥ 22.13.</td></tr>
+<tr><td><b>SQLite</b></td><td>The load is small: 4,500 leads and 3,000 service calls a month is a few per hour. A single file with WAL, foreign keys and transactions gives correctness (e.g. unique slot constraints) with no database server to run.</td><td>One writer, one process. Scaling out would mean moving to PostgreSQL (the SQL is plain, and access is in one <code>db.js</code> module).</td></tr>
+<tr><td><b>Business rules in services</b>, thin pages and API</td><td>Pages (SSR) and JSON API call the same service functions, so price, slot and assignment rules exist once and are unit-testable.</td><td>A little indirection.</td></tr>
+<tr><td><b>Permission-based RBAC</b> with server-side sessions</td><td>Roles map to permission strings editable by the admin; every API route declares its permission and a test fails if one does not. Sessions can be revoked (logout, password change, deactivation).</td><td>More moving parts than hard-coded role checks.</td></tr>
+<tr><td><b>Prices only from admin tables</b></td><td>Brief: "on-road prices always come from the admin table". No price is hard-coded in code or templates.</td><td>Admin must keep tables current; stale rules show "price being updated" rather than a wrong number.</td></tr>
+<tr><td><b>Adapters for messaging and AI</b></td><td>Brief says to mock messages and outside systems. A single <code>messaging.js</code> interface and an optional Claude call mean real providers plug in by environment variables.</td><td>Real providers were not exercised (section 9).</td></tr>
+</table>
+<p><b>Code layout.</b> <code>server/lib</code> (router, db, auth, perms, csv) · <code>server/services</code> (business rules) · <code>server/api</code> (JSON routes) · <code>server/pages</code> + <code>server/views</code> (SSR templates, i18n, image helpers) · <code>public</code> (CSS, small JS, fonts, optimised images) · <code>tests/api</code> (node:test) · <code>tests/e2e</code> (HTTP and browser suites) · <code>docs</code>. About 7,300 lines in total.</p>
+
+<h2><span class="n">4</span>Data model</h2>
+<svg viewBox="0 0 720 420" width="100%" role="img" aria-label="Data model overview">
+  <style>.t{fill:#fff;stroke:#111}.h{fill:#f6f5f2;stroke:#111}.k{font-size:9.5px;fill:#333}.hd{font-size:11px;font-weight:700}</style>
+  <g><rect class="t" x="10" y="10" width="170" height="104" rx="6"/><rect class="h" x="10" y="10" width="170" height="20" rx="6"/><text class="hd" x="18" y="24">CATALOGUE</text>
+   <text class="k" x="18" y="46">models (accessories_amount)</text><text class="k" x="18" y="60">variants (ex_showroom)</text><text class="k" x="18" y="74">cities</text><text class="k" x="18" y="88">price_rules (city × model)</text><text class="k" x="18" y="102">offers · banners</text></g>
+  <g><rect class="t" x="10" y="136" width="170" height="104" rx="6"/><rect class="h" x="10" y="136" width="170" height="20" rx="6"/><text class="hd" x="18" y="150">USED STOCK</text>
+   <text class="k" x="18" y="172">used_cars (reg no. stored,</text><text class="k" x="18" y="186">  exposed masked)</text><text class="k" x="18" y="200">  inspection JSON, status</text><text class="k" x="18" y="214">past_sales (price band input)</text><text class="k" x="18" y="228">demo_cars</text></g>
+  <g><rect class="t" x="10" y="262" width="170" height="90" rx="6"/><rect class="h" x="10" y="262" width="170" height="20" rx="6"/><text class="hd" x="18" y="276">SITES</text>
+   <text class="k" x="18" y="298">showrooms (+ used-car yard)</text><text class="k" x="18" y="312">workshops (bays, hours)</text><text class="k" x="18" y="326">settings (EMI defaults,</text><text class="k" x="18" y="340">  stats, contact)</text></g>
+  <g><rect class="t" x="250" y="10" width="200" height="150" rx="6"/><rect class="h" x="250" y="10" width="200" height="20" rx="6"/><text class="hd" x="258" y="24">SALES PIPELINE</text>
+   <text class="k" x="258" y="46">leads (source, status, assignee,</text><text class="k" x="258" y="60">  due_at, first_response_at,</text><text class="k" x="258" y="74">  ai_summary, ai_draft)</text><text class="k" x="258" y="90">lead_events (timeline)</text><text class="k" x="258" y="104">messages (outbox, templates)</text><text class="k" x="258" y="118">consents · optouts</text><text class="k" x="258" y="132">bookings (test_drive | service,</text><text class="k" x="258" y="146">  unique slot index, job-card status)</text></g>
+  <g><rect class="t" x="250" y="182" width="200" height="82" rx="6"/><rect class="h" x="250" y="182" width="200" height="20" rx="6"/><text class="hd" x="258" y="196">SERVICE DESK</text>
+   <text class="k" x="258" y="218">service_callbacks (15-min SLA)</text><text class="k" x="258" y="232">customer_vehicles</text><text class="k" x="258" y="246">bookings.status: booked → checked_in</text><text class="k" x="258" y="258">  → in_progress → ready → delivered</text></g>
+  <g><rect class="t" x="250" y="286" width="200" height="104" rx="6"/><rect class="h" x="250" y="286" width="200" height="20" rx="6"/><text class="hd" x="258" y="300">IDENTITY &amp; ACCESS</text>
+   <text class="k" x="258" y="322">users (staff, scrypt hash, scope)</text><text class="k" x="258" y="336">roles · role_permissions</text><text class="k" x="258" y="350">sessions (hashed id, expiry)</text><text class="k" x="258" y="364">customers · customer_otps (hashed)</text><text class="k" x="258" y="378">saved_cars · data_requests · audit_log</text></g>
+  <g font-size="10" fill="#333">
+   <rect class="t" x="510" y="40" width="200" height="120" rx="6" stroke-dasharray="4 3"/><text class="hd" x="518" y="58">Key relationships</text>
+   <text class="k" x="518" y="76">variant → model; price_rule → city (+ model)</text><text class="k" x="518" y="90">lead → showroom, model/variant, used_car,</text><text class="k" x="518" y="104">  assignee (user)</text><text class="k" x="518" y="118">booking → showroom|workshop, demo_car,</text><text class="k" x="518" y="132">  lead (test drive), customer</text><text class="k" x="518" y="146">user → role → permissions</text></g>
+</svg>
+<p class="small">Figure 2. Main tables (about 30 in total, created by versioned migrations in <code>server/lib/db.js</code>). Not every column is shown.</p>
+<ul>
+<li><b>price_rules</b> holds, per city (and optionally per model): road-tax % and a higher % above a price threshold, registration fee, insurance %, handling, FASTag, TCS % and threshold, and a <code>valid_until</code> date. This is the table the "hard part" of the brief depends on.</li>
+<li><b>Integrity is enforced by the database</b>, not only by code: foreign keys, a unique index on (demo car, date, time) for test drives, and capacity checks inside a transaction for service bays.</li>
+<li><b>Personal data</b> (leads, bookings, customers) is stored with its consent record; opt-out blocks further messages; a customer can request export or deletion, and completed deletions anonymise their rows.</li>
+<li><b>Seed data</b> (<code>server/seed.js</code>): the three rows from the brief (<code>NEW-H-02</code>, <code>UC-1182</code>, <code>UC-1190</code>, with Booked status) plus 4 models / 13 variants, 6 cities with price rules, 21 used cars with inspections, 32 past sales, 3 showrooms, 2 workshops, ~60 historical leads and the demo users. Everything beyond the three rows is invented <span class="tag">A1</span><span class="tag">A4</span>.</li>
+</ul>
+
+<h2 class="pb"><span class="n">5</span>Main flows</h2>
+
+<h3>5.1 On-road price breakup (the hard part)</h3>
+<p>The engine in <code>catalog.getOnRoadPrice</code> reads only admin tables. It looks for a <code>price_rules</code> row for (city, model), else the city-wide row, then:</p>
+<pre>ex_showroom   = variant.ex_showroom
+road_tax      = ex × (ex &gt; threshold ? pct_high : pct) / 100
+registration  = rule.registration_fee
+insurance     = ex × insurance_pct / 100
+handling, fastag = rule values
+tcs           = ex &gt; tcs_threshold ? ex × tcs_pct / 100 : 0
+accessories   = optional, from the model (toggle on the page)
+less          = active cash offers flagged "show in on-road" and not expired
+on_road       = ex + road_tax + registration + insurance + handling + fastag + tcs + accessories − less
+expired       = rule.valid_until is in the past  →  UI shows "price being updated – request a quote"</pre>
+<p><b>Worked example from the seed</b> (the brief's <code>NEW-H-02</code>, Model H ZX automatic, ₹12,45,000 ex-showroom), values from the running app:</p>
+<table style="width:78%">
+<tr><th>Line</th><th>Lucknow (₹)</th><th>Delhi NCR (₹)</th></tr>
+<tr><td>Ex-showroom</td><td>12,45,000</td><td>12,45,000</td></tr>
+<tr><td>Road tax (10%: seeded as 8% up to ₹10 lakh, 10% above)</td><td>1,24,500</td><td>1,24,500</td></tr>
+<tr><td>Registration and smart card</td><td>1,500</td><td>1,800</td></tr>
+<tr><td>Insurance</td><td>38,595</td><td>37,350</td></tr>
+<tr><td>Handling and logistics</td><td>4,500</td><td>5,500</td></tr>
+<tr><td>FASTag</td><td>600</td><td>500</td></tr>
+<tr><td>TCS (1%, above ₹10 lakh)</td><td>12,450</td><td>12,450</td></tr>
+<tr><td>Less: loyalty bonus offer (admin-defined)</td><td>− 15,000</td><td>− 15,000</td></tr>
+<tr><th>On-road price</th><th>14,12,145</th><th>14,12,100</th></tr>
+</table>
+<p class="small">The rates are illustrative seed values <span class="tag">A3</span>. Every page shows the breakup, the validity date and the note "Prices are indicative and may change without notice. Final on-road price is confirmed in the quotation." (English and Hindi). One seed choice deserves honesty: the loyalty bonus is deducted for every visitor in the public breakup, while in real life it would apply only to eligible owners. The admin flag "show in on-road" controls this, but I did not change the seed.</p>
+
+<h3>5.2 Enquiry → named consultant within five minutes</h3>
+<svg viewBox="0 0 720 150" width="100%" role="img" aria-label="Lead flow">
+  <g font-size="10.5">
+   <rect x="6" y="14" width="108" height="46" rx="6" fill="#f6f5f2" stroke="#111"/><text x="14" y="32" font-weight="700">Enquiry</text><text x="14" y="47">web form · test drive ·</text>
+   <text x="14" y="58" font-size="9.5">trade-in · portal CSV</text>
+   <rect x="134" y="14" width="108" height="46" rx="6" fill="#fff" stroke="#111"/><text x="142" y="32" font-weight="700">Validate</text><text x="142" y="47">phone, consent ✓</text>
+   <rect x="262" y="14" width="124" height="46" rx="6" fill="#fff" stroke="#111"/><text x="270" y="32" font-weight="700">Auto-assign</text><text x="270" y="47">showroom + model,</text><text x="270" y="58" font-size="9.5">fewest open leads</text>
+   <rect x="406" y="14" width="124" height="46" rx="6" fill="#fff" stroke="#b3122d" stroke-width="1.5"/><text x="414" y="32" font-weight="700" fill="#b3122d">Start timer</text><text x="414" y="47">due_at = now + 5 min</text>
+   <rect x="550" y="14" width="156" height="46" rx="6" fill="#fff" stroke="#111"/><text x="558" y="32" font-weight="700">Acknowledge</text><text x="558" y="47">WhatsApp/SMS template</text><text x="558" y="58" font-size="9.5">(skipped if opted out)</text>
+   <rect x="134" y="86" width="150" height="50" rx="6" fill="#fff" stroke="#111"/><text x="142" y="104" font-weight="700">AI assist</text><text x="142" y="119">summary + draft reply</text>
+   <rect x="304" y="86" width="150" height="50" rx="6" fill="#fff" stroke="#111"/><text x="312" y="104" font-weight="700">Consultant acts</text><text x="312" y="119">reviews/edits draft, sends</text>
+   <rect x="474" y="86" width="232" height="50" rx="6" fill="#fff" stroke="#111"/><text x="482" y="104" font-weight="700">first_response_at set</text><text x="482" y="119">status leaves "new" or reply sent</text><text x="482" y="131" font-size="9.5">→ SLA met or breached</text>
+  </g>
+  <g stroke="#111" fill="none" stroke-width="1.2"><path d="M114 37H134M242 37H262M386 37H406M530 37H550"/><path d="M628 60V73H209V86M284 111H304M454 111H474"/></g>
+</svg>
+<ul>
+<li><b>Assignment rule</b> (<code>leads.pickAssignee</code>): eligible consultants at the chosen showroom, preferring the model specialty, fewest open leads, then least recently assigned. A specialist is passed over only if a non-specialist has more than five fewer open leads. Without a showroom the city default is used. Nobody can be assigned who lacks the lead-work permission.</li>
+<li><b>Status flow:</b> new → contacted → test drive → negotiation → won / lost. Consultants can reassign (with a reason); showroom managers only within their showroom; the lead desk across all showrooms.</li>
+<li><b>Lead desk monitor</b> lists unassigned, near-breach and breached leads and per-consultant load. The exec dashboard turns the SLA data into the brief's revenue-at-risk estimate.</li>
+</ul>
+
+<h3>5.3 Test-drive and service booking</h3>
+<ul>
+<li><b>Test drive:</b> showroom + model + date → slots from the demo car for that model at that showroom (<code>listTestDriveSlots</code>); submitting runs in one transaction and a unique index makes a double booking impossible (HTTP 409; tested with six concurrent requests). The booking creates a lead and assigns a consultant, and the confirmation shows a "ticket" with a downloadable calendar (.ics) file and a WhatsApp share link.</li>
+<li><b>Service:</b> workshop + date → slots with remaining bays (<code>capacity − booked</code>); booking is refused when full. Job cards move through booked → checked in → in progress → ready → delivered.</li>
+<li><b>Call-back queue:</b> "request a call back" on the service and contact pages creates a call-back assigned to the least-loaded advisor with a 15-minute SLA <span class="tag">A6</span>, aimed at the "unanswered service calls" problem.</li>
+<li>The page polls slot availability every 20 seconds and keeps the buyer's selection; past slots show "Passed" (Lucknow time).</li>
+</ul>
+
+<h3>5.4 Portal CSV import</h3>
+<p>The lead desk or admin pastes or uploads a CSV from a car portal. A proper quoted-field parser reads it; headers are mapped flexibly (name/phone/mobile/email/model/city/message …); phones are normalised to ten digits; duplicates (same phone and model within seven days) are skipped; each bad row is reported with its row number; a dry-run previews the result before anything is saved. Imported leads are auto-assigned like web leads. Consent is recorded as "captured by the portal" <span class="tag">A10</span>.</p>
+
+<h3>5.5 Sign-in and authorisation</h3>
+<p>Staff sign in with email and password (scrypt, throttled, 30-minute idle timeout); buyers and owners are optional and sign in with a phone number and a one-time code (hashed, 5-minute expiry, five attempts). Sessions are stored server-side as hashes of an opaque cookie id and are revoked on logout, password change, role change or deactivation. Each API route is wrapped in <code>guard(permission, handler)</code>: unauthenticated → 401, missing permission → 403, state-changing request without JSON content type or <code>X-Requested-With</code> → 403 (CSRF). Data is scoped as well as gated: a consultant sees their own and their showroom's leads, a service advisor only their workshop, and the Dealer Principal is read-only (every one of 51 write calls tried with that role returned 403). Price-bearing fields (price rules, variants, cash offers, accessory price) need a separate price permission that only the admin has, so a content editor can change copy but never a price.</p>
+<table>
+<tr><th>Role</th><th>Can do</th><th>Cannot</th></tr>
+<tr><td>customer</td><td>own bookings, vehicles, saved cars, export/delete own data</td><td>any staff API</td></tr>
+<tr><td>consultant</td><td>work own/showroom leads, reply, reassign</td><td>import CSV, prices, users</td></tr>
+<tr><td>lead_desk</td><td>all leads, assign, CSV import, SLA monitor</td><td>prices, users</td></tr>
+<tr><td>showroom_manager</td><td>team inbox and stats, reassign within showroom</td><td>other showrooms</td></tr>
+<tr><td>service_advisor / workshop_manager</td><td>job cards, call-backs / plus bays and all advisors</td><td>sales leads</td></tr>
+<tr><td>used_manager</td><td>used stock, final prices, sees the AI price band</td><td>new-car prices</td></tr>
+<tr><td>content_editor</td><td>banners, offers copy, model copy</td><td>any price</td></tr>
+<tr><td>dealer_principal</td><td>read-only executive dashboard and audit log</td><td>every write</td></tr>
+<tr><td>admin</td><td>everything, including roles and users</td><td>nothing</td></tr>
+</table>
+
+<h3>5.6 DPDP Act 2023</h3>
+<p>Every form that collects personal data has an unticked consent checkbox linked to the privacy notice; the consent text, time, language and a hashed IP are stored. <code>/opt-out</code> (and withdrawal in the account page) marks all leads of that phone number as opted out and the messaging adapter refuses to send to them. Signed-in customers can download their data and request deletion, which the admin completes (anonymising their records). The notice and consent wording are my drafts, not legal advice <span class="tag">A10</span>.</p>
+
+<h2><span class="n">6</span>Used-car listings</h2>
+<p>Listings show year, owners, kilometres, fuel, transmission, a 100-point inspection report (sections of passed / needs-attention items with an overall score) and the price. The full registration number is stored but only a masked form (for example <code>UP32 •• ••34</code>) leaves the server – in HTML, JSON, JSON-LD and the sitemap (checked by automated tests). Photos were also masked: where a stock photo showed a number plate, I pixelated the plate region and kept the unmasked originals out of the repository (the history, however, still contains earlier unmasked versions of some images; see section 10). Sold cars are hidden from anonymous visitors; the brief's <code>UC-1190</code> shows as <i>Booked</i>.</p>
+
+<h2><span class="n">7</span>How the AI part works</h2>
+<p>The brief asks for three AI outputs and four safeguards. This is what exists and what is honest about each.</p>
+<table>
+<tr><th style="width:21%">Output</th><th style="width:40%">How it is produced</th><th>Who sees it</th></tr>
+<tr><td><b>Buyer summary</b></td><td>Extracts needs, budget, timeline, model/used-car interest and a next-best action from the enquiry text, trade-in and form fields (rules and regular expressions, e.g. "under 12 lakh", "this week"). If <code>ANTHROPIC_API_KEY</code> is set, the same lead is sent to Claude (<code>claude-sonnet-5-5</code>, 8-second timeout) with an instruction not to invent facts; any error or timeout falls back to the rule-based summary.</td><td>The assigned consultant, desk and managers, labelled "AI-generated – review before use"</td></tr>
+<tr><td><b>First-reply draft</b></td><td>Template-driven draft in English or Hindi that refers to the buyer's model and next step. With a key, Claude writes it; the output is then post-filtered.</td><td>Consultant only, as editable text</td></tr>
+<tr><td><b>Used-car price band</b></td><td>Not an LLM: a statistical estimate from the 32 seeded past sales of the same model, year ±1 and similar kilometres (±15,000 km, widening to ±30,000 km if fewer than three comparables), returning the 25th / 50th / 75th percentile rounded to ₹5,000, the number of comparables and the basis. With no comparables it says so instead of guessing.</td><td><b>Only the used-car manager and admin</b></td></tr>
+</table>
+<h3>When it is wrong – the brief's four rules and how each is enforced</h3>
+<ol>
+<li><b>Drafts are edited before sending.</b> The reply box is an editable text area and "Send" stays disabled until the consultant ticks "I have reviewed and edited this message"; the API rejects a send without <code>confirmed_edit: true</code>.</li>
+<li><b>Never quote discounts.</b> The draft generator never includes offers; a filter strips any sentence containing discount, offer, percentage, "off", ₹ or "Rs" amounts from both the heuristic and Claude output, and the send endpoint rejects text that contains such language (HTTP 422).</li>
+<li><b>The used-car manager sets every final price and is the only one who sees the suggestion.</b> The suggestion is not in public pages or public APIs, and consultants and the Dealer Principal get 403 (tested). It is never applied automatically; the manager types the price.</li>
+<li><b>Consultants can re-assign leads; on-road prices always come from the admin table.</b> Reassign is a first-class action with an audit trail; the AI cannot produce or alter an on-road price because the engine in section 5.1 never calls it.</li>
+</ol>
+<div class="callout"><b>Limits I want to be upfront about.</b> (a) By default the summary and draft are deterministic rules and templates: reliable and testable, but not language understanding. (b) The Claude path is implemented and guarded, but <b>I could not run it end to end</b>: I had no API key in my environment, so it is exercised only through its fallback behaviour. (c) The discount filter is a regular expression, so an unusual phrasing could slip through; that is why a human must confirm every send. (d) The price band is only as good as the 32 invented past sales <span class="tag">A16</span>. (e) I did not measure the AI against human-written summaries.</div>
+
+<h2 class="pb"><span class="n">8</span>UI and design decisions</h2>
+<p><b>Brief:</b> a premium showroom feel – large car photography, generous spacing, one accent colour, a price and a clear next step on every car page, and "nothing on screen that lacks a purpose". I started from the reference mock-up supplied with the request (white and black, one red accent, diagonal slashes, black pill buttons, "Handpicked For You" cards), then iterated seven times against QA screenshots.</p>
+<ul>
+<li><b>One accent, two moods.</b> Crimson is used only for primary actions, active states and key words. Day sections are white; "night garage" sections are near-black so the photography carries the drama. Type is a tight display sans with an italic serif accent for one word per headline (self-hosted, licences in <code>docs/FONT_LICENSES.md</code>), with metric-matched fallbacks so text does not jump.</li>
+<li><b>Every car page ends in a price and a next step.</b> A sticky bar shows the on-road price for the chosen city with "Book test drive" on desktop, and a sticky bottom CTA on phones.</li>
+<li><b>Show the number, show where it comes from.</b> The on-road price is a waterfall that rebuilds when the city changes, so a buyer sees what is tax, insurance and fees rather than a single opaque figure; the EMI box shows principal versus interest as a live bar.</li>
+<li><b>Start from the buyer's budget, not the catalogue.</b> The home page has a monthly-EMI slider that re-arranges new and used cars live, and a four-question "Find my car" matcher that returns three cars with plain-language reasons. These attack the "does nothing" complaint directly.</li>
+<li><b>Booking without a phone call.</b> A 14-day date rail and live slot chips replace the date input; taken and past slots are disabled; the confirmation is a ticket with a calendar file and WhatsApp share.</li>
+<li><b>Mobile first.</b> Most buyers are on phones: 44-pixel touch targets, a swipeable model strip instead of the pinned desktop rail, a bottom-sheet filter, no custom cursor or tilt effects on touch devices.</li>
+<li><b>Motion with a purpose and a cost limit.</b> Scroll reveals, a pinned model rail and number tickers explain structure and draw the eye; all of it respects <code>prefers-reduced-motion</code>. I vendored the Framer Motion browser build but use only its 5 KB light build for the matcher results; the 61 KB full build is not loaded because it broke the JavaScript budget.</li>
+<li><b>Staff screens are quiet.</b> The lead inbox, desk, service board and executive dashboard use the same type and tokens but little decoration: SLA chips go green / amber / red, and read-only roles see no edit controls at all.</li>
+<li><b>Hindi and English</b> are first-class: a header toggle, a Devanagari font loaded only for Hindi, lakh/crore written in Devanagari. Hindi text was written by me and has had no native review <span class="tag">A11</span>.</li>
+</ul>
+
+<figure class="two">
+  <img src="screens/01-home-hero-desktop.jpg" alt="Home hero, desktop"><img src="screens/02-home-hero-mobile.jpg" alt="Home hero, mobile" style="max-width:24%">
+</figure>
+<p class="small" style="margin-top:-4pt">Figures 3–4. The "night garage" hero (desktop and phone): one headline, one accent, a live "next test drive" chip, a price-from chip and a primary action.</p>
+
+<figure><img src="screens/03-home-budget-slider-desktop.jpg" alt="Monthly budget slider"><figcaption>Figure 5. Monthly-budget slider: the cars rearrange around what the buyer can pay each month; links to the filtered lists.</figcaption></figure>
+<figure><img src="screens/05-model-page-onroad-waterfall.jpg" alt="Model page on-road waterfall"><figcaption>Figure 6. Model page: the on-road price breakup by city, with validity date and the "may change" note.</figcaption></figure>
+<figure class="two"><img src="screens/06-used-car-detail-inspection.jpg" alt="Used-car detail with inspection report"><img src="screens/04-home-find-my-car-dialog.jpg" alt="Find my car dialog"></figure>
+<p class="small" style="margin-top:-4pt">Figures 7–8. Used-car detail with the inspection report (registration masked); the four-question "Find my car" dialog.</p>
+<figure class="two"><img src="screens/07-test-drive-slots.jpg" alt="Test drive slot picker"><img src="screens/08-booking-ticket.jpg" alt="Booking confirmation ticket"></figure>
+<p class="small" style="margin-top:-4pt">Figures 9–10. Real slots by showroom and demo car; the confirmation ticket with calendar and WhatsApp share.</p>
+<figure><img src="screens/09-staff-lead-inbox-ai-drawer.jpg" alt="Staff lead inbox with AI drawer"><figcaption>Figure 11. Consultant's lead inbox: SLA chip, AI summary labelled "AI-generated – review before use", editable draft with the confirm-before-send tick, status, reassign and timeline.</figcaption></figure>
+<figure class="two"><img src="screens/10-lead-desk-sla.jpg" alt="Lead desk SLA monitor"><img src="screens/11-exec-dashboard.jpg" alt="Executive dashboard"></figure>
+<p class="small" style="margin-top:-4pt">Figures 12–13. Lead-desk SLA monitor; read-only executive dashboard for the Dealer Principal (SLA %, funnel, revenue at risk).</p>
+<figure class="two"><img src="screens/12-admin-prices.jpg" alt="Admin price rules"><img src="screens/13-account-portal.jpg" alt="Customer account"></figure>
+<p class="small" style="margin-top:-4pt">Figures 14–15. Admin price table with live calculator preview; the customer account (bookings, vehicles, saved cars, privacy actions).</p>
+<figure class="two"><img src="screens/14-service-booking-mobile.jpg" alt="Service booking, mobile" style="max-width:24%"><img src="screens/15-hindi-model-page.jpg" alt="Hindi model page"></figure>
+<p class="small" style="margin-top:-4pt">Figures 16–17. Service booking against bay capacity on a phone; the Hindi model page.</p>
+
+<h2 class="pb"><span class="n">9</span>Testing, quality and honest results</h2>
+<table>
+<tr><th style="width:30%">What</th><th>Result</th></tr>
+<tr><td><code>npm test</code> (node:test, temp databases)</td><td class="ok">67 passing: on-road math, slots and double-booking, assignment, SLA, CSV import, RBAC matrix (every role × endpoint), sessions, customer OTP, price permission, production bootstrap, consent, discount filter, masking</td></tr>
+<tr><td><code>tests/e2e/run.js</code> (HTTP)</td><td class="ok">442 / 442 on a fresh database</td></tr>
+<tr><td><code>tests/e2e/rbac.js</code></td><td>121 / 122 (the one miss is by design: the OTP lock-out check does not apply in mock mode)</td></tr>
+<tr><td>Browser suites (headless Edge/Chrome)</td><td class="ok">112 / 112 public and staff flows; 11 / 11 customer flow; no console errors, no horizontal scroll at 390 px, no touch targets under 44 px, contrast scan clean on the main pages</td></tr>
+</table>
+<p><b>QA rounds.</b> Seven rounds were run by an AI QA agent (not an independent human reviewer) against a fixed rubric (functionality 30, backend and security 20, UX and design 20, SEO / performance / accessibility 10, language and DPDP 10, deployability and docs 10). The agent reproduced every defect instead of reading code, and I fed each report back to the developers. The scores are my own process metric, not an external grade:</p>
+<table style="width:100%">
+<tr><th>Round</th><th>1</th><th>2</th><th>3</th><th>4</th><th>5</th><th>6</th><th>7</th></tr>
+<tr><td>Score /100</td><td>79</td><td>91</td><td>79</td><td>87</td><td>84</td><td>84</td><td><b>88</b></td></tr>
+<tr><td>Why</td><td>first build</td><td>fixes</td><td>role system and redesign added, new defects</td><td>fixes</td><td>big UI overhaul, perf regressed</td><td>perf, void bug</td><td>0 major open</td></tr>
+</table>
+<p>Scores fell after the two large additions (role system, visual overhaul) because the new surface area brought new defects – the process worked as intended.</p>
+<h3>Performance against "under 2.5 s on 4G"</h3>
+<table>
+<tr><th>Profile (warm runs, median)</th><th>Home, phone</th><th>Home, desktop</th><th>Model page, phone</th></tr>
+<tr><td>Fast 4G (1.6 Mbps, 150 ms RTT) – <b>primary metric</b></td><td class="ok">LCP 0.74 s · 278 KB</td><td class="ok">LCP 1.41 s · 398 KB</td><td class="ok">LCP 0.71 s · 152 KB</td></tr>
+<tr><td>Fast 4G + 4× CPU slowdown (stress)</td><td class="ok">1.33 s</td><td class="warn">2.54 s</td><td class="bad">2.98 s</td></tr>
+<tr><td>Slow 4G</td><td class="ok">2.12 s</td><td class="bad">5.49 s (hero image)</td><td>not measured</td></tr>
+</table>
+<p>Layout shift is near zero everywhere (CLS ≤ 0.008). On the stress profile total blocking time stays high (home 0.5–1.3 s) because of two large full-page layout passes; I tried CSS containment, content-visibility, a smaller DOM and font changes and none gave a reproducible gain, so I did not find the root cause. Measurements were taken with headless Chrome on a development PC, not on real devices or a real network.</p>
+
+<h2 class="pb"><span class="n">10</span>What I cut, known limits and risks</h2>
+<table>
+<tr><th style="width:34%">Cut or limitation</th><th>Detail</th></tr>
+<tr><td>Real WhatsApp / SMS sending</td><td>A mock adapter stores and logs messages (as the brief allows). An HTTP gateway is wired by environment variables and DLT fields but has never been run against a real provider. In production, customer OTP login fails closed until one is configured.</td></tr>
+<tr><td>Live deployment</td><td>Not deployed. The Dockerfile (non-root, health check, volume) was reviewed but not built on my machine (no Docker installed). <span class="tag">A1</span></td></tr>
+<tr><td>AI with a real model</td><td>Implemented, not exercised (section 7).</td></tr>
+<tr><td>Photography</td><td>Stock photos from Wikimedia Commons (CC licences, credited at <code>/credits</code>), graded and cropped. They show other manufacturers' badges and some show-floor clutter, which is the weakest part of the visual result (my QA rating 7 / 10). The client must replace them with Brand X press images and the yard's own photos; upload is built.</td></tr>
+<tr><td>History hygiene</td><td>The git history is kept as required. Earlier commits include stock-photo versions from before plates were masked and one image later removed because its photographer asks to be contacted before commercial use. No secrets or real personal data are in the repository (seed data is invented; <code>.env</code> and <code>data/</code> are ignored).</td></tr>
+<tr><td>Price values</td><td>Illustrative, not official road-tax or insurance rates; the admin edits them.</td></tr>
+<tr><td>Security hardening</td><td>Rate limits and login lock-outs live in memory (reset on restart, per process). No CAPTCHA, no 2FA for staff, no automated backups. Fine for a single instance; not for a scaled-out fleet.</td></tr>
+<tr><td>Admin ergonomics</td><td>Some JSON-shaped fields (colours, specs, inspection) are edited as JSON text.</td></tr>
+<tr><td>Not built</td><td>360° viewer, online payment (out of scope), DMS integration (a daily CSV export endpoint instead), spare-parts shop (out of scope), email notifications, CI pipeline.</td></tr>
+<tr><td>Language review</td><td>Hindi strings were not reviewed by a native speaker; the privacy notice is not legal advice.</td></tr>
+</table>
+
+<h3>What I would do next</h3>
+<ol>
+<li>Deploy a demo (container host with a persistent volume), build and health-check the image, and run the browser suites in CI (GitHub Actions) on every push.</li>
+<li>Connect a real WhatsApp Business / SMS provider with approved templates; test the OTP and acknowledgement paths for real; add delivery receipts to the lead timeline.</li>
+<li>Run the AI path with a real key on a labelled set of enquiries, measure summary quality and discount-filter misses, and add a second guard (an LLM or rules-based review) before send.</li>
+<li>Replace the photography with the dealer's own and Brand X press images; add a proper media library, an admin form for JSON fields and an optional 360° viewer.</li>
+<li>Root-cause the main-thread cost on slow phones (critical-CSS inlining, lighter first screen) and measure on real devices.</li>
+<li>Instrument the three success metrics (SLA %, online test-drive count, unanswered call-backs) with a time-series and a weekly report; move to PostgreSQL when more than one instance is needed.</li>
+<li>Native Hindi review, legal review of the privacy notice, a security review and a WCAG audit with real assistive technology.</li>
+</ol>
+
+<h2><span class="n">11</span>Assumptions register</h2>
+<p class="small">The brief gives three sample rows, the numbers in the problem section and the constraints. Everything below is mine and is labelled where it appears above.</p>
+<table>
+<tr><th style="width:7%">ID</th><th>Assumption</th></tr>
+<tr><td>A1</td><td>Brand X has four models – H (hatchback), C (sedan), S (SUV), V (7-seat MPV) – with 2–4 variants each; names, specs, colours, offers, 21 used cars, 32 past sales and ~60 historic leads are invented. The brief supplies only <code>NEW-H-02</code>, <code>UC-1182</code> and <code>UC-1190</code>. The project is not deployed publicly because the brief asks for a live link only "if you deployed it".</td></tr>
+<tr><td>A2</td><td>On-road prices are offered for six cities: Lucknow, Kanpur, Varanasi, Prayagraj, Gorakhpur and Delhi NCR; all are editable in the admin.</td></tr>
+<tr><td>A3</td><td>Road-tax %, registration fee, insurance %, handling, FASTag, the TCS rule (1% above ₹10 lakh) and all rule values are illustrative defaults, not official rates.</td></tr>
+<tr><td>A4</td><td>Showroom, workshop and yard names and addresses (Gomti Nagar, Aliganj, Alambagh; Amausi and Gomti Nagar Extension workshops; a yard on Faizabad Road), phone numbers and opening hours are invented.</td></tr>
+<tr><td>A5</td><td>Slots are one hour long within opening hours; a demo car can take one test drive per slot; each workshop has a fixed number of bays per slot (6 and 4).</td></tr>
+<tr><td>A6</td><td>The five-minute response SLA comes from the brief; the 15-minute SLA for service call-backs is my choice.</td></tr>
+<tr><td>A7</td><td>The brief names buyers/owners, sales consultants and the lead desk, service advisors and the Dealer Principal. I added showroom manager, workshop manager, used-car manager (the brief's "used-car manager"), content editor and admin, and gave buyers optional phone-OTP accounts.</td></tr>
+<tr><td>A8</td><td>Buyers can enquire and book without creating an account; the account is an optional extra.</td></tr>
+<tr><td>A9</td><td>I read the "Ai or automation" line in the out-of-scope list as the heading of the AI rules that follow it, not as an exclusion of AI. Automatic acknowledgements by WhatsApp or SMS template are implemented with a mock provider.</td></tr>
+<tr><td>A10</td><td>Consent wording, the privacy notice, the "captured by the portal" consent for CSV imports and the deletion flow are my drafts, not legal advice.</td></tr>
+<tr><td>A11</td><td>Hindi text was produced by me without native review.</td></tr>
+<tr><td>A12</td><td>Photos are stand-ins; the real dealer would supply brand imagery.</td></tr>
+<tr><td>A13</td><td>Messaging providers and OTP delivery are simulated by default.</td></tr>
+<tr><td>A14</td><td>Revenue-at-risk uses the brief's own formula (late leads × conversion gap × ₹25,000; unanswered call-backs × ½ × ₹4,500 × 30%); the conversion gap is measured from the data if available, else 10 percentage points.</td></tr>
+<tr><td>A15</td><td>The "daily CSV export" for the DMS is an admin endpoint (<code>/api/admin/export/dms.csv</code>) rather than a scheduled job.</td></tr>
+<tr><td>A16</td><td>The used-car price band is computed from the invented past sales table (same model, year ±1, similar kilometres).</td></tr>
+<tr><td>A17</td><td>EMI defaults (9.5% a year, 60 months, 20% down payment) are placeholders in the settings table.</td></tr>
+<tr><td>A18</td><td>The load estimates (4,500 leads and 3,000 service calls a month) come from the brief and are taken as the capacity target for a single SQLite instance.</td></tr>
+</table>
+
+<h2><span class="n">12</span>Process and how to review the code</h2>
+<p>I worked as a small team of specialised AI agents under my direction – a manager, a researcher, a backend developer, a frontend developer, a tester and helpers for photo sourcing and screenshots – with a written engineering contract (<code>docs/CONTRACT.md</code>) that fixed the stack, file ownership and API shapes, a progress log (<code>PROGRESS.md</code>) and QA reports (<code>docs/QA_REPORT.md</code>). The git history (more than 40 commits) shows the build in order: setup and contract → backend → frontend → QA fixes → role system → photos → redesign → QA rounds. Suggested reading order: <code>README.md</code>, <code>deployment.md</code>, <code>docs/CONTRACT.md</code>, <code>server/services/catalog.js</code> (price engine), <code>server/services/leads.js</code> (assignment and SLA), <code>server/services/sales.js</code> (bookings), <code>server/services/ai.js</code>, <code>server/lib/perms.js</code> and <code>tests/api</code>.</p>
+<p class="small">Additional documents in the repository: <code>docs/RESEARCH.md</code> and <code>docs/UX_RESEARCH_V2.md</code> (research notes), <code>docs/IMAGE_CREDITS.md</code> and <code>docs/FONT_LICENSES.md</code> (licences), <code>docs/BACKEND_NOTES.md</code> and <code>docs/FRONTEND_NOTES.md</code> (developer notes).</p>
+
+</body>
+</html>

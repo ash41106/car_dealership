@@ -6,3 +6,4 @@ data/
 !.claude/skills/
 docs/_originals_private/
 __pycache__/
+submission/*.zip
