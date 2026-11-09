@@ -55,9 +55,15 @@ function carHero(m, o) { // card/hero image: uploaded hero > photo > svg
   return img(c.src, m.name, Object.assign({ w: c.w, h: c.h }, o));
 }
 
+function emiFrom(price, emi) {
+  emi = emi || { rate: 9.5, months: 60, down_pct: 20 };
+  const p = Number(price); if (!p) return 0;
+  const loan = p * (1 - (Number(emi.down_pct) || 20) / 100), r = (Number(emi.rate) || 9.5) / 1200, n = Number(emi.months) || 60;
+  return Math.round(loan * r * Math.pow(1 + r, n) / (Math.pow(1 + r, n) - 1) / 100) * 100;
+}
 function modelCard(m, t, lang) {
   const fuels = (m.fuel_types || []).map(f => `<span class="chip">${esc(f)}</span>`).join('');
-  return `<article class="card mcard reveal" data-tilt><a class="card-img" href="/new-cars/${esc(m.slug)}" tabindex="-1" aria-hidden="true">${carHero(m, {})}</a>
+  return `<article class="card mcard reveal" data-tilt><a class="card-img" href="/new-cars/${esc(m.slug)}" tabindex="-1" aria-hidden="true">${carHero(m, {})}<span class="qs" aria-hidden="true"><b>${esc(t(m.body_type))}</b><b>${esc((m.fuel_types || []).join(' / '))}</b>${m.onroad ? `<b>${esc(t('emi_from'))} ${esc(inr(emiFrom(m.onroad)))}${esc(t('per_month'))}</b>` : ''}</span></a>
 <div class="card-b"><div class="chips">${fuels}</div><h3><a href="/new-cars/${esc(m.slug)}">${esc(m.name)}</a></h3><p class="muted">${esc(L(m, 'tagline', lang))}</p>
 <button class="heart" type="button" data-save="${esc(m.slug)}" aria-pressed="false" aria-label="${esc(t('save') + ': ' + m.name)}">${ICON.heart}</button><label class="cmp"><input type="checkbox" data-cmp="${esc(m.slug)}" data-name="${esc(m.name)}"><span>${esc(t('compare'))}</span></label><div class="card-f"><div><small>${esc(t('from'))} ${esc(t('ex_showroom'))}</small><strong class="price">${esc(lakh(m.from_price))}</strong></div><a class="circ" href="/new-cars/${esc(m.slug)}" aria-label="${esc(t('view_details') + ': ' + m.name)}">${ICON.arrow}</a></div></div></article>`;
 }
@@ -66,7 +72,7 @@ function usedCard(u, t, lang, bm) {
   const sold = u.status === 'booked' || u.status === 'sold';
   const badge = sold ? `<span class="badge badge-dark">${esc(t(u.status))}</span>` : (u.featured ? `<span class="badge">${esc(t('featured'))}</span>` : `<span class="badge badge-line">${esc(t('verified'))}</span>`);
   const title = u.title || [u.year, u.model, u.variant].filter(Boolean).join(' ');
-  return `<article class="card ucard reveal" data-tilt><a class="card-img" href="/used-cars/${esc(u.slug)}" tabindex="-1" aria-hidden="true">${usedMedia(u, bm, t, { sizes: '(min-width:1100px) 340px, (min-width:600px) 45vw, 100vw' })}</a>${badge}
+  return `<article class="card ucard reveal" data-tilt><a class="card-img" href="/used-cars/${esc(u.slug)}" tabindex="-1" aria-hidden="true">${usedMedia(u, bm, t, { sizes: '(min-width:1100px) 340px, (min-width:600px) 45vw, 100vw' })}<span class="qs" aria-hidden="true"><b>${esc(u.year)}</b><b>${esc(Number(u.km || 0).toLocaleString('en-IN'))} ${esc(t('km'))}</b>${u.owners ? `<b>${esc(u.owners)} ${esc(t('owners'))}</b>` : ''}</span></a>${badge}
 <button class="heart" type="button" data-save="${esc(u.slug)}" aria-pressed="false" aria-label="${esc(t('save') + ': ' + title)}">${ICON.heart}</button>
 <div class="card-b"><h3><a href="/used-cars/${esc(u.slug)}">${esc(title)}</a></h3><p class="muted">${esc([u.variant, u.transmission].filter(Boolean).join(' · '))}</p>
 <ul class="meta"><li>${esc(u.year)}</li><li>${esc(u.fuel)}</li><li>${esc(Number(u.km || 0).toLocaleString('en-IN'))} ${esc(t('km'))}</li></ul>
@@ -109,4 +115,4 @@ function hdr(o) { // page header
   return `<section class="phead"><div class="wrap"><h1 class="h1" data-split>${o.title}<span class="dot">.</span></h1>${o.sub ? `<p class="lead">${esc(o.sub)}</p>` : ''}</div></section>`;
 }
 
-module.exports = { svc, colorHex, bodyMap, usedBody, usedPhotos, usedMedia, usedLocation, carHero, modelCard, usedCard, breakup, emiWidget, leadForm, hdr };
+module.exports = { emiFrom, svc, colorHex, bodyMap, usedBody, usedPhotos, usedMedia, usedLocation, carHero, modelCard, usedCard, breakup, emiWidget, leadForm, hdr };

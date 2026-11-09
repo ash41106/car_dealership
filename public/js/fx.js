@@ -6,7 +6,8 @@
   var tk = 0;
   w.addEventListener('scroll', function () { if (tk) return; tk = requestAnimationFrame(function () { var h = d.documentElement.scrollHeight - w.innerHeight; sb.style.transform = 'scaleX(' + (h > 0 ? w.scrollY / h : 0) + ')'; tk = 0; }); }, { passive: true });
   // page transition
-  if (!RM) d.addEventListener('click', function (e) {
+  var nativeVT = !!(w.CSS && CSS.supports && CSS.supports('view-transition-name:a'));
+  if (!RM && !nativeVT) d.addEventListener('click', function (e) {
     var a = e.target.closest && e.target.closest('a[href]'); if (!a || e.defaultPrevented || e.metaKey || e.ctrlKey || e.shiftKey || a.target || a.hasAttribute('download')) return;
     var u = new URL(a.href, location.href); if (u.origin !== location.origin || (u.pathname === location.pathname && u.search === location.search) || /^\/(api|uploads)/.test(u.pathname)) return;
     e.preventDefault(); d.body.classList.add('leaving'); setTimeout(function () { location.href = a.href; }, 160);
@@ -123,3 +124,10 @@
 })();
 
 (function () { var on = function () { var run = function () { document.documentElement.classList.add("grain"); }; if (window.requestIdleCallback) requestIdleCallback(run, { timeout: 3000 }); else setTimeout(run, 1500); }; if (document.readyState === "complete") on(); else window.addEventListener("load", on); })();
+
+(function () {
+  var A = window.A; A.$$('.card-img img, .rs-img img').forEach(function (im) {
+    var p = im.closest('.card-img, .rs-img'); if (!p) return;
+    if (im.complete && im.naturalWidth) p.classList.add('ld'); else { im.addEventListener('load', function () { p.classList.add('ld'); }); im.addEventListener('error', function () { p.classList.add('ld'); }); }
+  });
+})();

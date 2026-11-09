@@ -61,7 +61,7 @@ ${offers.length ? `<section class="sec"><div class="wrap"><h2 class="h2">${esc(t
 // ---------- NEW CARS ----------
 function newCars(ctx) {
   const t = ctxT(ctx); const lang = ctx.lang;
-  let models = safe(() => svc.catalog.listModels(), []);
+  let models = safe(() => require('./home').modelsWithPrice(), []);
   const ty = String(ctx.query.type || '');
   if (ty) models = models.filter(m => m.body_type === ty);
   const maxP = Number(ctx.query.maxPrice) || 0;

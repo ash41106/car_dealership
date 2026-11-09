@@ -74,3 +74,15 @@ html[lang=hi] .split .w{padding-bottom:.25em;margin-bottom:-.25em}
 .cur-r{display:grid;place-items:center;font:700 .62rem/1 var(--f-display);letter-spacing:.14em;color:#fff;text-transform:uppercase}
 .cur-h .cur-r.lbl{width:76px;height:76px;margin:-38px 0 0 -38px;background:var(--crimson);border-color:var(--crimson)}
 .cur-r.lbl::before{content:attr(data-l)}
+
+/* ---------- cards: quick-spec reveal, loading shimmer, image morph ---------- */
+.card-img{position:relative}
+.card-img::before{content:"";position:absolute;inset:0;z-index:1;background:linear-gradient(100deg,#e6e4e0 30%,#f3f2ef 50%,#e6e4e0 70%);background-size:300% 100%;animation:sk 1.4s linear infinite;transition:opacity var(--dur-3)}
+.card-img.ld::before{opacity:0;animation:none;pointer-events:none}
+.qs{position:absolute;left:0;right:0;bottom:0;z-index:2;display:flex;flex-wrap:wrap;gap:6px;padding:28px 12px 12px;background:linear-gradient(0deg,rgba(11,11,14,.82),rgba(11,11,14,0));transform:translateY(100%);opacity:0;transition:transform var(--dur-3) var(--ease-out),opacity var(--dur-3)}
+.qs b{font:600 .74rem var(--f-display);letter-spacing:.04em;color:#fff;background:rgba(255,255,255,.16);border:1px solid rgba(255,255,255,.28);padding:5px 10px;border-radius:99px;-webkit-backdrop-filter:blur(6px);backdrop-filter:blur(6px)}
+.card:hover .qs,.card:focus-within .qs{transform:none;opacity:1}
+@media(hover:none){.qs{transform:none;opacity:1}}
+.card h3 a::after{z-index:1}
+.card h3,.card .price{font-family:var(--f-display)}
+@media(prefers-reduced-motion:reduce){.card-img::before{animation:none}.qs{transition:none}}
