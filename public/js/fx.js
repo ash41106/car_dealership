@@ -174,3 +174,15 @@
   var io = new IntersectionObserver(function (es) { es.forEach(function (e) { if (e.isIntersecting) under.add(e.target); else under.delete(e.target); }); set(); }, { rootMargin: '0px 0px -92% 0px' });
   tones.forEach(function (t) { io.observe(t); });
 })();
+
+// every open modal <dialog> traps Tab/Shift+Tab (native modals can hand focus to browser chrome; this keeps it looping inside)
+(function () {
+  var A = window.A, d = document;
+  d.addEventListener('keydown', function (e) {
+    if (e.key !== 'Tab') return; var dl = d.querySelector('dialog[open]'); if (!dl) return;
+    var f = A.$$('a[href],button:not([disabled]),input:not([disabled]):not([type=hidden]),select,textarea,summary,[tabindex]:not([tabindex="-1"])', dl).filter(function (n) { return n.offsetParent !== null && !n.closest('[hidden]'); });
+    if (!f.length) return; var first = f[0], last = f[f.length - 1], a = d.activeElement;
+    if (e.shiftKey && (a === first || !dl.contains(a))) { e.preventDefault(); last.focus(); }
+    else if (!e.shiftKey && (a === last || !dl.contains(a))) { e.preventDefault(); first.focus(); }
+  });
+})();

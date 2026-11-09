@@ -13,10 +13,11 @@ const CHROMES = [process.env.CHROME, 'C:/Program Files/Google/Chrome/Application
 const sleep = ms => new Promise(r => setTimeout(r, ms));
 // Art direction: focal point (x,y as fractions of the source) and zoom (>1 = tighter) per image, so every car is large in a consistent 16:9 (4:3 for used) frame.
 // A unified grade (slight desaturation, contrast, cool-shadow/warm-highlight split, vignette) is baked into the variants.
+const TARGET_SAT = 0.36; // mean saturation cap: over-saturated blue/red photos are pulled down, muted ones are left alone
 const CROP = {
   'cars/model-h-hero': { x: 0.46, y: 0.55, z: 1.04 }, 'cars/model-h-side': { x: 0.6, y: 0.5, z: 1.0 },
-  'cars/model-c-hero': { x: 0.5, y: 0.66, z: 1.18 }, 'cars/model-c-side': { x: 0.52, y: 0.55, z: 1.0 },
-  'cars/model-s-hero': { x: 0.52, y: 0.5, z: 1.0 }, 'cars/model-s-side': { x: 0.55, y: 0.5, z: 1.0 },
+  'cars/model-c-hero': { x: 0.5, y: 0.64, z: 1.14 }, 'cars/model-c-side': { x: 0.52, y: 0.55, z: 1.0 },
+  'cars/model-s-hero': { x: 0.52, y: 0.4, z: 1.0 }, 'cars/model-s-side': { x: 0.55, y: 0.5, z: 1.0 },
   'cars/model-v-hero': { x: 0.55, y: 0.55, z: 1.06 }, 'cars/model-v-side': { x: 0.52, y: 0.58, z: 1.0 }
 };
 
@@ -42,11 +43,12 @@ const CROP = {
       const expr = `(async()=>{const b=await (await fetch('/img/${dir}/${f}?_=${Date.now()}')).blob();const bm=await createImageBitmap(b);const AR=${AR},fx=${cr.x == null ? 0.5 : cr.x},fy=${cr.y == null ? 0.55 : cr.y},z=${cr.z || 1};
 let bw,bh;if(bm.width/bm.height>AR){bh=bm.height;bw=bh*AR}else{bw=bm.width;bh=bw/AR}
 const cw=bw/z,ch=bh/z;const sx=Math.max(0,Math.min(bm.width-cw,fx*bm.width-cw/2)),sy=Math.max(0,Math.min(bm.height-ch,fy*bm.height-ch/2));const out={};
+const pc=document.createElement('canvas');pc.width=pc.height=48;const px=pc.getContext('2d');px.drawImage(bm,sx,sy,cw,ch,0,0,48,48);const id=px.getImageData(0,0,48,48).data;let sa=0,n=0;for(let i=0;i<id.length;i+=4){const mx=Math.max(id[i],id[i+1],id[i+2]),mn=Math.min(id[i],id[i+1],id[i+2]);if(mx>40){sa+=(mx-mn)/mx;n++}}const avgS=n?sa/n:0.3;const SATF=Math.max(0.55,Math.min(1,${TARGET_SAT}/Math.max(avgS,0.01)));
 for(const w of ${JSON.stringify(WIDTHS[dir])}){const sw=Math.min(w,Math.round(cw)),sh=Math.round(sw/AR);const c=document.createElement('canvas');c.width=sw;c.height=sh;const x=c.getContext('2d');
-x.filter='${G.f}';x.drawImage(bm,sx,sy,cw,ch,0,0,sw,sh);x.filter='none';
+x.filter='${G.f}'.replace(/saturate\\(([\\d.]+)\\)/,(m,v)=>'saturate('+(v*SATF).toFixed(3)+')');x.drawImage(bm,sx,sy,cw,ch,0,0,sw,sh);x.filter='none';
 x.globalCompositeOperation='soft-light';let g=x.createLinearGradient(0,0,0,sh);g.addColorStop(0,'rgba(40,70,120,.24)');g.addColorStop(1,'rgba(160,95,50,.2)');x.fillStyle=g;x.fillRect(0,0,sw,sh);
-x.globalCompositeOperation='source-over';const rg=x.createRadialGradient(sw/2,sh*.56,sw*.28,sw/2,sh*.56,sw*.78);rg.addColorStop(0,'rgba(0,0,0,0)');rg.addColorStop(1,'rgba(0,0,0,${G.v})');x.fillStyle=rg;x.fillRect(0,0,sw,sh);
-out[w]={webp:c.toDataURL('image/webp',0.74).split(',')[1],jpg:c.toDataURL('image/jpeg',0.74).split(',')[1],w:sw,h:sh};}return JSON.stringify(out);})()`;
+x.globalCompositeOperation='source-over';if(${dir==='cars'?1:0}){const lg=x.createLinearGradient(0,sh*.62,0,sh);lg.addColorStop(0,'rgba(8,8,10,0)');lg.addColorStop(1,'rgba(8,8,10,.38)');x.fillStyle=lg;x.fillRect(0,sh*.62,sw,sh*.38)}const rg=x.createRadialGradient(sw/2,sh*.56,sw*.28,sw/2,sh*.56,sw*.78);rg.addColorStop(0,'rgba(0,0,0,0)');rg.addColorStop(1,'rgba(0,0,0,${G.v})');x.fillStyle=rg;x.fillRect(0,0,sw,sh);
+out[w]={webp:c.toDataURL('image/webp',${isHero ? 0.5 : 0.74}).split(',')[1],jpg:c.toDataURL('image/jpeg',0.74).split(',')[1],w:sw,h:sh};}return JSON.stringify(out);})()`;
       const r = await S('Runtime.evaluate', { expression: expr, awaitPromise: true, returnByValue: true });
       if (!r.result || !r.result.value) { console.error('FAILED', dir, f, JSON.stringify(r).slice(0, 200)); continue; }
       const res = JSON.parse(r.result.value);
