@@ -3,16 +3,17 @@
   var A = window.A, I = A.I, F = A.F;
   if (!F) return;
   function slotsLoader(form, urlFn, render) {
-    var box = A.$('[data-slots]', form), hid = form.elements.time, seq = 0;
+    var box = A.$('[data-slots]', form), hid = form.elements.time, seq = 0, poll = false;
+    form._poll = function () { poll = true; };
     return function () {
-      var u = urlFn(); hid.value = '';
+      var u = urlFn(); if (!poll) hid.value = ''; poll = false;
       if (!u) { box.innerHTML = ''; return; }
       var n = ++seq; box.innerHTML = '<div class="skel"></div><div class="skel"></div><div class="skel"></div>'; box.setAttribute('aria-busy', 'true');
       A.json(u).then(function (r) {
         if (n !== seq) return; box.removeAttribute('aria-busy');
         var list = Array.isArray(r) ? r : (r.slots || r.items || []);
         if (!list.length) { box.innerHTML = '<p class="muted">' + A.esc(I.no_slots) + '</p>'; return; }
-        box.innerHTML = list.map(function (s, i) { return render(s, i); }).join('');
+        var keep = hid.value; box.innerHTML = list.map(function (s, i) { return render(s, i).replace('<label class="slot">', '<label class="slot" style="--i:' + i + '">'); }).join(''); if (keep) { var again = A.$('input[value="' + keep + '"]', box); if (again && !again.disabled) { again.checked = true; hid.value = keep; } else hid.value = ''; }
       }).catch(function () { if (n !== seq) return; box.removeAttribute('aria-busy'); box.innerHTML = '<p class="err" role="alert">' + A.esc(I.error_generic) + ' <button type="button" class="btn btn-sm btn-o" data-retry>' + A.esc(I.retry) + '</button></p>'; A.$('[data-retry]', box).onclick = function () { form._reload(); }; });
     };
   }
@@ -24,6 +25,24 @@
   }
   function conflict(form, e) { if (e.status === 409) { F.msg(form, I.slot_conflict, 'bad'); form._reload && form._reload(); return true; } return false; }
 
+  // ---- confirmation ticket: the chosen date chip morphs into the ticket's date block (View Transitions where supported) ----
+  function ticket(form, o) {
+    var b = o.body, dt = new Date(b.date + 'T' + b.time + ':00'), loc = A.lang === 'hi' ? 'hi-IN' : 'en-IN', day = dt.getDate(), mon = dt.toLocaleDateString(loc, { month: 'short' }), nice = dt.toLocaleDateString(loc, { weekday: 'long', day: 'numeric', month: 'long' }) + ', ' + b.time;
+    var td = o.kind === 'td', title = td ? I.tk_td : I.tk_sv, where, what;
+    if (td) { var sh = A.$('[name=showroomId]:checked', form), md = A.$('[name=modelId]:checked', form); where = sh ? A.$('.opt-in b', sh.closest('.opt')).textContent : ''; what = md ? A.$('.opt-in b', md.closest('.opt')).textContent : ''; }
+    else { var wk2 = A.$('[name=workshopId]:checked', form); where = wk2 ? A.$('.opt-in b', wk2.closest('.opt')).textContent : ''; what = (b.model || '') + (b.regNo ? ' ' + b.regNo : ''); }
+    var who = o.r && o.r.assignee ? o.r.assignee.name + (o.r.assignee.phone ? ' (' + o.r.assignee.phone + ')' : '') : '';
+    var pad2 = function (n) { return (n < 10 ? '0' : '') + n; }, stamp = function (d2) { return d2.getFullYear() + pad2(d2.getMonth() + 1) + pad2(d2.getDate()) + 'T' + pad2(d2.getHours()) + pad2(d2.getMinutes()) + '00'; };
+    var end = new Date(dt.getTime() + (td ? 45 : 90) * 60000);
+    var ics = ['BEGIN:VCALENDAR', 'VERSION:2.0', 'PRODID:-//Company A Motors//Booking//EN', 'BEGIN:VEVENT', 'UID:' + Date.now() + '@companya-motors', 'DTSTAMP:' + stamp(new Date()), 'DTSTART;TZID=Asia/Kolkata:' + stamp(dt), 'DTEND;TZID=Asia/Kolkata:' + stamp(end), 'SUMMARY:' + title + ': ' + what + ' - Company A Motors', 'LOCATION:' + where + ', Lucknow', 'DESCRIPTION:' + title + ' booked on the Company A Motors website.', 'END:VEVENT', 'END:VCALENDAR'].join('\r\n');
+    var href = URL.createObjectURL(new Blob([ics], { type: 'text/calendar' })), wa = 'https://wa.me/?text=' + encodeURIComponent(title + ': ' + what + ' - ' + where + ', ' + nice);
+    var html = '<div class="ticket" role="status"><div class="tk-top"><span class="tk-date" style="view-transition-name:tkdate"><b>' + day + '</b><small>' + A.esc(mon) + '</small></span><div><h2>' + A.esc(I.tk_t) + '</h2><p>' + A.esc(title + (what ? ': ' + what : '')) + '</p></div><svg class="tk-tick" viewBox="0 0 44 44" aria-hidden="true"><circle cx="22" cy="22" r="19"/><path d="M13 23l7 7 12-15"/></svg></div><div class="tk-body"><dl><dt>' + A.esc(I.tk_where) + '</dt><dd>' + A.esc(where) + '</dd><dt>' + A.esc(I.tk_when) + '</dt><dd>' + A.esc(nice) + '</dd>' + (who ? '<dt>' + A.esc(I.tk_who) + '</dt><dd>' + A.esc(who) + '</dd>' : '') + '</dl><div class="tk-act"><a class="btn" download="company-a-booking.ics" href="' + href + '">' + A.esc(I.tk_cal) + '</a><a class="btn btn-o" target="_blank" rel="noopener" href="' + wa + '">' + A.esc(I.tk_wa) + '</a></div><div class="tk-todo"><h3>' + A.esc(I.tk_bring) + '</h3><ul style="list-style:none;margin:0;padding:0;display:grid;gap:.3rem">' + (td ? '<li>' + A.esc(I.tk_b1) + '</li><li>' + A.esc(I.tk_b2) + '</li><li>' + A.esc(I.tk_b3) + '</li>' : '<li>' + A.esc(I.tk_s1) + '</li><li>' + A.esc(I.tk_s2) + '</li><li>' + A.esc(I.tk_s3) + '</li>') + '</ul></div></div></div>';
+    var chip = A.$('[name=date]:checked', form); chip = chip && chip.nextElementSibling;
+    var swap = function () { F.done(form, html); A.$$('.tk-todo li').forEach(function (l) { l.style.listStyle = 'none'; }); };
+    if (!A.RM && chip && document.startViewTransition) { chip.style.viewTransitionName = 'tkdate'; document.startViewTransition(swap); } else swap();
+    if (!A.RM && navigator.vibrate) navigator.vibrate(30);
+  }
+
   // ---- test drive stepper ----
   var td = A.$('form[data-td]');
   if (td) {
@@ -32,7 +51,7 @@
     var val = function (n) { var c = A.$('[name=' + n + ']:checked', td); return c ? c.value : ''; };
     var load = slotsLoader(td, function () { var m = val('modelId'), s = val('showroomId'), d = td.elements.date.value; return m && s && d ? '/api/slots/test-drive?showroom=' + encodeURIComponent(s) + '&model=' + encodeURIComponent(m) + '&date=' + encodeURIComponent(d) : ''; },
       function (s) { return slotHtml(s.time, !s.available, s.available ? '' : I.slot_taken, s.demoCarId ? ' data-car="' + A.esc(s.demoCarId) + '"' : ''); });
-    td._reload = load; td.elements.date.addEventListener('change', load);
+    td._reload = load; td.addEventListener('change', function (e) { if (e.target.name === 'date') load(); });
     function show() {
       panels.forEach(function (p, i) { p.hidden = i + 1 !== step; }); lis.forEach(function (l, i) { l.classList.toggle('on', i + 1 === step); l.classList.toggle('done', i + 1 < step); if (i + 1 === step) l.setAttribute('aria-current', 'step'); else l.removeAttribute('aria-current'); });
       back.hidden = step === 1; next.hidden = step === 4; sub.hidden = step !== 4; if (step === 3) load();
@@ -54,11 +73,12 @@
       var body = { name: td.elements.name.value.trim(), phone: F.phone(td.elements.phone.value), email: td.elements.email.value.trim() || undefined, showroomId: F.id(val('showroomId')), modelId: F.id(val('modelId')), date: td.elements.date.value, time: td.elements.time.value, consent: true, lang: A.lang };
       F.busy(td, true); F.msg(td, '');
       A.post('/api/test-drive', body).then(function (r) {
-        F.done(td, '<h2 class="h2">' + A.esc(I.booking_done) + '<span class="dot">.</span></h2><p class="lead" style="margin-inline:auto">' + A.esc(body.date + ' · ' + body.time) + '</p>' + F.consultant(r));
+        ticket(td, { kind: 'td', body: body, r: r });
       }).catch(function (e) { F.busy(td, false); if (conflict(td, e)) { step = 3; show(); return; } F.serverErrors(td, e); });
     });
     // preselected model from ?model=
     if (val('modelId')) { step = 2; show(); }
+    setInterval(function () { if (!document.hidden && step === 3) { td._poll(); load(); } }, 20000);
   }
 
   // ---- service ----
@@ -68,7 +88,8 @@
     var wk = function () { var c = A.$('[name=workshopId]:checked', sv); return c ? c.value : ''; };
     var ld = slotsLoader(sv, function () { var w = wk(), d = sv.elements.date.value; return w && d ? '/api/slots/service?workshop=' + encodeURIComponent(w) + '&date=' + encodeURIComponent(d) : ''; },
       function (s) { var full = !(s.remaining > 0); return slotHtml(s.time, full, full ? I.full : s.remaining + ' ' + I.remaining); });
-    sv._reload = ld; sv.elements.date.addEventListener('change', ld); A.$$('[name=workshopId]', sv).forEach(function (r) { r.addEventListener('change', ld); });
+    setInterval(function () { if (!document.hidden && sv.elements.time && A.$('[data-slots] .slot', sv)) { sv._poll(); ld(); } }, 20000);
+    sv._reload = ld; sv.addEventListener('change', function (e) { if (e.target.name === 'date') ld(); }); A.$$('[name=workshopId]', sv).forEach(function (r) { r.addEventListener('change', ld); });
     sv.addEventListener('submit', function (ev) {
       ev.preventDefault(); var okf = F.validate(sv), er = A.$('[name=workshopId]', sv).closest('.field').querySelector('.err');
       if (!wk()) { er.textContent = I.err_required; er.hidden = false; okf = false; } else er.hidden = true;
@@ -78,7 +99,7 @@
       var body = { name: g('name'), phone: F.phone(g('phone')), regNo: g('regNo').toUpperCase(), model: g('model'), workshopId: F.id(wk()), date: g('date'), time: g('time'), serviceType: g('serviceType'), pickupDrop: sv.elements.pickupDrop.checked, notes: g('notes') || undefined, consent: true, lang: A.lang };
       F.busy(sv, true); F.msg(sv, '');
       A.post('/api/service', body).then(function () {
-        F.done(sv, '<h2 class="h2">' + A.esc(I.booking_done) + '<span class="dot">.</span></h2><p class="lead" style="margin-inline:auto">' + A.esc(body.date + ' · ' + body.time) + '</p>');
+        ticket(sv, { kind: 'sv', body: body });
       }).catch(function (e) { F.busy(sv, false); if (conflict(sv, e)) return; F.serverErrors(sv, e); });
     });
   }

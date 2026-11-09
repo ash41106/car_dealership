@@ -6,7 +6,13 @@ const M = require('../views/media');
 const { svc } = C;
 
 function ctxT(ctx) { return V.make(ctx.lang); }
-function today(off) { const d = new Date(Date.now() + (off || 0) * 864e5); return d.toISOString().slice(0, 10); }
+// calendar dates are Lucknow dates (IST), independent of the server timezone
+function today(off) { return new Date(Date.now() + (off || 0) * 864e5 + 19800000).toISOString().slice(0, 10); }
+function dateRail(t, lang, n, sel) {
+  const loc = lang === 'hi' ? 'hi-IN' : 'en-IN';
+  const chips = Array.from({ length: n }, (_, i) => { const iso = today(i), d = new Date(iso + 'T00:00:00Z'); const wd = d.toLocaleDateString(loc, { weekday: 'short', timeZone: 'UTC' }), mo = d.toLocaleDateString(loc, { month: 'short', timeZone: 'UTC' }); return `<label class="dchip"><input type="radio" name="date" value="${iso}" required${i === sel ? ' checked' : ''}><span><small>${esc(i === 0 ? t('today') : wd)}</small><b>${d.getUTCDate()}</b><small>${esc(mo)}</small></span></label>`; }).join('');
+  return `<fieldset class="dates"><legend class="h4">${esc(t('date_rail'))}</legend><div class="rail-d" data-cursor="DRAG">${chips}</div></fieldset>`;
+}
 const safe = (fn, dflt) => { try { return fn(); } catch (e) { return dflt; } };
 
 // ---------- HOME ----------
@@ -186,12 +192,12 @@ function testDrive(ctx) {
 <ol class="steps">${stepNames.map((s, i) => `<li${i === 0 ? ' class="on" aria-current="step"' : ''}><span>${i + 1}</span>${esc(s)}</li>`).join('')}</ol>
 <div class="panel" data-step="1"><h2 class="h3">${esc(t('choose_model'))}</h2><div class="opts">${models.map((m, i) => `<label class="opt"><input type="radio" name="modelId" value="${esc(m.id)}" required${(pre ? m.slug === pre : false) ? ' checked' : ''}><span class="opt-in">${img(m.hero_image || imgUrl(m.slug, m.body_type), m.name)}<b>${esc(m.name)}</b></span></label>`).join('')}</div><p class="err" role="alert" hidden></p></div>
 <div class="panel" data-step="2" hidden><h2 class="h3">${esc(t('choose_showroom'))}</h2><div class="opts list">${shows.map((s, i) => `<label class="opt"><input type="radio" name="showroomId" value="${esc(s.id)}" required><span class="opt-in"><b>${esc(L(s, 'name', lang))}</b><small>${esc(L(s, 'address', lang))}</small></span></label>`).join('')}</div><p class="err" role="alert" hidden></p></div>
-<div class="panel" data-step="3" hidden><h2 class="h3">${esc(t('choose_date'))}</h2><div class="field"><label for="td-date">${esc(t('date'))}</label><input type="date" id="td-date" name="date" min="${today(0)}" max="${today(30)}" value="${today(1)}" required></div>
+<div class="panel" data-step="3" hidden><h2 class="h3">${esc(t('choose_date'))}</h2>${dateRail(t, lang, 14, 1)}
 <h3 class="h4">${esc(t('choose_slot'))}</h3><div class="slots" data-slots role="radiogroup" aria-label="${esc(t('choose_slot'))}" aria-live="polite"></div><p class="err" role="alert" hidden></p></div>
 <div class="panel" data-step="4" hidden><h2 class="h3">${esc(t('td_s4'))}</h2>${personFields(t)}${consentField(t, 'c-td')}<div class="form-msg" role="status" aria-live="polite"></div></div>
 <div class="step-nav"><button type="button" class="btn btn-o" data-back hidden>${ICON.left} ${esc(t('back'))}</button><button type="button" class="btn" data-next>${esc(t('continue'))} ${ICON.arrow}</button><button type="submit" class="btn" data-submit hidden>${esc(t('confirm_booking'))} ${ICON.arrow}</button></div>
 <input type="hidden" name="time"></form><div class="done" data-done hidden></div></div></section>`;
-  return ctx.html(page({ ctx, title: t('td_title'), desc: t('td_title') + ' - Company A Motors', body, jsonld: [crumbsLd([['Home', '/'], [t('td_title'), '/test-drive']])], scripts: ['/js/forms.js', '/js/book.js'] }));
+  return ctx.html(page({ ctx, title: t('td_title'), desc: t('td_title') + ' - Company A Motors', body, jsonld: [crumbsLd([['Home', '/'], [t('td_title'), '/test-drive']])], css: ['/css/book2.css'], scripts: ['/js/forms.js', '/js/book.js'] }));
 }
 
 function callbackBox(t) {
@@ -204,7 +210,7 @@ function servicePage(ctx) {
   const body = `${crumbsHtml([[t('sv_title'), '/service']], t)}${C.hdr({ title: esc(t('sv_title')) })}<section class="sec tight"><div class="wrap narrow">
 <form class="form" data-sv method="post" action="/forms/service" novalidate>
 <div class="field"><span class="lab">${esc(t('workshop'))} <i>*</i></span><div class="opts list">${ws.map(w => `<label class="opt"><input type="radio" name="workshopId" value="${esc(w.id)}" required><span class="opt-in"><b>${esc(L(w, 'name', lang))}</b><small>${esc(L(w, 'address', lang))}</small></span></label>`).join('')}</div><p class="err" role="alert" hidden></p></div>
-${field(t, { name: 'date', label: t('date'), type: 'date', required: true, value: today(1), min: today(0), max: today(60) })}
+${dateRail(t, lang, 14, 1)}
 <div class="field"><span class="lab">${esc(t('choose_slot'))} <i>*</i></span><div class="slots" data-slots role="radiogroup" aria-label="${esc(t('choose_slot'))}" aria-live="polite"></div><p class="err" role="alert" hidden></p></div><input type="hidden" name="time">
 ${personFields(t)}${field(t, { name: 'regNo', label: t('reg_no'), required: true, maxlength: 14, value: '' })}
 ${field(t, { name: 'model', label: t('car_model'), type: 'select', required: true, options: models.map(m => [m.name, m.name]).concat([['Other', 'Other']]) })}
@@ -212,7 +218,7 @@ ${field(t, { name: 'serviceType', label: t('service_type'), type: 'select', opti
 <label class="chk"><input type="checkbox" name="pickupDrop" value="1"><span>${esc(t('pickup'))}</span></label>
 ${field(t, { name: 'notes', label: t('message'), type: 'textarea' })}${consentField(t, 'c-sv')}<div class="form-msg" role="status" aria-live="polite"></div>
 <button class="btn" type="submit">${esc(t('confirm_booking'))} ${ICON.arrow}</button></form><div class="done" data-done hidden></div>${callbackBox(t)}</div></section>`;
-  return ctx.html(page({ ctx, title: t('sv_title'), desc: t('sv_title') + ' - Company A Motors', body, jsonld: [crumbsLd([['Home', '/'], [t('sv_title'), '/service']])], scripts: ['/js/forms.js', '/js/book.js'] }));
+  return ctx.html(page({ ctx, title: t('sv_title'), desc: t('sv_title') + ' - Company A Motors', body, jsonld: [crumbsLd([['Home', '/'], [t('sv_title'), '/service']])], css: ['/css/book2.css'], scripts: ['/js/forms.js', '/js/book.js'] }));
 }
 
 function comparePage(ctx) {

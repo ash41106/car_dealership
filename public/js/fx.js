@@ -106,6 +106,20 @@
       else if (!e.shiftKey && (d.activeElement === last || !fl.contains(d.activeElement))) { e.preventDefault(); first.focus(); }
     });
     mq.addEventListener && mq.addEventListener('change', function () { if (isOpen() && !mq.matches) close(); });
+    // bottom-sheet grip: drag down to dismiss
+    var grip = d.createElement('div'); grip.className = 'sheet-grip'; grip.setAttribute('aria-hidden', 'true'); fl.insertBefore(grip, fl.firstChild);
+    var y0 = null, dy = 0;
+    grip.addEventListener('pointerdown', function (e) { y0 = e.clientY; dy = 0; grip.setPointerCapture(e.pointerId); fl.style.transition = 'none'; });
+    grip.addEventListener('pointermove', function (e) { if (y0 === null) return; dy = Math.max(0, e.clientY - y0); fl.style.transform = 'translateY(' + dy + 'px)'; });
+    var end = function () { if (y0 === null) return; y0 = null; fl.style.transition = ''; fl.style.transform = ''; if (dy > 120) close(); };
+    grip.addEventListener('pointerup', end); grip.addEventListener('pointercancel', end);
+    // live result count on the apply button
+    var apply = A.$('button[type=submit]', fl), base = apply ? apply.innerHTML : '', tm;
+    var count = function () {
+      var p = new URLSearchParams(new FormData(fl)); p.delete('sort'); p.set('pageSize', 1); Array.from(p.keys()).forEach(function (k) { if (!p.get(k)) p.delete(k); });
+      A.json('/api/used?' + p.toString()).then(function (r) { if (apply && typeof r.total === 'number') apply.innerHTML = A.esc((A.I.show_n || 'Show {n}').replace('{n}', r.total)) + ' ' + (base.match(/<svg[\s\S]*<\/svg>/) || [''])[0]; }).catch(function () { });
+    };
+    fl.addEventListener('change', function () { clearTimeout(tm); tm = setTimeout(count, 250); });
   }
 })();
 

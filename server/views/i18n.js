@@ -345,6 +345,27 @@ const S = {
   emi_in: { en: "Interest", hi: "ब्याज" },
   reserve_t: { en: "Reserve your interest", hi: "अपनी रुचि दर्ज करें" },
   sheet_close: { en: "Close", hi: "बंद करें" },
+  tk_t: { en: "Booking confirmed", hi: "बुकिंग पक्की" },
+  tk_cal: { en: "Add to calendar", hi: "कैलेंडर में जोड़ें" },
+  tk_wa: { en: "Share on WhatsApp", hi: "WhatsApp पर शेयर करें" },
+  tk_bring: { en: "What to bring", hi: "क्या साथ लाएँ" },
+  tk_b1: { en: "Original driving licence", hi: "ओरिजिनल ड्राइविंग लाइसेंस" },
+  tk_b2: { en: "A photo ID", hi: "फ़ोटो पहचान पत्र" },
+  tk_b3: { en: "Arrive 10 minutes early", hi: "10 मिनट पहले पहुँचें" },
+  tk_s1: { en: "Your vehicle registration (RC)", hi: "आपकी गाड़ी का RC" },
+  tk_s2: { en: "Previous service book, if you have it", hi: "पिछली सर्विस बुक, अगर हो" },
+  tk_s3: { en: "A spare key", hi: "अतिरिक्त चाबी" },
+  tk_td: { en: "Test drive", hi: "टेस्ट ड्राइव" },
+  tk_sv: { en: "Service", hi: "सर्विस" },
+  tk_where: { en: "Where", hi: "कहाँ" },
+  tk_when: { en: "When", hi: "कब" },
+  tk_who: { en: "Your consultant", hi: "आपके कंसल्टेंट" },
+  tk_veh: { en: "Vehicle", hi: "गाड़ी" },
+  tk_new: { en: "Book another", hi: "एक और बुक करें" },
+  date_rail: { en: "Pick a day", hi: "दिन चुनें" },
+  live_slots: { en: "Live availability", hi: "लाइव उपलब्धता" },
+  show_n: { en: "Show {n} cars", hi: "{n} कारें देखें" },
+  filt_sheet: { en: "Filters", hi: "फ़िल्टर" },
   grievance: { en: 'Grievance officer', hi: 'शिकायत अधिकारी' }
 };
 
@@ -355,7 +376,7 @@ function make(lang) {
   return t;
 }
 // subset of strings shipped to client JS
-const CLIENT_KEYS = ['loading', 'error_generic', 'retry', 'err_name', 'err_phone', 'err_email', 'err_consent', 'err_required', 'sending', 'submit', 'slot_taken', 'no_slots', 'slot_conflict', 'thanks', 'thanks_lead', 'your_consultant', 'booking_done', 'remaining', 'full', 'select', 'ex_showroom', 'on_road', 'valid_until', 'price_updating', 'request_quote', 'price_note', 'per_month', 'optout_done', 'inspection_pass', 'inspection_attn', 'step', 'continue', 'confirm_booking', 'choose_slot', 'compare', 'close', 'name', 'privacy', 'enlarge', 'prev', 'next', 'gallery_lbl'];
+const CLIENT_KEYS = ['loading', 'error_generic', 'retry', 'err_name', 'err_phone', 'err_email', 'err_consent', 'err_required', 'sending', 'submit', 'slot_taken', 'no_slots', 'slot_conflict', 'thanks', 'thanks_lead', 'your_consultant', 'booking_done', 'remaining', 'full', 'select', 'ex_showroom', 'on_road', 'valid_until', 'price_updating', 'request_quote', 'price_note', 'per_month', 'optout_done', 'inspection_pass', 'inspection_attn', 'step', 'continue', 'confirm_booking', 'choose_slot', 'compare', 'close', 'name', 'privacy', 'enlarge', 'prev', 'next', 'gallery_lbl', 'tk_t', 'tk_cal', 'tk_wa', 'tk_bring', 'tk_b1', 'tk_b2', 'tk_b3', 'tk_s1', 'tk_s2', 'tk_s3', 'tk_td', 'tk_sv', 'tk_where', 'tk_when', 'tk_who', 'tk_veh', 'tk_new', 'show_n', 'results'];
 // all keys sharing a prefix (used to ship feature-specific strings to one page)
 function group(lang, prefix) { const t = make(lang), o = {}; Object.keys(S).forEach(k => { if (k.startsWith(prefix)) o[k] = t(k); }); return o; }
 function client(lang) {

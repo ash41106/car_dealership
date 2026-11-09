@@ -86,3 +86,12 @@ html[lang=hi] .split .w{padding-bottom:.25em;margin-bottom:-.25em}
 .card h3 a::after{z-index:1}
 .card h3,.card .price{font-family:var(--f-display)}
 @media(prefers-reduced-motion:reduce){.card-img::before{animation:none}.qs{transition:none}}
+
+/* mobile filters become a bottom sheet */
+.sheet-grip{display:none}
+@media(max-width:959px){
+  .filters{top:auto;left:0;right:0;bottom:0;width:100%;max-height:88vh;border-radius:22px 22px 0 0;padding:34px 20px calc(24px + env(safe-area-inset-bottom));transform:translateY(105%);box-shadow:0 -24px 60px rgba(0,0,0,.3);transition:transform var(--dur-4) var(--ease-out),visibility 0s linear var(--dur-4)}
+  .filters.open{transform:none;transition:transform var(--dur-4) var(--ease-out)}
+  .sheet-grip{display:block;position:absolute;left:0;right:0;top:0;height:30px;cursor:grab;touch-action:none}.sheet-grip::after{content:"";position:absolute;left:50%;top:11px;width:44px;height:4px;margin-left:-22px;border-radius:9px;background:#cfccc6}
+  .fl-x{top:8px;right:8px}
+}
