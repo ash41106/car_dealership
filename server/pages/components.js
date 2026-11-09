@@ -106,7 +106,7 @@ ${V.consentField(t, 'c-' + (o.id || 'x'))}<div class="form-msg" role="status" ar
 }
 
 function hdr(o) { // page header
-  return `<section class="phead"><div class="wrap"><h1 class="h1">${o.title}<span class="dot">.</span></h1>${o.sub ? `<p class="lead">${esc(o.sub)}</p>` : ''}</div></section>`;
+  return `<section class="phead"><div class="wrap"><h1 class="h1" data-split>${o.title}<span class="dot">.</span></h1>${o.sub ? `<p class="lead">${esc(o.sub)}</p>` : ''}</div></section>`;
 }
 
 module.exports = { svc, colorHex, bodyMap, usedBody, usedPhotos, usedMedia, usedLocation, carHero, modelCard, usedCard, breakup, emiWidget, leadForm, hdr };

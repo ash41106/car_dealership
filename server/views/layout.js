@@ -73,13 +73,13 @@ function page(o) {
   const navHtml = nav.map(([p, k]) => `<a href="${p}"${cur(p) ? ' aria-current="page"' : ''}>${esc(t(k))}</a>`).join('');
   const other = lang === 'en' ? 'hi' : 'en';
   const ld = (o.jsonld || []).map(j => `<script type="application/ld+json">${jsonSafe(j)}</script>`).join('');
-  const scripts = ['/js/app.js', '/js/fx.js'].concat(o.scripts || []).map(s => `<script src="${s}?v=4" defer></script>`).join('');
+  const scripts = ['/js/app.js', '/js/fx.js', '/js/v2.js'].concat(o.scripts || []).map(s => `<script src="${s}?v=5" defer></script>`).join('');
   return `<!doctype html><html lang="${lang}"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
 <title>${esc(title)}</title><meta name="description" content="${esc(desc)}">
 ${o.noindex ? '<meta name="robots" content="noindex,nofollow">' : `<link rel="canonical" href="${esc(canon)}"><link rel="alternate" hreflang="en" href="${esc(canon)}?lang=en"><link rel="alternate" hreflang="hi" href="${esc(canon)}?lang=hi"><link rel="alternate" hreflang="x-default" href="${esc(canon)}">`}
 <meta property="og:type" content="${o.ogType || 'website'}"><meta property="og:title" content="${esc(title)}"><meta property="og:description" content="${esc(desc)}"><meta property="og:url" content="${esc(canon)}"><meta property="og:image" content="${esc(og)}"><meta property="og:locale" content="${lang === 'hi' ? 'hi_IN' : 'en_IN'}"><meta name="twitter:card" content="summary_large_image">
 <meta name="theme-color" content="#0b0b0b"><link rel="icon" href="/img/favicon.svg" type="image/svg+xml">
-${o.preload ? preloadTag(o.preload) : ''}<link rel="stylesheet" href="/css/app.css?v=4"><link rel="stylesheet" href="/css/fx.css?v=4">${(o.css || []).map(c => `<link rel="stylesheet" href="${c}?v=1">`).join('')}${ld}</head>
+${o.preload ? preloadTag(o.preload) : ''}<link rel="stylesheet" href="/css/app.css?v=5"><link rel="preload" as="font" type="font/woff2" href="/fonts/inter-tight.woff2" crossorigin><link rel="preload" as="font" type="font/woff2" href="/fonts/inter.woff2" crossorigin><link rel="stylesheet" href="/css/fx.css?v=5"><link rel="stylesheet" href="/css/v2.css?v=5">${lang === 'hi' ? '<style>@font-face{font-family:"Noto Sans Devanagari";src:url(/fonts/noto-devanagari.woff2) format("woff2");font-weight:400 700;font-display:swap;unicode-range:U+0900-097F,U+1CD0-1CF9,U+200C-200D,U+20A8,U+20B9,U+25CC,U+A830-A839,U+A8E0-A8FF,U+11B00-11B09}</style>' : ''}${(o.css || []).map(c => `<link rel="stylesheet" href="${c}?v=1">`).join('')}${ld}</head>
 <body class="${esc(o.bodyClass || '')}"><div class="progress" id="progress" aria-hidden="true"></div>
 <a class="skip" href="#main">${esc(t('skip'))}</a>
 <header class="hdr" id="hdr"><div class="wrap hdr-in">
@@ -132,6 +132,6 @@ function personFields(t, v) {
     field(t, { name: 'phone', label: t('phone'), required: true, type: 'tel', autocomplete: 'tel-national', inputmode: 'numeric', maxlength: 16, value: v.phone }) +
     field(t, { name: 'email', label: t('email'), type: 'email', autocomplete: 'email', value: v.email });
 }
-function heading(a, b) { return `<h2 class="h2">${esc(a)} <em>${esc(b)}</em><span class="dot">.</span></h2>`; }
+function heading(a, b) { return `<h2 class="h2" data-split>${esc(a)} <em>${esc(b)}</em><span class="dot">.</span></h2>`; }
 
 module.exports = { colourName, esc, inr, lakh, L, jsonSafe, ICON, imgUrl, img, page, crumbsLd, crumbsHtml, dealerLd, consentField, field, personFields, heading, BASE, make, langHref };
