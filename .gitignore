@@ -2,5 +2,7 @@ node_modules/
 data/
 *.log
 .env
-.claude/
+.claude/*
+!.claude/skills/
 docs/_originals_private/
+__pycache__/
