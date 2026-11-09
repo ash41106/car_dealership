@@ -5,7 +5,7 @@
   var fine = !!(w.matchMedia && w.matchMedia('(hover:hover) and (pointer:fine) and (min-width: 900px)').matches);
   var data = {}; try { data = JSON.parse(A.$('#home-data').textContent); } catch (e) { }
   var clamp = function (v, a, b) { return Math.max(a, Math.min(b, v)); };
-  var lakh = function (n) { n = Math.round(n); return n >= 1e7 ? '₹' + (n / 1e7).toFixed(2) + ' Cr' : n >= 1e5 ? '₹' + (n / 1e5).toFixed(2).replace(/\.?0+$/, '') + ' Lakh' : A.inr(n); };
+  var lakh = function (n) { n = Math.round(n); return n >= 1e7 ? '₹' + (n / 1e7).toFixed(2) + ' ' + (F.cr || 'Cr') : n >= 1e5 ? '₹' + (n / 1e5).toFixed(2).replace(/\.?0+$/, '') + ' ' + (F.lk || 'Lakh') : A.inr(n); };
 
   /* ---- hero ---- */
   var hero = A.$('.hero3');
@@ -83,7 +83,7 @@
       A.tween(mx, max, lakh);
       var k = 0; flip(function () { items.forEach(function (el) { var ok = +el.getAttribute('data-p') <= max; el.hidden = !ok; if (ok) k++; }); });
       var kn = 0, ku = 0; items.forEach(function (el) { if (!el.hidden) { if (el.getAttribute('data-k') === 'used') ku++; else kn++; } });
-      cnt.textContent = k + ' ' + (F.bud_match || ''); none.hidden = k > 0;
+      cnt.textContent = k + ' ' + (F.bud_match || ''); none.hidden = k > 0; var hint = A.$('#b-hint'); if (hint) hint.hidden = k > 0;
       [['#b-new', kn], ['#b-used', ku]].forEach(function (p) { var a = A.$(p[0]); if (p[1] > 0) { a.removeAttribute('aria-disabled'); a.removeAttribute('tabindex'); } else { a.setAttribute('aria-disabled', 'true'); a.setAttribute('tabindex', '-1'); } });
       A.$('#b-new').href = '/new-cars?maxPrice=' + Math.round(max); A.$('#b-used').href = '/used-cars?maxPrice=' + Math.round(max);
     }

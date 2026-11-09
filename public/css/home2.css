@@ -120,8 +120,7 @@ dialog.fdlg[open]{animation:dlg var(--dur-3) var(--ease-out)}@keyframes dlg{from
 .night .eyebrow li{color:#e6e4df}.h3-in .lead{color:#e4e2dd}
 @media(max-width:700px){.h3-shade{background:linear-gradient(0deg,rgba(11,11,14,.96) 0%,rgba(11,11,14,.84) 38%,rgba(11,11,14,.6) 68%,rgba(11,11,14,.2) 100%)}.cta3::after{display:none}}
 /* rail pin is capped so tall monitors do not inflate it */
-.mrail{height:calc(var(--n) * min(72vh,700px) + min(52vh,500px))}
-.rail-pin{height:min(100vh,960px);top:calc((100vh - min(100vh,960px)) / 2)}
+@media(min-width:900px){.mrail{height:calc(var(--n) * min(72vh,700px) + min(52vh,500px))}.rail-pin{height:min(100vh,960px);top:calc((100vh - min(100vh,960px)) / 2)}}
 /* art-directed frame: skewed crop + red slash + floor gradient so every photo reads as designed */
 .rs-img{position:relative;clip-path:polygon(7% 0,100% 0,100% 100%,0 100%);border-radius:0;box-shadow:none}
 .rs-img::before{content:"";position:absolute;left:0;top:0;bottom:0;width:7%;background:var(--crimson);transform:skewX(-9deg) translateX(-30%);z-index:2;opacity:.95}
@@ -135,3 +134,8 @@ dialog.fdlg[open]{animation:dlg var(--dur-3) var(--ease-out)}@keyframes dlg{from
 .bud-top{max-width:46rem;margin-bottom:2rem}
 a.btn[aria-disabled=true]{opacity:.4;pointer-events:none}
 .fd-res .pc small{display:block;font:500 .68rem var(--f-body);letter-spacing:.08em;text-transform:uppercase;color:var(--muted-night)}.bud-out{flex-wrap:wrap}.bud-out output{font-size:clamp(2.2rem,3.4vw,3.4rem)}.bud-out span{white-space:nowrap}.bud-sum small{display:inline-block;white-space:nowrap}
+
+/* horizontal strips: cards are visible as soon as the strip is (no per-card off-screen reveal) */
+.bud-grid .reveal,.strip .reveal,.rail-view .reveal{opacity:1!important;transform:none!important}
+.bud-hint{margin:.6rem 0 0;padding:.7rem 1rem;border-radius:12px;background:#fff;border:1px dashed #c9c5be;font-size:.9rem;color:var(--muted)}
+@media(max-width:899px){.mrail{height:auto!important}.rail-pin{position:static!important;height:auto!important;top:auto!important}}

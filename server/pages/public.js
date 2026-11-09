@@ -381,7 +381,7 @@ function carImage(ctx) {
   ctx.text(render(type, ctx.query.c), 200, 'image/svg+xml; charset=utf-8');
 }
 
-function wrap(fn) { return async (ctx) => { try { return await fn(ctx); } catch (e) { if (e && e.status && e.status < 500) throw e; console.error('[page]', ctx.req && ctx.req.url, e); return serverError(ctx); } }; }
+function wrap(fn) { return async (ctx) => { V.setLang(ctx.lang); try { return await fn(ctx); } catch (e) { if (e && e.status && e.status < 500) throw e; console.error('[page]', ctx.req && ctx.req.url, e); return serverError(ctx); } }; }
 
 module.exports = { register(router) {
   const g = (p, fn) => router.get(p, wrap(fn));

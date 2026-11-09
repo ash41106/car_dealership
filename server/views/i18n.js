@@ -372,6 +372,9 @@ const S = {
   fr_who_two: { en: "suits two people comfortably", hi: "दो लोगों के लिए आरामदायक है" },
   fr_who_fam: { en: "seats a family of four or five comfortably", hi: "4-5 लोगों के परिवार के लिए आरामदायक है" },
   fr_who_big: { en: "has room for a bigger group", hi: "बड़े समूह के लिए जगह है" },
+  lk_word: { en: "Lakh", hi: "लाख" },
+  cr_word: { en: "Cr", hi: "करोड़" },
+  bud_hint: { en: "No cars fit this budget yet. Raise the monthly EMI or pick a longer tenure.", hi: "इस बजट में अभी कोई कार नहीं है। मासिक EMI बढ़ाएँ या लंबी अवधि चुनें।" },
   grievance: { en: 'Grievance officer', hi: 'शिकायत अधिकारी' }
 };
 

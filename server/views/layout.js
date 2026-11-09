@@ -4,10 +4,13 @@ const { make, client } = require('./i18n');
 const BASE = () => (process.env.BASE_URL || 'http://localhost:' + (process.env.PORT || 3000)).replace(/\/$/, '');
 const esc = (v) => String(v == null ? '' : v).replace(/[&<>"'`]/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;', '`': '&#96;' }[c]));
 const inr = (n) => (n == null || n === '' || isNaN(n)) ? '' : '\u20B9' + Number(n).toLocaleString('en-IN', { maximumFractionDigits: 0 });
-const lakh = (n) => {
-  n = Number(n); if (!n) return '';
-  if (n >= 1e7) return '\u20B9' + (n / 1e7).toFixed(2).replace(/\.?0+$/, '') + ' Cr';
-  if (n >= 1e5) return '\u20B9' + (n / 1e5).toFixed(2).replace(/\.?0+$/, '') + ' Lakh';
+// lakh/crore follow the page language (Devanagari words under lang=hi). Rendering is synchronous per request, so a module-level current language is safe.
+const WORDS = { en: { lakh: 'Lakh', cr: 'Cr' }, hi: { lakh: '\u0932\u093E\u0916', cr: '\u0915\u0930\u094B\u0921\u093C' } };
+const cur = { lang: 'en' };
+const lakh = (n, lang) => {
+  n = Number(n); if (!n) return ''; const w = WORDS[lang || cur.lang] || WORDS.en;
+  if (n >= 1e7) return '\u20B9' + (n / 1e7).toFixed(2).replace(/\.?0+$/, '') + ' ' + w.cr;
+  if (n >= 1e5) return '\u20B9' + (n / 1e5).toFixed(2).replace(/\.?0+$/, '') + ' ' + w.lakh;
   return inr(n);
 };
 const L = (o, f, lang) => { if (!o) return ''; const v = o[f + '_' + lang]; return v != null && v !== '' ? v : (o[f + '_en'] != null ? o[f + '_en'] : (o[f] != null ? o[f] : '')); };
@@ -79,7 +82,7 @@ function page(o) {
 ${o.noindex ? '<meta name="robots" content="noindex,nofollow">' : `<link rel="canonical" href="${esc(canon)}"><link rel="alternate" hreflang="en" href="${esc(canon)}?lang=en"><link rel="alternate" hreflang="hi" href="${esc(canon)}?lang=hi"><link rel="alternate" hreflang="x-default" href="${esc(canon)}">`}
 <meta property="og:type" content="${o.ogType || 'website'}"><meta property="og:title" content="${esc(title)}"><meta property="og:description" content="${esc(desc)}"><meta property="og:url" content="${esc(canon)}"><meta property="og:image" content="${esc(og)}"><meta property="og:locale" content="${lang === 'hi' ? 'hi_IN' : 'en_IN'}"><meta name="twitter:card" content="summary_large_image">
 <script>(function(){if(!(window.CSS&&CSS.supports&&CSS.supports('view-transition-name:a')))return;addEventListener('pageswap',function(e){if(!e.viewTransition||!e.activation||!e.activation.entry)return;try{var p=new URL(e.activation.entry.url).pathname,a=document.querySelector('.card-img[href="'+p+'"]');if(a)a.style.viewTransitionName='car'}catch(x){}});addEventListener('pagereveal',function(e){if(!e.viewTransition)return;var s=document.querySelector('.stage');if(s){s.style.viewTransitionName='car';e.viewTransition.finished.finally(function(){s.style.viewTransitionName=''})}})})();</script><meta name="theme-color" content="#0b0b0b"><link rel="icon" href="/img/favicon.svg" type="image/svg+xml">
-${o.preload ? preloadTag(o.preload) : ''}<link rel="stylesheet" href="/css/app.css?v=5"><link rel="preload" as="font" type="font/woff2" href="/fonts/inter-tight.woff2" crossorigin><link rel="stylesheet" href="/css/fx.css?v=5"><link rel="stylesheet" href="/css/v2.css?v=5">${lang === 'hi' ? '<style>@font-face{font-family:"Noto Sans Devanagari";src:url(/fonts/noto-devanagari.woff2) format("woff2");font-weight:400 700;font-display:swap;unicode-range:U+0900-097F,U+1CD0-1CF9,U+200C-200D,U+20A8,U+20B9,U+25CC,U+A830-A839,U+A8E0-A8FF,U+11B00-11B09}</style>' : ''}${(o.css || []).map(c => `<link rel="stylesheet" href="${c}?v=5">`).join('')}${ld}</head>
+${o.preload ? preloadTag(o.preload) : ''}<link rel="stylesheet" href="/css/app.css?v=5"><link rel="preload" as="font" type="font/woff2" href="/fonts/inter-tight.woff2" crossorigin><link rel="preload" as="font" type="font/woff2" href="/fonts/instrument-serif-italic.woff2" crossorigin><link rel="stylesheet" href="/css/fx.css?v=5"><link rel="stylesheet" href="/css/v2.css?v=5">${lang === 'hi' ? '<style>@font-face{font-family:"Noto Sans Devanagari";src:url(/fonts/noto-devanagari.woff2) format("woff2");font-weight:400 700;font-display:swap;unicode-range:U+0900-097F,U+1CD0-1CF9,U+200C-200D,U+20A8,U+20B9,U+25CC,U+A830-A839,U+A8E0-A8FF,U+11B00-11B09}</style>' : ''}${(o.css || []).map(c => `<link rel="stylesheet" href="${c}?v=5">`).join('')}${ld}</head>
 <body class="${esc(o.bodyClass || '')}"><div class="progress" id="progress" aria-hidden="true"></div>
 <a class="skip" href="#main">${esc(t('skip'))}</a>
 <header class="hdr" id="hdr"><div class="wrap hdr-in">
@@ -134,4 +137,4 @@ function personFields(t, v) {
 }
 function heading(a, b) { return `<h2 class="h2" data-split>${esc(a)} <em>${esc(b)}</em><span class="dot">.</span></h2>`; }
 
-module.exports = { colourName, esc, inr, lakh, L, jsonSafe, ICON, imgUrl, img, page, crumbsLd, crumbsHtml, dealerLd, consentField, field, personFields, heading, BASE, make, langHref };
+module.exports = { setLang: (l) => { cur.lang = l === 'hi' ? 'hi' : 'en'; }, colourName, esc, inr, lakh, L, jsonSafe, ICON, imgUrl, img, page, crumbsLd, crumbsHtml, dealerLd, consentField, field, personFields, heading, BASE, make, langHref };
