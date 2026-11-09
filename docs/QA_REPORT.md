@@ -1,3 +1,87 @@
+# QA Report - Company A Motors (Round 6: final verification)
+
+Tester: QA lead. Fresh DBs (ports 3700-3702, RATE_LIMIT_PUBLIC=5000), headless Edge via CDP, commit 51fee4e. No app code edited. New helpers in `tests/e2e/`: `perf6.js` (profile x page x viewport, 5 runs, run 1 discarded), `trace6.js` (main-thread trace attribution), `layout6.js`, `montage6.js`, `imgsheet6.js`, `r6_void.js`, `r6_void2.js`, `r6_hi_a11y.js`. Screenshots in `%TEMP%\qa6-shots` (montages `M6_*.png`, `P_*.png`).
+
+## Round 6 score: 84 / 100 (round 5: 84) - does NOT clear 85
+
+| Area | Max | R6 | Why |
+|---|---|---|---|
+| Functionality | 30 | 28 | npm test 67/67, run.js 442/442, rbac.js 121/122 (by-design OTP lockout), browser3 112/112, customer 11/11. R5-01, 04, 05, 08, 09, 10, 12, 15 verified fixed. Deductions: R6-01, budget CTAs at minimum EMI. |
+| Backend / security | 20 | 17 | Not re-audited (UI-only changes); suites green. |
+| Frontend UX / design | 20 | 17 | Header tone, EMI bar, budget layout, graded photography all better. R6-01: about 1,700 px black void on the mobile home. Photography still stock-like. |
+| SEO / perf / a11y | 10 | 6 | CLS about 0, JS cost small, no console errors, no overflow, targets pass. TBT under 4x CPU still high (home 0.56-0.87 s, model page 1.7 s). |
+| i18n + DPDP | 10 | 8 | Hindi finder reasons and budget strings translated; "Lakh" stays Latin. Plates masked in every sampled variant. |
+| Deploy / docs / tests | 10 | 8 | Helpers added, no new deps. |
+| **Total** | **100** | **84** | |
+
+## Performance (cache off, 5 runs, run 1 cold/discarded; median / worst of runs 2-5)
+| Profile | Page | LCP | TBT | CLS | KB |
+|---|---|---|---|---|---|
+| Fast 4G, no CPU slowdown (primary) | Home 390 | 0.76 / 0.80 s | 14 / 15 ms | 0.0015 | 303 |
+| | Home 1440 | 1.68 / 1.72 s | 17 / 17 ms | 0.0047 | 469 |
+| | Model H 390 / 1440 | 0.82 / 0.84 ; 1.13 / 1.14 s | 21 ; 20 ms | 0.0001 | 158 ; 177 |
+| | Used 390 / 1440 | 1.25 / 1.29 ; 1.46 / 1.49 s | 0 ; 0 | 0 | 215 ; 365 |
+| Fast 4G + 4x CPU (stress) | Home 390 | 2.75 / 3.38 s | 562 / 874 ms | 0 | 303 |
+| | Home 1440 | 2.88 / 3.00 s | 1154 / 1398 ms | 0.0048 | 469 |
+| | Model H 390 | 2.61 / 2.65 s | 1716 / 1746 ms | 0 | 158 |
+| | Model H 1440 | 1.63 / 2.72 s | 1759 / 1866 ms | 0.0001 | 177 |
+| | Used 390 / 1440 | 1.04 / 1.15 ; 1.23 / 1.30 s | 786 / 818 ; 1013 / 1063 ms | 0 | 215 ; 365 |
+| Slow 4G (0.4 Mbps, 400 ms) | Home 390 / 1440 | 2.60 / 2.62 ; 6.72 / 6.76 s | about 15 ms | 0.0015 / 0.0047 | 327 / 349 |
+| Unthrottled | Home 390 / 1440 | 0.21 / 0.22 ; 0.37 / 0.42 s | 32 ; 72 ms | 0 / 0.0048 | 303 / 469 |
+
+Cold first runs were worse (mobile home LCP 3.2 s, TBT 1.4 s; model TBT 2.5-2.7 s).
+Brief "under 2.5 s on 4G": MET on the primary metric (Fast 4G, no CPU slowdown: LCP 0.76-1.68 s on all pages tested). NOT met under the 4x CPU stress (mobile home 2.75 s, model 2.6 s) nor Slow 4G desktop home (6.7 s; hero image + 469 KB).
+
+### Main-thread attribution (mobile 390, Fast 4G + 4x CPU, trace)
+Home TBT about 740-800 ms in 2-4 long tasks. JavaScript is not the problem (app.js eval about 70 ms on model page, about 0 on home).
+1. First full-document Layout: 500-535 ms in one task (1,028 objects, partialLayout=false) plus UpdateLayoutTree about 85 ms. Same on model (433 ms, 673 objects) and used list (333 ms, 824 objects). Blocking all fonts still left 455 ms; blocking all CSS left 256 ms, so roughly half is cold-renderer text shaping (partly a headless-Windows artefact) and half is style-driven.
+2. Second full Layout 215-250 ms when late CSS/fonts/hero arrive (root invalidated).
+3. UpdateLayoutTree 70-90 ms + Paint/PrePaint about 30 ms; then script (model page 68 ms).
+Steady-state subtree layout is cheap (largest section 8 ms at 4x), so the cost is the two cold root layouts.
+Fixes: (a) inline critical CSS, load the rest non-blocking so layout runs once; (b) preload the body font, `font-display:swap` with metric-matched fallback (`size-adjust`/`ascent-override`); (c) `content-visibility:auto` + `contain-intrinsic-size` only on sections more than 2 viewports down (budget, offers, locations, footer), plus `contain:layout style` on cards; (d) render rail slides 2-4 and the finder dialog lazily (home DOM about 1,000 layout objects); (e) smaller hero bytes (about 120 KB) for Slow 4G.
+
+## First-visit typography (font-display:optional)
+Not jarring: the fallback is size-adjusted (CLS 0.0015 mobile) and Inter Tight loaded in every cold run. The visible loss is the Instrument Serif italic accent ("drive.", "monthly budget."), reported `unloaded` on first view, so it falls back to a generic italic and loses the signature. Recommendation: switch to `swap` plus `<link rel=preload as=font crossorigin>` for inter-tight and instrument-serif-italic (about 67 KB) with `size-adjust` fallbacks; CLS stays near 0 and the brand type shows on first paint.
+
+## Photography: 6.5 / 10 (R5 about 4)
+Grading and fixed crops work: hero, rail, cards and used grid share one palette and read as a set; plates are blurred in all 15 used variants and 8 sampled car variants at full size (`P_rear.png`, `P_used.png`: nothing legible; masks read as grey patches). Still cluttered: auto-show booths and bystanders (Model H gold, Model S side), real OEM badges and signs ("CRETA", "CITY", "VISITORS CAR PARKING"), over-saturated blue/red used cars. To raise it: cut-outs on one dark studio floor with reflection or a consistent reshoot, mask or crop badges/signs, per-image saturation normalisation.
+
+## Status of earlier defects
+| ID | Status |
+|---|---|
+| R5-01 EMI bar | Fixed |
+| R5-02 perf | Open, downgraded to Minor: LCP met on Fast 4G; TBT high only under 4x CPU |
+| R5-03 contrast | Fixed (scan clean on 5 pages); hero lead over brightest slides not pixel-sampled |
+| R5-04 colour chips | Fixed (plain labels); bloom still unreachable in photo mode |
+| R5-05 CTA slash | Fixed |
+| R5-06 budget | Partly: controls beside grid now; CTAs at minimum still link to an empty list (R6-02) |
+| R5-07 focus outline | Not re-verified |
+| R5-08 ICS | Fixed: CRLF, UTC Z times (15:00 IST = 09:30Z), escaped comma, DTSTAMP Z |
+| R5-09 booking polish | Fixed (past slots disabled) |
+| R5-10 finder copy | Fixed (reasons match answers, prices labelled, Hindi OK) |
+| R5-11 admin prices spacing | Not re-verified |
+| R5-12 targets | Fixed (0 small targets, 15 pages x 2 viewports) |
+| R5-13 waterfall | Partly: total label still touches bar end; micro rows still slivers |
+| R5-14 photography | Improved; open (Manager), see rating |
+| R5-15 header tone | Fixed |
+| R5-16 reveal | Still present (Info): 4 cards at opacity 0 on mobile until swiped |
+| R5-17 vibrate | Fixed (no console errors) |
+
+## New defects
+| ID | Sev | Owner | Defect / repro |
+|---|---|---|---|
+| R6-01 | Major | Frontend | Mobile home has about 1,700 px of black void after the rail strip. `public/css/home2.css` lines 123-124 (rail cap: `.mrail{height:calc(var(--n)*min(72vh,700px)+...)}`, `.rail-pin{height:min(100vh,960px)}`) come after the mobile media rule at line 65 (`.mrail{height:auto}.rail-pin{position:static;height:auto}`) and override it: `#rail` is 2,870 px at 390. Repro `node tests/e2e/r6_void.js`, `void_2500.png`, `M6_home_m.png` tiles 3-4. Fix: wrap the cap in `@media (min-width:900px)`. |
+| R6-02 | Minor | Frontend | Budget at minimum EMI: "See new cars in budget" links to `/new-cars?maxPrice=476148` (0 cars) while counter says 0 cars; disable CTAs at 0. One probe showed a stale max-price read-out (Rs 12.39 Lakh) at 1440 for the min step vs 4.76 Lakh at 390. |
+| R6-03 | Minor | Frontend | Hindi keeps Latin "Lakh" in prices; use the Devanagari word. |
+| R6-04 | Info | Frontend | Not fully driven this round: finder dialog Tab containment (inconclusive in headless), filters sheet and lightbox keyboard flows. Reserve sheet opens with focus inside, no errors. |
+
+Open counts: Major 1 (R6-01), Minor 5 (R5-02, R5-06/R6-02, R5-13, R6-03, R5-14 design counted under Manager), Info 2. Owners: Frontend all except R5-14 (Manager). Backend 0.
+
+## Verdict
+Large visual improvement and the brief's 4G target is met on the primary metric, but 84 does not clear 85 because of R6-01 (one-line CSS fix) and unresolved throttled-CPU TBT. Fix R6-01 and the budget CTA state: about 87. Add critical CSS plus font preload: about 89.
+
+---
+
 # QA Report - Company A Motors (Round 5: visual + functional review of the UI overhaul)
 
 Tester: QA lead. Fresh seeded DBs (ports 3600-3603, RATE_LIMIT_PUBLIC=5000), headless Edge 157 via CDP, real viewports 1440x900 and 390x844, scrolled in steps with a viewport screenshot per step (never a tall window). No app code edited. New test helpers in `tests/e2e/`: `cdp5.js` (CDP helper), `scroll5.js` (step-scroll screenshots, hidden-element and counter probe), `perf5.js` (Fast 4G + 4x CPU, LCP/CLS/TBT/transfer, 3 runs), `r5_budget.js`, `r5_finder.js`, `r5_testdrive.js`, `r5_service.js`, `r5_pages.js` (CLS, targets, hidden elements on 15 pages x 2 viewports), `r5_rm_cursor.js`, `r5_contrast.js`, `r5_viewtransitions.js`. Screenshots: `%TEMP%\qa5-shots` (about 160 PNGs; montages `M_*.png`).
