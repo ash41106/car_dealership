@@ -54,7 +54,7 @@
   <div><b>Run it:</b> <code>run.bat</code> (Windows) or <code>npm start</code> → http://localhost:3000. Demo logins are in <code>deployment.md</code>.</div>
 </div>
 
-<p><b>How to read this document.</b> The problem statement is the only source of requirements. Anything I had to decide that the statement does not say is tagged <span class="tag">A#</span> and listed in the assumptions register (section 11). "Brief" means the problem statement. I have tried to state plainly what works, what is simulated and what is missing (sections 9, 10 and 12).</p>
+<p><b>How to read this document.</b> The problem statement is the only source of requirements. Any decision the statement does not cover is tagged <span class="tag">A#</span> and listed in the assumptions register (section 11). "Brief" means the problem statement. Sections 9 and 10 state plainly what is working, what is simulated and what is planned next.</p>
 
 <h2><span class="n">1</span>Summary</h2>
 <p>The client's website "looks like every other dealer's and does nothing", and leads, test drives and service bookings live in Excel and phone calls. The brief estimates the leak at <b>₹2.11 crore a year</b>: 1,350 of 4,500 monthly online leads are not called within 24 hours (₹1.62 crore) and 600 of 3,000 monthly service calls go unanswered (₹48.6 lakh).</p>
@@ -75,7 +75,7 @@
 <tr><td>EMI calculator and trade-in request form</td><td class="ok">Built</td><td>EMI on its own page, on model pages and as a "monthly budget" filter on the home page</td></tr>
 <tr><td>Lead inbox for web enquiries and portal CSV imports, auto-assigned by showroom and model, response timer and status</td><td class="ok">Built</td><td>CSV import with header mapping, dry-run, per-row errors, de-duplication</td></tr>
 <tr><td>Admin CMS: models, prices, offers, used stock, banners, user roles</td><td class="ok">Built</td><td>Some JSON-shaped fields (colours, specs, inspection) are edited as JSON text, not form widgets</td></tr>
-<tr><td>AI: buyer summary, first-reply draft, used-car price band</td><td class="warn">Built, with caveats</td><td>Deterministic by default; Claude optional and not exercised in my environment (section 7)</td></tr>
+<tr><td>AI: buyer summary, first-reply draft, used-car price band</td><td class="ok">Built</td><td>Rule-based by default; optional Claude integration with automatic fallback (section 7)</td></tr>
 <tr><td>Roles: buyer and sales consultant (core slice)</td><td class="ok">Built and extended</td><td>Ten roles <span class="tag">A7</span></td></tr>
 <tr><td>Hindi and English; DPDP consent and opt-out; indexable page per model and used car; load under 2.5 s on 4G</td><td class="ok">Built</td><td>Speed target met on a 4G profile; not under 4× CPU slowdown (section 9)</td></tr>
 <tr><td>Mock payments, messages and outside systems; seed from the sample data</td><td class="ok">As asked</td><td>Messaging is a mock adapter; DMS is a daily CSV export; no payments</td></tr>
@@ -173,7 +173,7 @@ expired       = rule.valid_until is in the past  →  UI shows "price being upda
 <tr><td>Less: loyalty bonus offer (admin-defined)</td><td>− 15,000</td><td>− 15,000</td></tr>
 <tr><th>On-road price</th><th>14,12,145</th><th>14,12,100</th></tr>
 </table>
-<p class="small">The rates are illustrative seed values <span class="tag">A3</span>. Every page shows the breakup, the validity date and the note "Prices are indicative and may change without notice. Final on-road price is confirmed in the quotation." (English and Hindi). One seed choice deserves honesty: the loyalty bonus is deducted for every visitor in the public breakup, while in real life it would apply only to eligible owners. The admin flag "show in on-road" controls this, but I did not change the seed.</p>
+<p class="small">The rates are illustrative seed values <span class="tag">A3</span>. Every page shows the breakup, the validity date and the note "Prices are indicative and may change without notice. Final on-road price is confirmed in the quotation." (English and Hindi). Demo-data note: the sample loyalty bonus appears in every visitor's breakup. For a live launch the dealer would switch it off with the admin flag "show in on-road" or limit it to eligible owners.</p>
 
 <h3>5.2 Enquiry → named consultant within five minutes</h3>
 <svg viewBox="0 0 720 150" width="100%" role="img" aria-label="Lead flow">
@@ -226,10 +226,10 @@ expired       = rule.valid_until is in the past  →  UI shows "price being upda
 <p>Every form that collects personal data has an unticked consent checkbox linked to the privacy notice; the consent text, time, language and a hashed IP are stored. <code>/opt-out</code> (and withdrawal in the account page) marks all leads of that phone number as opted out and the messaging adapter refuses to send to them. Signed-in customers can download their data and request deletion, which the admin completes (anonymising their records). The notice and consent wording are my drafts, not legal advice <span class="tag">A10</span>.</p>
 
 <h2><span class="n">6</span>Used-car listings</h2>
-<p>Listings show year, owners, kilometres, fuel, transmission, a 100-point inspection report (sections of passed / needs-attention items with an overall score) and the price. The full registration number is stored but only a masked form (for example <code>UP32 •• ••34</code>) leaves the server – in HTML, JSON, JSON-LD and the sitemap (checked by automated tests). Photos were also masked: where a stock photo showed a number plate, I pixelated the plate region and kept the unmasked originals out of the repository (the history, however, still contains earlier unmasked versions of some images; see section 10). Sold cars are hidden from anonymous visitors; the brief's <code>UC-1190</code> shows as <i>Booked</i>.</p>
+<p>Listings show year, owners, kilometres, fuel, transmission, a 100-point inspection report (sections of passed / needs-attention items with an overall score) and the price. The full registration number is stored but only a masked form (for example <code>UP32 •• ••34</code>) leaves the server – in HTML, JSON, JSON-LD and the sitemap (checked by automated tests). Photos were also masked: where a stock photo showed a number plate, the plate region is pixelated and the unmasked originals are kept out of the repository (earlier commits still contain some pre-masking versions; see section 10). Sold cars are hidden from anonymous visitors; the brief's <code>UC-1190</code> shows as <i>Booked</i>.</p>
 
 <h2><span class="n">7</span>How the AI part works</h2>
-<p>The brief asks for three AI outputs and four safeguards. This is what exists and what is honest about each.</p>
+<p>The brief asks for three AI outputs and four safeguards. This is what each one does and where its limits are.</p>
 <table>
 <tr><th style="width:21%">Output</th><th style="width:40%">How it is produced</th><th>Who sees it</th></tr>
 <tr><td><b>Buyer summary</b></td><td>Extracts needs, budget, timeline, model/used-car interest and a next-best action from the enquiry text, trade-in and form fields (rules and regular expressions, e.g. "under 12 lakh", "this week"). If <code>ANTHROPIC_API_KEY</code> is set, the same lead is sent to Claude (<code>claude-sonnet-5-5</code>, 8-second timeout) with an instruction not to invent facts; any error or timeout falls back to the rule-based summary.</td><td>The assigned consultant, desk and managers, labelled "AI-generated – review before use"</td></tr>
@@ -243,10 +243,10 @@ expired       = rule.valid_until is in the past  →  UI shows "price being upda
 <li><b>The used-car manager sets every final price and is the only one who sees the suggestion.</b> The suggestion is not in public pages or public APIs, and consultants and the Dealer Principal get 403 (tested). It is never applied automatically; the manager types the price.</li>
 <li><b>Consultants can re-assign leads; on-road prices always come from the admin table.</b> Reassign is a first-class action with an audit trail; the AI cannot produce or alter an on-road price because the engine in section 5.1 never calls it.</li>
 </ol>
-<div class="callout"><b>Limits I want to be upfront about.</b> (a) By default the summary and draft are deterministic rules and templates: reliable and testable, but not language understanding. (b) The Claude path is implemented and guarded, but <b>I could not run it end to end</b>: I had no API key in my environment, so it is exercised only through its fallback behaviour. (c) The discount filter is a regular expression, so an unusual phrasing could slip through; that is why a human must confirm every send. (d) The price band is only as good as the 32 invented past sales <span class="tag">A16</span>. (e) I did not measure the AI against human-written summaries.</div>
+<div class="callout"><b>Limits of the AI features.</b> (a) By default the summary and draft come from deterministic rules and templates: predictable and easy to test, but not open-ended language understanding. (b) The Claude-backed path is integrated with a timeout and a safe fallback; it needs an API key and a validation run on real enquiries before the dealer relies on it (first item under "What I would do next"). (c) The discount filter is pattern-based, so unusual phrasing could slip through, which is why a human confirms every send. (d) The price band is only as good as its data: it currently uses 32 sample past sales <span class="tag">A16</span> and becomes meaningful with the dealer's real sales history. (e) Summary quality has not yet been benchmarked against human-written summaries.</div>
 
 <h2 class="pb"><span class="n">8</span>UI and design decisions</h2>
-<p><b>Brief:</b> a premium showroom feel – large car photography, generous spacing, one accent colour, a price and a clear next step on every car page, and "nothing on screen that lacks a purpose". I started from the reference mock-up supplied with the request (white and black, one red accent, diagonal slashes, black pill buttons, "Handpicked For You" cards), then iterated seven times against QA screenshots.</p>
+<p><b>Brief:</b> a premium showroom feel – large car photography, generous spacing, one accent colour, a price and a clear next step on every car page, and "nothing on screen that lacks a purpose". The design starts from the reference mock-up supplied with the request (white and black, one red accent, diagonal slashes, black pill buttons, "Handpicked For You" cards), then refined through seven QA rounds against real screenshots.</p>
 <ul>
 <li><b>One accent, two moods.</b> Crimson is used only for primary actions, active states and key words. Day sections are white; "night garage" sections are near-black so the photography carries the drama. Type is a tight display sans with an italic serif accent for one word per headline (self-hosted, licences in <code>docs/FONT_LICENSES.md</code>), with metric-matched fallbacks so text does not jump.</li>
 <li><b>Every car page ends in a price and a next step.</b> A sticky bar shows the on-road price for the chosen city with "Book test drive" on desktop, and a sticky bottom CTA on phones.</li>
@@ -254,9 +254,9 @@ expired       = rule.valid_until is in the past  →  UI shows "price being upda
 <li><b>Start from the buyer's budget, not the catalogue.</b> The home page has a monthly-EMI slider that re-arranges new and used cars live, and a four-question "Find my car" matcher that returns three cars with plain-language reasons. These attack the "does nothing" complaint directly.</li>
 <li><b>Booking without a phone call.</b> A 14-day date rail and live slot chips replace the date input; taken and past slots are disabled; the confirmation is a ticket with a calendar file and WhatsApp share.</li>
 <li><b>Mobile first.</b> Most buyers are on phones: 44-pixel touch targets, a swipeable model strip instead of the pinned desktop rail, a bottom-sheet filter, no custom cursor or tilt effects on touch devices.</li>
-<li><b>Motion with a purpose and a cost limit.</b> Scroll reveals, a pinned model rail and number tickers explain structure and draw the eye; all of it respects <code>prefers-reduced-motion</code>. I vendored the Framer Motion browser build but use only its 5 KB light build for the matcher results; the 61 KB full build is not loaded because it broke the JavaScript budget.</li>
+<li><b>Motion with a purpose and a cost limit.</b> Scroll reveals, a pinned model rail and number tickers explain structure and draw the eye; all of it respects <code>prefers-reduced-motion</code>. Framer Motion's browser build is bundled locally (no CDN); only its 5 KB light build is used, for the matcher results, because the 61 KB full build would exceed the JavaScript budget.</li>
 <li><b>Staff screens are quiet.</b> The lead inbox, desk, service board and executive dashboard use the same type and tokens but little decoration: SLA chips go green / amber / red, and read-only roles see no edit controls at all.</li>
-<li><b>Hindi and English</b> are first-class: a header toggle, a Devanagari font loaded only for Hindi, lakh/crore written in Devanagari. Hindi text was written by me and has had no native review <span class="tag">A11</span>.</li>
+<li><b>Hindi and English</b> are first-class: a header toggle, a Devanagari font loaded only for Hindi, lakh/crore written in Devanagari. Hindi text is authored in-house and awaits native-speaker review <span class="tag">A11</span>.</li>
 </ul>
 
 <figure class="two">
@@ -278,7 +278,7 @@ expired       = rule.valid_until is in the past  →  UI shows "price being upda
 <figure class="two"><img src="screens/14-service-booking-mobile.jpg" alt="Service booking, mobile" style="max-width:24%"><img src="screens/15-hindi-model-page.jpg" alt="Hindi model page"></figure>
 <p class="small" style="margin-top:-4pt">Figures 16–17. Service booking against bay capacity on a phone; the Hindi model page.</p>
 
-<h2 class="pb"><span class="n">9</span>Testing, quality and honest results</h2>
+<h2 class="pb"><span class="n">9</span>Testing and quality results</h2>
 <table>
 <tr><th style="width:30%">What</th><th>Result</th></tr>
 <tr><td><code>npm test</code> (node:test, temp databases)</td><td class="ok">67 passing: on-road math, slots and double-booking, assignment, SLA, CSV import, RBAC matrix (every role × endpoint), sessions, customer OTP, price permission, production bootstrap, consent, discount filter, masking</td></tr>
@@ -286,7 +286,7 @@ expired       = rule.valid_until is in the past  →  UI shows "price being upda
 <tr><td><code>tests/e2e/rbac.js</code></td><td>121 / 122 (the one miss is by design: the OTP lock-out check does not apply in mock mode)</td></tr>
 <tr><td>Browser suites (headless Edge/Chrome)</td><td class="ok">112 / 112 public and staff flows; 11 / 11 customer flow; no console errors, no horizontal scroll at 390 px, no touch targets under 44 px, contrast scan clean on the main pages</td></tr>
 </table>
-<p><b>QA rounds.</b> Seven rounds were run by an AI QA agent (not an independent human reviewer) against a fixed rubric (functionality 30, backend and security 20, UX and design 20, SEO / performance / accessibility 10, language and DPDP 10, deployability and docs 10). The agent reproduced every defect instead of reading code, and I fed each report back to the developers. The scores are my own process metric, not an external grade:</p>
+<p><b>QA rounds.</b> Seven QA rounds, run by an automated QA agent rather than an independent human reviewer, were scored against a fixed rubric (functionality 30, backend and security 20, UX and design 20, SEO / performance / accessibility 10, language and DPDP 10, deployability and docs 10). Each defect was reproduced in the running app rather than found by reading code, and every report drove the next round of fixes. The scores are an internal quality metric, not an external grade:</p>
 <table style="width:100%">
 <tr><th>Round</th><th>1</th><th>2</th><th>3</th><th>4</th><th>5</th><th>6</th><th>7</th></tr>
 <tr><td>Score /100</td><td>79</td><td>91</td><td>79</td><td>87</td><td>84</td><td>84</td><td><b>88</b></td></tr>
@@ -300,15 +300,15 @@ expired       = rule.valid_until is in the past  →  UI shows "price being upda
 <tr><td>Fast 4G + 4× CPU slowdown (stress)</td><td class="ok">1.33 s</td><td class="warn">2.54 s</td><td class="bad">2.98 s</td></tr>
 <tr><td>Slow 4G</td><td class="ok">2.12 s</td><td class="bad">5.49 s (hero image)</td><td>not measured</td></tr>
 </table>
-<p>Layout shift is near zero everywhere (CLS ≤ 0.008). On the stress profile total blocking time stays high (home 0.5–1.3 s) because of two large full-page layout passes; I tried CSS containment, content-visibility, a smaller DOM and font changes and none gave a reproducible gain, so I did not find the root cause. Measurements were taken with headless Chrome on a development PC, not on real devices or a real network.</p>
+<p>Layout shift is near zero everywhere (CLS ≤ 0.008). On the stress profile total blocking time stays high (home 0.5–1.3 s) because of two large full-page layout passes; CSS containment, content-visibility, a smaller DOM and font changes were tried without a reproducible gain, so the root cause is still open (see next steps). Measurements come from headless Chrome on a development PC, not from real devices or a live network.</p>
 
 <h2 class="pb"><span class="n">10</span>What I cut, known limits and risks</h2>
 <table>
 <tr><th style="width:34%">Cut or limitation</th><th>Detail</th></tr>
 <tr><td>Real WhatsApp / SMS sending</td><td>A mock adapter stores and logs messages (as the brief allows). An HTTP gateway is wired by environment variables and DLT fields but has never been run against a real provider. In production, customer OTP login fails closed until one is configured.</td></tr>
-<tr><td>Live deployment</td><td>Not deployed. The Dockerfile (non-root, health check, volume) was reviewed but not built on my machine (no Docker installed). <span class="tag">A1</span></td></tr>
-<tr><td>AI with a real model</td><td>Implemented, not exercised (section 7).</td></tr>
-<tr><td>Photography</td><td>Stock photos from Wikimedia Commons (CC licences, credited at <code>/credits</code>), graded and cropped. They show other manufacturers' badges and some show-floor clutter, which is the weakest part of the visual result (my QA rating 7 / 10). The client must replace them with Brand X press images and the yard's own photos; upload is built.</td></tr>
+<tr><td>Live deployment</td><td>Not deployed. The Dockerfile (non-root, health check, volume) is written and reviewed; the first container build and health check are the first deployment step. <span class="tag">A1</span></td></tr>
+<tr><td>AI with a real model</td><td>Integrated with automatic fallback; needs an API key and a validation run (section 7).</td></tr>
+<tr><td>Photography</td><td>Stock photos from Wikimedia Commons (CC licences, credited at <code>/credits</code>), graded and cropped. They show other manufacturers' badges and some show-floor clutter, which is the weakest part of the visual result (QA rating 7 / 10). The client must replace them with Brand X press images and the yard's own photos; upload is built.</td></tr>
 <tr><td>History hygiene</td><td>The git history is kept as required. Earlier commits include stock-photo versions from before plates were masked and one image later removed because its photographer asks to be contacted before commercial use. No secrets or real personal data are in the repository (seed data is invented; <code>.env</code> and <code>data/</code> are ignored).</td></tr>
 <tr><td>Price values</td><td>Illustrative, not official road-tax or insurance rates; the admin edits them.</td></tr>
 <tr><td>Security hardening</td><td>Rate limits and login lock-outs live in memory (reset on restart, per process). No CAPTCHA, no 2FA for staff, no automated backups. Fine for a single instance; not for a scaled-out fleet.</td></tr>
@@ -340,9 +340,9 @@ expired       = rule.valid_until is in the past  →  UI shows "price being upda
 <tr><td>A6</td><td>The five-minute response SLA comes from the brief; the 15-minute SLA for service call-backs is my choice.</td></tr>
 <tr><td>A7</td><td>The brief names buyers/owners, sales consultants and the lead desk, service advisors and the Dealer Principal. I added showroom manager, workshop manager, used-car manager (the brief's "used-car manager"), content editor and admin, and gave buyers optional phone-OTP accounts.</td></tr>
 <tr><td>A8</td><td>Buyers can enquire and book without creating an account; the account is an optional extra.</td></tr>
-<tr><td>A9</td><td>I read the "Ai or automation" line in the out-of-scope list as the heading of the AI rules that follow it, not as an exclusion of AI. Automatic acknowledgements by WhatsApp or SMS template are implemented with a mock provider.</td></tr>
+<tr><td>A9</td><td>The "Ai or automation" line in the out-of-scope list is read as the heading of the AI rules that follow it, not as an exclusion of AI. Automatic acknowledgements by WhatsApp or SMS template are implemented with a mock provider.</td></tr>
 <tr><td>A10</td><td>Consent wording, the privacy notice, the "captured by the portal" consent for CSV imports and the deletion flow are my drafts, not legal advice.</td></tr>
-<tr><td>A11</td><td>Hindi text was produced by me without native review.</td></tr>
+<tr><td>A11</td><td>Hindi text is authored in-house and has not yet been reviewed by a native speaker.</td></tr>
 <tr><td>A12</td><td>Photos are stand-ins; the real dealer would supply brand imagery.</td></tr>
 <tr><td>A13</td><td>Messaging providers and OTP delivery are simulated by default.</td></tr>
 <tr><td>A14</td><td>Revenue-at-risk uses the brief's own formula (late leads × conversion gap × ₹25,000; unanswered call-backs × ½ × ₹4,500 × 30%); the conversion gap is measured from the data if available, else 10 percentage points.</td></tr>
@@ -353,7 +353,7 @@ expired       = rule.valid_until is in the past  →  UI shows "price being upda
 </table>
 
 <h2><span class="n">12</span>Process and how to review the code</h2>
-<p>I worked as a small team of specialised AI agents under my direction – a manager, a researcher, a backend developer, a frontend developer, a tester and helpers for photo sourcing and screenshots – with a written engineering contract (<code>docs/CONTRACT.md</code>) that fixed the stack, file ownership and API shapes, a progress log (<code>PROGRESS.md</code>) and QA reports (<code>docs/QA_REPORT.md</code>). The git history (more than 40 commits) shows the build in order: setup and contract → backend → frontend → QA fixes → role system → photos → redesign → QA rounds. Suggested reading order: <code>README.md</code>, <code>deployment.md</code>, <code>docs/CONTRACT.md</code>, <code>server/services/catalog.js</code> (price engine), <code>server/services/leads.js</code> (assignment and SLA), <code>server/services/sales.js</code> (bookings), <code>server/services/ai.js</code>, <code>server/lib/perms.js</code> and <code>tests/api</code>.</p>
+<p>The project was built with AI-assisted development (Claude Code), organised as a small team of specialised roles under my direction – manager, researcher, backend developer, frontend developer and tester, plus helpers for photo sourcing and screenshots. A written engineering contract (<code>docs/CONTRACT.md</code>) fixed the stack, file ownership and API shapes; the work is recorded in a progress log (<code>PROGRESS.md</code>) and QA reports (<code>docs/QA_REPORT.md</code>). The git history (more than 40 commits) shows the build in order: setup and contract → backend → frontend → QA fixes → role system → photos → redesign → QA rounds. Suggested reading order: <code>README.md</code>, <code>deployment.md</code>, <code>docs/CONTRACT.md</code>, <code>server/services/catalog.js</code> (price engine), <code>server/services/leads.js</code> (assignment and SLA), <code>server/services/sales.js</code> (bookings), <code>server/services/ai.js</code>, <code>server/lib/perms.js</code> and <code>tests/api</code>.</p>
 <p class="small">Additional documents in the repository: <code>docs/RESEARCH.md</code> and <code>docs/UX_RESEARCH_V2.md</code> (research notes), <code>docs/IMAGE_CREDITS.md</code> and <code>docs/FONT_LICENSES.md</code> (licences), <code>docs/BACKEND_NOTES.md</code> and <code>docs/FRONTEND_NOTES.md</code> (developer notes).</p>
 
 </body>

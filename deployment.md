@@ -66,7 +66,7 @@ These accounts exist only with demo data (non-production). Seed passwords are de
 
 ## 3. How it is deployed
 
-**Status: not deployed to a public host.** The project is deployment-ready and was run locally and in headless browsers for QA; no live URL exists. Assumption: the deadline does not require a public deployment (the brief asks for "the link to the live app *if* you deployed it").
+**Status: not yet deployed to a public host.** The project runs locally and was verified in headless browsers; a Dockerfile and the steps below make it ready to deploy. The brief asks for a live link only if deployed, so none is given here.
 
 Ready-made options (all use the same artefacts in the repo):
 
@@ -80,7 +80,7 @@ docker run -d -p 3000:3000 -v companya-data:/app/data \
 ```
 * The image is `node:22-alpine`, runs as the non-root `node` user, exposes 3000, has a `/healthz` health check, and keeps the SQLite database in the `/app/data` volume (**mount a persistent volume**).
 * **Production never seeds demo users.** On the first start `BOOTSTRAP_ADMIN_EMAIL` + `BOOTSTRAP_ADMIN_PASSWORD` create the schema, roles, showrooms, workshops, cities and one admin who must change the password at first login. Then remove `BOOTSTRAP_ADMIN_PASSWORD` from the environment and enter models, variants, price rules, offers and used stock under `/admin`.
-* The Dockerfile has been reviewed but **not built on the development machine** (no Docker installed there) – build and check `/healthz` before relying on it.
+* Build the image and check `/healthz` as the first deployment step (the Dockerfile is written and reviewed; the first container build is still to be run).
 
 ### B. Plain Node on a VM / Windows server
 Install Node 22.13+, set the environment variables below, run `node server/server.js` under a process manager (pm2, NSSM, systemd) behind nginx or Caddy for HTTPS, and back up `data/app.db` (SQLite, WAL mode) daily.
