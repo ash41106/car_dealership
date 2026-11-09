@@ -81,3 +81,19 @@ td.saved input{border-color:#14822f}td.fail input{border-color:var(--red)}
 /* SLA desk cards */
 .mini .rowf{grid-template-columns:minmax(0,1fr) auto}.mini select{min-width:0;width:100%;font-size:.85rem;padding-right:28px;text-overflow:ellipsis}
 .mx thead th{letter-spacing:0!important;font-size:.64rem}.mx td:first-child,.mx th:first-child{min-width:200px}
+
+/* v2 polish: Inter, softer cards, ticker KPIs, sparklines, empty states */
+body.staff{font-family:var(--f-body);background:#f4f3f1}
+.s-head h1,.panel-s h2,.s-bar h2,.kpi strong,.sb-g a,.s-ttl{font-family:var(--f-display)}
+.s-head h1{letter-spacing:-.04em;font-size:clamp(1.7rem,3vw,2.4rem)}
+.kpi,.panel-s,.col,.tbl-w{border-radius:16px;border-color:#e9e6e1;box-shadow:0 1px 2px rgba(0,0,0,.03)}
+.kpi{position:relative;overflow:hidden;transition:transform var(--dur-2) var(--ease-out),box-shadow var(--dur-2)}.kpi:hover{transform:translateY(-3px);box-shadow:var(--shadow-soft)}
+.kpi strong{font-size:2.1rem;letter-spacing:-.045em;font-variant-numeric:tabular-nums}
+.kpi .spark{position:absolute;right:10px;bottom:10px;width:46%;height:32px;opacity:.9}
+.sb-g a{transition:background var(--dur-2),transform var(--dur-2) var(--ease-out)}.sb-g a:hover{transform:translateX(3px)}
+.empty{padding:3.2rem 1rem;text-align:center;color:var(--muted)}.empty::before{content:"";display:block;width:64px;height:64px;margin:0 auto 1rem;border-radius:50%;background:#ece9e4 url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%238d8a84' stroke-width='1.6' stroke-linecap='round' stroke-linejoin='round'><path d='M4 7h16M6 7l1 12h10l1-12M9 7V5h6v2'/></svg>") center/28px no-repeat}
+.skel{border-radius:12px}
+.tbl tbody tr{transition:background var(--dur-2)}.tbl tbody tr:hover{background:#faf9f7}
+.lrow{border-radius:14px;transition:transform var(--dur-2) var(--ease-out),box-shadow var(--dur-2),border-color var(--dur-2)}.lrow:hover{transform:translateY(-2px);box-shadow:var(--shadow-soft)}
+@media(prefers-reduced-motion:reduce){.kpi,.lrow,.sb-g a{transition:none}.kpi:hover,.lrow:hover,.sb-g a:hover{transform:none}}
+.kpi .sub{max-width:52%}

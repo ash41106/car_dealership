@@ -12,8 +12,8 @@
   }
   Promise.all([S.api('/api/exec/summary?days=30'), S.api('/api/exec/trend?days=30')]).then(function (a) {
     var s = a[0], t = a[1], sla = s.sla || {}, f = s.funnel || [], won = (f[4] || {}).count || 0, tot = (f[0] || {}).count || 0;
-    var k = function (l, v, sub, bad) { return '<div class="kpi' + (bad ? ' bad' : '') + '"><small>' + l + '</small><strong>' + esc(v) + '</strong>' + (sub ? '<span class="sub">' + esc(sub) + '</span>' : '') + '</div>'; };
-    $('#kpis').innerHTML = k('Replied within 5 min', sla.pct_within_5min == null ? '-' : sla.pct_within_5min + '%', 'avg ' + (sla.avg_response_min == null ? '-' : sla.avg_response_min) + ' min') + k('Leads (30 d)', tot) + k('Won', won, tot ? Math.round(won * 100 / tot) + '% conversion' : '') + k('SLA breaches', sla.breached || 0, '', sla.breached > 0) + k('Revenue at risk', S.inr((s.revenue_at_risk || {}).total || 0), 'estimate', true);
+    var series = t.series || [], k = function (l, v, sub, bad, key) { return '<div class="kpi' + (bad ? ' bad' : '') + '"><small>' + l + '</small><strong>' + esc(v) + '</strong>' + (sub ? '<span class="sub">' + esc(sub) + '</span>' : '') + (key ? S.spark(series.map(function (d) { return d[key]; }), bad ? '#c41230' : '#0b0b0e') : '') + '</div>'; };
+    $('#kpis').innerHTML = k('Replied within 5 min', sla.pct_within_5min == null ? '-' : sla.pct_within_5min + '%', 'avg ' + (sla.avg_response_min == null ? '-' : sla.avg_response_min) + ' min') + k('Leads (30 d)', tot, '', false, 'leads') + k('Won', won, tot ? Math.round(won * 100 / tot) + '% conversion' : '', false, 'won') + k('SLA breaches', sla.breached || 0, '', sla.breached > 0, 'breached') + k('Revenue at risk', S.inr((s.revenue_at_risk || {}).total || 0), 'estimate', true);
     $('#ch-trend').innerHTML = line(t.series || []);
     $('#funnel').innerHTML = bars(f, 'stage', 'count');
     $('#sources').innerHTML = bars(s.leads_by_source || [], 'key', 'count');

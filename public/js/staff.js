@@ -81,3 +81,22 @@
     S.api('/api/auth/change-password', 'POST', { current_password: f.elements.current_password.value, new_password: f.elements.new_password.value }).then(function () { location.href = '/staff'; }).catch(function (x) { m.className = 'form-msg bad'; m.textContent = S.errText(x); });
   });
 })();
+
+(function () {
+  'use strict';
+  var S = window.S, RM = window.matchMedia && matchMedia('(prefers-reduced-motion: reduce)').matches;
+  // number ticker for KPI tiles: counts up whenever a tile's text changes
+  function tick(el) {
+    var txt = el.textContent.trim(), m = /^(\D*)([\d,]+(?:\.\d+)?)(.*)$/.exec(txt); if (!m || el.getAttribute('data-tk') === txt) return; el.setAttribute('data-tk', txt);
+    if (RM) return; var to = parseFloat(m[2].replace(/,/g, '')), dec = (m[2].split('.')[1] || '').length, t0 = performance.now(), dur = 900;
+    (function f(t) { var p = Math.min(1, (t - t0) / dur); p = 1 - Math.pow(1 - p, 3); var v = to * p; el.textContent = m[1] + (dec ? v.toFixed(dec) : Math.round(v).toLocaleString('en-IN')) + m[3]; if (p < 1) requestAnimationFrame(f); else el.textContent = txt; })(t0);
+  }
+  S.tickKpis = function (root) { S.$$('.kpi strong', root || document).forEach(tick); };
+  var k = S.$('#kpis'); if (k && 'MutationObserver' in window) new MutationObserver(function () { S.tickKpis(k); }).observe(k, { childList: true });
+  // tiny inline-SVG sparkline from a numeric series
+  S.spark = function (vals, color) {
+    if (!vals || vals.length < 2) return ''; var W = 120, H = 32, mx = Math.max.apply(null, vals.concat([1])), n = vals.length;
+    var pts = vals.map(function (v, i) { return (i * W / (n - 1)).toFixed(1) + ',' + (H - 3 - v / mx * (H - 6)).toFixed(1); }).join(' ');
+    return '<svg class="spark" viewBox="0 0 ' + W + ' ' + H + '" preserveAspectRatio="none" aria-hidden="true"><polyline points="' + pts + '" fill="none" stroke="' + (color || '#c41230') + '" stroke-width="2" stroke-linejoin="round" stroke-linecap="round" vector-effect="non-scaling-stroke"/></svg>';
+  };
+})();

@@ -55,14 +55,14 @@ function shell(ctx, o) { // o:{title,path,body,scripts}
   const side = Object.keys(groups).map(g => `<div class="sb-g"><h2>${esc(g)}</h2>${groups[g].map(n => `<a href="${n[0]}"${o.path === n[0] ? ' aria-current="page"' : ''}>${esc(n[1])}</a>`).join('')}</div>`).join('');
   const ro = !has(perms, ['lead.update', 'used.write', 'users.manage', 'prices.write', 'content.offers']) ? ' <span class="chip">read-only</span>' : '';
   return `<!doctype html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><meta name="robots" content="noindex,nofollow">
-<title>${esc(o.title)} | Company A Motors staff</title><link rel="icon" href="/img/favicon.svg" type="image/svg+xml"><link rel="stylesheet" href="/css/app.css?v=4"><link rel="stylesheet" href="/css/staff.css?v=4"></head>
+<title>${esc(o.title)} | Company A Motors staff</title><link rel="icon" href="/img/favicon.svg" type="image/svg+xml"><link rel="preload" as="font" type="font/woff2" href="/fonts/inter.woff2" crossorigin><link rel="stylesheet" href="/css/app.css?v=5"><link rel="stylesheet" href="/css/v2.css?v=5"><link rel="stylesheet" href="/css/staff.css?v=5"></head>
 <body class="staff"><a class="skip" href="#main">Skip to content</a>
 <div class="s-app"><aside class="sb" id="sb" aria-label="Staff navigation"><a class="logo" href="${homeFor(u, perms)}"><span class="logo-mark">A</span><span class="logo-t">Staff <b>console</b></span></a><nav>${side}</nav>
 <div class="sb-u"><strong>${esc(u.name)}</strong><small>${esc(ROLE_LABEL[u.role] || u.role)}${ro}</small><div class="cta-row"><a class="btn btn-sm btn-o" href="/" target="_blank" rel="noopener">Website</a><button class="btn btn-sm btn-o" id="logout" type="button">Sign out</button></div></div></aside>
 <div class="s-col"><header class="s-top"><button class="circ" id="sb-t" type="button" aria-label="Menu" aria-controls="sb" aria-expanded="false">&#9776;</button><span class="s-ttl">${esc(o.title)}</span><span class="s-live" id="s-clock" aria-hidden="true"></span></header>
 <main id="main" class="s-main">${o.body}</main></div></div><div id="toasts" class="toasts" role="status" aria-live="polite"></div>
 <script>window.__U=${jsonSafe({ id: u.id, name: u.name, role: u.role, showroom_id: u.showroom_id, workshop_id: u.workshop_id, perms })};</script>
-<script src="/js/staff.js?v=4"></script>${(o.scripts || []).map(s => `<script src="${s}?v=2" defer></script>`).join('')}</body></html>`;
+<script src="/js/staff.js?v=5"></script>${(o.scripts || []).map(s => `<script src="${s}?v=2" defer></script>`).join('')}</body></html>`;
 }
 
 function forbidden(ctx, perms) {
@@ -85,8 +85,8 @@ const head = (t, sub) => `<div class="s-head"><h1>${esc(t)}</h1>${sub ? `<p clas
 const skel = (n) => Array.from({ length: n || 3 }, () => '<div class="skel row"></div>').join('');
 
 function changePw(ctx) {
-  const body = `<!doctype html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><meta name="robots" content="noindex,nofollow"><title>Change password | Company A Motors</title><link rel="stylesheet" href="/css/app.css?v=4"><link rel="stylesheet" href="/css/staff.css?v=4"></head><body class="staff login"><main class="login-box"><h1>Set a new password</h1><p class="muted">Your administrator reset your password. Choose a new one to continue.</p>
-<form class="form" id="cpf" novalidate><div class="field"><label for="cp0">Current (temporary) password</label><input id="cp0" name="current_password" type="password" autocomplete="current-password" required></div><div class="field"><label for="cp1">New password</label><input id="cp1" name="new_password" type="password" autocomplete="new-password" minlength="8" required aria-describedby="cp1-e"><p class="err" id="cp1-e" role="alert" hidden></p></div><div class="form-msg" role="status" aria-live="polite"></div><button class="btn" type="submit">Change password</button></form><p><button class="btn btn-sm btn-o" id="logout" type="button">Sign out</button></p></main><script>window.__U={};</script><script src="/js/staff.js?v=4"></script></body></html>`;
+  const body = `<!doctype html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><meta name="robots" content="noindex,nofollow"><title>Change password | Company A Motors</title><link rel="preload" as="font" type="font/woff2" href="/fonts/inter.woff2" crossorigin><link rel="stylesheet" href="/css/app.css?v=5"><link rel="stylesheet" href="/css/v2.css?v=5"><link rel="stylesheet" href="/css/staff.css?v=5"></head><body class="staff login"><main class="login-box"><h1>Set a new password</h1><p class="muted">Your administrator reset your password. Choose a new one to continue.</p>
+<form class="form" id="cpf" novalidate><div class="field"><label for="cp0">Current (temporary) password</label><input id="cp0" name="current_password" type="password" autocomplete="current-password" required></div><div class="field"><label for="cp1">New password</label><input id="cp1" name="new_password" type="password" autocomplete="new-password" minlength="8" required aria-describedby="cp1-e"><p class="err" id="cp1-e" role="alert" hidden></p></div><div class="form-msg" role="status" aria-live="polite"></div><button class="btn" type="submit">Change password</button></form><p><button class="btn btn-sm btn-o" id="logout" type="button">Sign out</button></p></main><script>window.__U={};</script><script src="/js/staff.js?v=5"></script></body></html>`;
   return ctx.html(body);
 }
 const DEMO = [
@@ -98,13 +98,13 @@ function login(ctx) {
   if (ctx.user) return ctx.redirect(homeFor(ctx.user, permsFor(ctx.user)));
   const next = String(ctx.query.next || '');
   const demo = process.env.NODE_ENV === 'production' ? '' : `<details class="demo"><summary>Demo accounts</summary><p class="muted small">Non-production only. Click a row to fill the form.</p><table><thead><tr><th>Role</th><th>Email</th><th>Password</th></tr></thead><tbody>${DEMO.map(d => `<tr tabindex="0" role="button" data-fill="${esc(d[1])}|${esc(d[2])}"><td>${esc(d[0])}</td><td>${esc(d[1])}</td><td><code>${esc(d[2])}</code></td></tr>`).join('')}</tbody></table></details>`;
-  const body = `<!doctype html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><meta name="robots" content="noindex,nofollow"><title>Staff login | Company A Motors</title><link rel="icon" href="/img/favicon.svg"><link rel="stylesheet" href="/css/app.css?v=4"><link rel="stylesheet" href="/css/staff.css?v=4"></head>
+  const body = `<!doctype html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><meta name="robots" content="noindex,nofollow"><title>Staff login | Company A Motors</title><link rel="icon" href="/img/favicon.svg"><link rel="preload" as="font" type="font/woff2" href="/fonts/inter.woff2" crossorigin><link rel="stylesheet" href="/css/app.css?v=5"><link rel="stylesheet" href="/css/v2.css?v=5"><link rel="stylesheet" href="/css/staff.css?v=5"></head>
 <body class="staff login"><main class="login-box"><a class="logo" href="/"><span class="logo-mark">A</span><span class="logo-t">Company A <b>Motors</b></span></a><h1>Staff sign in</h1>
 <form class="form" id="lf" novalidate data-next="${esc(next.startsWith('/') && !next.startsWith('//') ? next : '')}">
 <div class="field"><label for="em">Email</label><input id="em" name="email" type="email" autocomplete="username" required aria-describedby="em-e"><p class="err" id="em-e" role="alert" hidden></p></div>
 <div class="field"><label for="pw">Password</label><input id="pw" name="password" type="password" autocomplete="current-password" required aria-describedby="pw-e"><p class="err" id="pw-e" role="alert" hidden></p></div>
 <div class="form-msg" role="status" aria-live="polite"></div><button class="btn" type="submit">Sign in ${ICON.arrow}</button></form>${demo}<p class="muted small"><a href="/">Back to website</a> &middot; <a href="/account">Customer sign in</a></p></main>
-<script src="/js/staff.js?v=4"></script></body></html>`;
+<script src="/js/staff.js?v=5"></script></body></html>`;
   ctx.setHeader('Cache-Control', 'no-store');
   return ctx.html(body);
 }
