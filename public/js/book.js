@@ -46,7 +46,7 @@
     var chip = A.$('[name=date]:checked', form); chip = chip && chip.nextElementSibling;
     var swap = function () { F.done(form, html); A.$$('.tk-todo li').forEach(function (l) { l.style.listStyle = 'none'; }); };
     if (!A.RM && chip && document.startViewTransition) { chip.style.viewTransitionName = 'tkdate'; document.startViewTransition(swap); } else swap();
-    if (!A.RM && navigator.vibrate) navigator.vibrate(30);
+    if (!A.RM && navigator.vibrate && navigator.userActivation && navigator.userActivation.hasBeenActive) navigator.vibrate(30);
   }
 
   // ---- test drive stepper ----

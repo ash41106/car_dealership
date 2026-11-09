@@ -140,3 +140,6 @@ html[lang=hi] .split .w{padding-bottom:.25em;margin-bottom:-.25em}
 .specs{gap:1.2rem}.spec{background:#fff;border:1px solid var(--line);border-radius:18px;padding:1.2rem 1.4rem}.spec h3{font:700 1.2rem var(--f-display);letter-spacing:-.02em;margin-bottom:.6rem}
 .sec>.wrap>.h2{margin-bottom:var(--s-6)}
 .ftr a{display:flex;align-items:center;min-height:44px}.ftr .mapc{display:block;padding-top:16px;padding-bottom:16px}.ftr .logo{display:inline-flex}.ftr-b a{display:inline-flex}
+.crumbs a{min-width:44px;justify-content:center}.crumbs li{min-height:44px}
+.tbl a,.tbl.dense a{display:inline-flex;align-items:center;min-height:44px}
+#acc{min-height:420px}
