@@ -1,3 +1,87 @@
+# QA Report - Company A Motors (Round 5: visual + functional review of the UI overhaul)
+
+Tester: QA lead. Fresh seeded DBs (ports 3600-3603, RATE_LIMIT_PUBLIC=5000), headless Edge 157 via CDP, real viewports 1440x900 and 390x844, scrolled in steps with a viewport screenshot per step (never a tall window). No app code edited. New test helpers in `tests/e2e/`: `cdp5.js` (CDP helper), `scroll5.js` (step-scroll screenshots, hidden-element and counter probe), `perf5.js` (Fast 4G + 4x CPU, LCP/CLS/TBT/transfer, 3 runs), `r5_budget.js`, `r5_finder.js`, `r5_testdrive.js`, `r5_service.js`, `r5_pages.js` (CLS, targets, hidden elements on 15 pages x 2 viewports), `r5_rm_cursor.js`, `r5_contrast.js`, `r5_viewtransitions.js`. Screenshots: `%TEMP%\qa5-shots` (about 160 PNGs; montages `M_*.png`).
+
+## Round 5 score: 84 / 100 (round 4: 87)
+
+| Area | Max | R5 | Why |
+|---|---|---|---|
+| Functionality vs brief | 30 | 27 | npm test 67/67, run.js 442/442, rbac.js 121/122 (the one fail is the by-design mock-OTP lockout expectation), browser3 112/112. Budget slider, Find-my-car dialog (keyboard end to end), waterfall per city (6 cities, totals change correctly), date-rail booking for test drive and service, slot polling (a booking in one session dropped "6 bays left" to 5 in the next), confirmation ticket, filter bottom sheet, compare tray, View Transitions, reduced motion all work. Deductions: EMI bar broken (R5-01), colour bloom unreachable on every seeded model (R5-04), finder copy/price inconsistencies (R5-10), past slots called "Taken" (R5-09). |
+| Backend / security | 20 | 17 | Not re-audited this round (UI-only change set); regression suites green; carried from R4 with R4-02/R4-03 not re-tested. |
+| Frontend UX / design | 20 | 18 | Genuinely distinctive: night hero with word-by-word headline, pinned rail, tickets, waterfall, 100-point rings. Held back by photography (R5-14), the broken EMI bar, a few legibility/consistency issues below. |
+| SEO / perf / a11y | 10 | 6 | CLS excellent (0 to 0.013 everywhere), fonts load, no console errors, focus visible on 40/40 tab stops, no horizontal scroll, no FOIT jump. But throttled TBT 1.0-2.7 s and mobile home LCP 1.5-3.8 s (R4: 1.3-1.6 s) (R5-02); contrast failures (R5-03); 38 px wide language toggle (R5-12). |
+| i18n + DPDP | 10 | 8 | Hindi uses Noto Sans Devanagari (loaded); the 96 px headline at line-height 1.12 renders matras without clipping; no overflow at 390/1440. One unconfirmed rail price clipping in Hindi (R5-16). |
+| Deployability / docs / tests | 10 | 8 | New helper scripts are syntax-checked; no new dependency; docs not re-reviewed beyond FRONTEND_NOTES. |
+| **Total** | **100** | **84** | |
+
+## (a) The "1000 px black band" and "1 / 1 / 25" counters: capture artifact, not a bug
+- At 1440x2600 the rail wrapper is `100vh` per slide (`.rail-pin{height:100vh}`, JS sizes the scroller from vh): I measured the rail at **8,840 px** in a 2600 px window versus about 3,600 px at 900. A full-page capture with a tall window inflates the pin and centres a 450 px card in 2600 px of black.
+- Real scrolling at 1440x900 and 390x844 (`home_d_01..05`, `home_m_*`): the trust band ends about 250 px before the "Four ways to drive" heading, the rail pins, advances H to C to S to V (progress bar and labels update), unpins cleanly, and the budget section follows with no void. Counters ended at **6,000+ / 3 / 2 / 100 / 5** at both viewports and under reduced motion. The "1/1/25" capture was taken a few hundred ms after the counters' IntersectionObserver fired, all at once in the tall window.
+- Residual, low: a genuinely tall portrait monitor would show the oversized rail. Cap it (`height:min(100vh,960px)`) if that matters.
+
+## Measurements (Fast 4G 1.6 Mbps / 150 ms RTT, 4x CPU, cache off, 3 runs; TBT = long tasks over 50 ms)
+| Page | Viewport | LCP (3 runs) | CLS | TBT | Transfer |
+|---|---|---|---|---|---|
+| Home | 1440 | 2.0 / 3.3 / 3.6 s | 0.005 | 0.98 / 2.14 / 2.39 s | 680 KB |
+| Home | 390 | 3.8 / 3.2 / 3.0 s (a separate run: 1.5 s, hero IMG) | 0 | 2.73 / 2.29 / 1.19 s | 327 KB |
+| Model H | 1440 | 3.1 / 1.7 / 2.7 s | 0.0006 | 2.08 / 1.12 / 1.60 s | 181 KB |
+| Model H | 390 | 2.8 / 1.7 / 3.1 s | 0 | 1.93 / 1.44 / 2.08 s | 158 KB |
+| Used list | 1440 | 2.8 / 2.8 / 3.3 s | 0 | 1.28 / 1.19 / 1.75 s | 360 KB |
+| Used list | 390 | 2.7 / 3.0 / 2.9 s | 0 | 1.75 / 1.63 / 1.59 s | 212 KB |
+
+Unthrottled mobile home LCP 0.41 s. Run-to-run variance is large (lab noise), but the trend versus R4 (mobile home LCP 1.3-1.6 s) is worse.
+
+## Defects (ID / severity / owner / repro / evidence)
+| ID | Sev | Owner | Defect | Repro / evidence |
+|---|---|---|---|---|
+| R5-01 | Major | Frontend | EMI stacked bar: the principal segment and its legend swatch are `#fff` (`.b-pr{background:#fff}` in detail2.css) on a white page, so only two slivers (grey down payment, red interest) show with a blank gap between. | `/used-cars/uc-1182-model-c-vx-2022`, "EMI calculator", both viewports. `M_used_d2.png`, `M_used_m1.png`. Use a mid-grey or ink colour. |
+| R5-02 | Major | Frontend | Throttled main-thread cost on home is high: TBT 1.0-2.7 s, desktop 680 KB, mobile LCP regressed vs R4. Candidates: fx.js + home2.js + the 184 KB `motion-dom.js`, parallax/tilt/word-split work at load, 4 hero slides. | `node tests/e2e/perf5.js`. Defer non-hero JS to idle, split headline words server-side, load motion-dom only on interaction. |
+| R5-03 | Minor | Frontend | Contrast: "Find my car" peek list `.fd-peek li{color:#4b4b55}` on `#0b0b0e` = **2.47:1** (real text, fails AA); crimson script eyebrows on night 4.25:1; mobile hero lead paragraph over the brightest slides worst-case about 4.1:1. | `home_d_08.png`; pixel sampling of `hero_390_0/3.png`. |
+| R5-04 | Minor | Frontend / Manager | Colour bloom is unreachable: all four seeded models are in photo mode, which renders non-interactive colour chips (`ul.colchips`) styled like pill buttons plus "Photo shows one colour". The advertised swatch bloom never appears and the chips look clickable. | `/new-cars/model-h` (`M_model_d1.png`). Supply per-colour photos or style the chips as plain labels. |
+| R5-05 | Minor | Frontend | Final CTA band: the crimson diagonal slash runs through the headline and subtext on mobile ("Your drive starts here", "keys"). | Home at 390, bottom (`M_home_c.png`, tile 3). |
+| R5-06 | Minor | Frontend | Budget section: on desktop the controls card is about 610 px tall and the filtered grid starts below the fold, so the user cannot see cars rearranging while dragging (the headline interaction of the section). At minimum EMI the CTAs ("See new cars in budget") still link to an empty list. The last row can orphan a single card (7 cars). | `budget_1440_MIN.png`. Put the live count and top cards beside the slider; disable CTAs at 0. |
+| R5-07 | Cosmetic | Frontend | Programmatic `focus()` on step headings, results heading and the booking ticket paints a heavy double red/white outline (`finder_*_res`, `M_td_m.png`). Right for keyboard users, but it is a thick box around a heading; soften. Dialog open focuses the x button rather than the question. | `r5_finder.js`. |
+| R5-08 | Minor | Frontend | `.ics` is sloppy: `DTSTART;TZID=Asia/Kolkata` with no `VTIMEZONE`, `DTSTAMP` in local time without `Z`, unescaped comma in `LOCATION`, no final CRLF. Outlook may treat times as floating. Content is otherwise correct (UID, SUMMARY, 45/90 min DTEND, location, right date and time). WhatsApp link `https://wa.me/?text=<encoded title - model - showroom, weekday, date, time>` is correct. | `r5_testdrive.js` prints the blob. Use UTC `...Z` times or add VTIMEZONE; escape commas. |
+| R5-09 | Minor | Frontend | Booking polish: slots earlier than now on today's date read "Taken" (should be "Passed"); on 390 the step circles 3 and 4 sit higher than 1 and 2; step 1 model tiles are the old cartoon side-view SVGs beside photographic cards elsewhere. | `td_390_*`, `M_td_m.png`. |
+| R5-10 | Minor | Frontend | Find-my-car results: reason copy says "Model H seats your group comfortably" for a "Just me" answer; prices shown are on-road but unlabelled and differ from the card's "From Rs 9.85 Lakh"; on desktop the results step scrolls inside a 370 px dialog and hides Back/Start again below the fold. | `M_finder_d.png`. |
+| R5-11 | Minor | Frontend | Admin Prices live preview ("How the price builds up"): no gap between label and amount ("Ex-showroom price Rs 9,85,000" run together, "...Model H-Rs 15,000"). | `/admin/prices` at 390, `M_staff_m.png`. |
+| R5-12 | Minor | Frontend | Targets: the language toggle is 38x44 on every page; Credits links are 20 px tall. | `r5_pages.js`. |
+| R5-13 | Cosmetic | Frontend | Waterfall: the total label overlaps the end of the full-width red bar and clips the rupee glyph; micro rows (FASTag Rs 600) render as 2 px slivers. | `M_model_d1.png`, right tile. |
+| R5-14 | Major (design) | Manager | Photography is the main thing keeping this from "showroom": cluttered real-world shots (auto-show booths, bystanders, parked cars, smudged plates), real OEM badges under made-up "Model X" names, inconsistent crops and lighting between cards. See critique. | `home_d_02..04.png`, `M_used_d1.png`. |
+| R5-15 | Minor | Frontend | After the dark hero the header flips to a white bar and stays white over the night rail and finder sections, breaking the Night Garage mood. | `home_d_01..08.png`. |
+| R5-16 | Info | Frontend | Not fully verified: (1) mobile home leaves 6 `.reveal` cards at opacity 0 until swiped horizontally (they reveal on intersection, but a fast fling could show blanks); (2) Hindi rail at one scroll position showed the price clipped at the right edge and a stray "5" glyph (`M_hi_d.png`), probably mid-scroll transform, not reproduced at rest. | |
+| R5-17 | Cosmetic | Frontend | `navigator.vibrate` logs a console intervention in automation when the ticket opens (no real gesture); harmless for real taps, but guard with `navigator.userActivation.isActive`. | `r5_testdrive.js`. |
+
+Defect count: 17 (Major 3: R5-01, R5-02, R5-14; Minor 9; Cosmetic 4; Info 1). Owners: Frontend 15 (R5-04 shared with Manager), Manager 2 (R5-14, R5-04), Backend 0.
+
+## Verified working (no defect)
+- Hero: crossfade across 4 slides (only the active slide has opacity 1), Ken-Burns/parallax run, controls and dots work, CLS 0.005.
+- Rail: desktop pinned horizontal H/C/S/V with progress bar and labels; mobile `position:static` snap strip; reduced motion keeps everything visible.
+- Budget slider: 8,000 to 80,000 step 1,000; min = 0 cars and "Nothing fits this budget yet", mid/max = 8 cars, keyboard arrows work, FLIP reflow, links carry `maxPrice` (`/new-cars?maxPrice=1200000` = 1 car, `/used-cars?maxPrice=900000` = 11 cars all within limit, `maxPrice=100` = empty-state message). Same at 390.
+- Find-my-car: opens from keyboard (Enter), validation message when nothing is selected, radios by Space/arrows, EMI slider by arrows, 3 ranked results, Esc closes and returns focus to the opener, at both viewports.
+- Model page: 6 cities (Lucknow and Kanpur Rs 10,85,935; Varanasi 10,87,420; Prayagraj 10,86,235; Gorakhpur 10,87,620; Delhi NCR 10,76,300 with 7% road tax), waterfall re-renders each time, sticky price bar appears on scroll and does not overlap the footer; mobile has a bottom CTA bar that clears the footer.
+- Used detail: inspection ring (99) and 100-point rows (rings partial at 9/10), timeline, reserve CTA. Test-drive and service flows reach the ticket with correct date block, consultant, what-to-bring list, `.ics` and WhatsApp link.
+- View Transitions: screencast of home to new-cars, new-cars to model, used list to detail shows no blank or white frame (frame luminance stddev never below 26).
+- Cursor: native cursor kept on body and inputs (the custom ring is additive); forms and selects usable. Focus: 40/40 tab stops show an outline; skip link first.
+- Fonts: Inter Tight, Inter, Noto Sans Devanagari report `loaded`; size-adjusted fallbacks keep CLS at or below 0.013.
+- No console errors or failed requests on 15 pages x 2 viewports (apart from my deliberate probe of a non-existent `/sell`, which correctly 404s); no horizontal scroll at 390 or 1440.
+- Staff/admin restyle: dashboard, lead inbox, prices render cleanly at both viewports (only R5-11).
+
+## What still feels mediocre (design critique)
+1. **Photography is the ceiling.** Type, motion and layout are premium; the images are not. Auto-show floors, people in the background, smudged plates and real manufacturer badges undermine the Night Garage story. Fix: one consistent studio treatment (cut-outs on a graded dark floor with soft reflection), or at minimum a uniform crop, darker vignette and lowered-saturation grade over every card so mixed sources read as a set. "Model V" on an Ertiga invites confusion.
+2. **The night/day split is inconsistent.** A white header, white cards and a bright budget section interrupt the dark mood; the hero is the only truly cinematic moment. Make the header adapt (dark over night sections) and give budget, offers and locations a toned surface (warm grey rather than pure white) so the page has one rhythm.
+3. **Spacing rhythm is uneven.** About 250 px of dead space after the trust band, 100 px of black below the rail, then a hard white cut; the budget card and the grid it controls are separated by a screen of white. Pick one vertical rhythm (for example 96/128 px) and align section transitions.
+4. **Hierarchy repeats itself.** The same red-script eyebrow "More than a car" opens both the rail and the finder; the hero stacks three headline-scale items plus a ghost word behind everything; the ghost model letters in the rail collide with the price numbers. One idea per fold.
+5. **Content pages are plain.** Compare is a stock table with mismatched image ratios; the variants table shows bare "Features" links; specs are three thin columns; test-drive step 1 uses cartoon SVG tiles. These feel like a different site from the hero.
+6. **Waterfall and rings are good ideas with a rough finish**: the broken EMI bar (R5-01), clipped total label (R5-13), and tiny slivers for small charges. Use a minimum bar width and put the label outside the bar.
+7. **Legibility**: 2.5:1 grey list on black, crimson script at 4.25:1, hero paragraph over bright slides near 4.1:1 on mobile.
+8. **The budget interaction hides its payoff.** The cars rearranging happens off-screen on desktop. Put the live count and top three cards beside the slider.
+
+## Verdict: does it "outcast" typical dealership sites?
+Largely yes on interaction and typography. The pinned model rail, live budget filter, Find-my-car dialog, price waterfall, booking tickets with calendar and WhatsApp, and the clean motion and reduced-motion behaviour put it well ahead of the usual dealer template (dense banner carousels, pop-ups, stock grids). It stops short of "premium showroom" because the photography and some inconsistent surfaces read as a strong template filled with mediocre assets, and because the cost of the motion layer on a throttled phone is visible (TBT above 1 s). Fix R5-01 and R5-02, the contrast items, and re-grade or reshoot the imagery, and it moves from "clearly better than average" to "memorable".
+
+---
+
 # QA Report - Company A Motors (Round 4)
 
 Tester: QA lead. Fresh seeded DBs (ports 3500-3520, RATE_LIMIT_PUBLIC=5000), headless Edge via CDP, commit 20c1d96. No app code edited. Tests changed/added: `tests/e2e/run.js` (CSV-import block now really logs in as lead_desk; the round-3 note claiming this was done was wrong) and new `tests/e2e/browser4.js` (modes `perf`, `pages`, `a11y`, `misc`, `probe`). Note: run.js and rbac.js must each run against a fresh DB (login lock-outs carry over between suites).
