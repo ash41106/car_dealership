@@ -247,7 +247,7 @@
  {
   "name": "m /: no horizontal scroll",
   "ok": true,
-  "info": "sw=390 iw=390 IMG."
+  "info": "sw=390 iw=390 IMG.,IMG.,IMG.,IMG."
  },
  {
   "name": "m /: no broken images",
@@ -322,7 +322,7 @@
  {
   "name": "m /used-cars: no horizontal scroll",
   "ok": true,
-  "info": "sw=390 iw=390 BUTTON.circ fl-x,H2.sr,DIV.field,LABEL."
+  "info": "sw=390 iw=390 "
  },
  {
   "name": "m /used-cars: no broken images",
@@ -397,7 +397,7 @@
  {
   "name": "m /service: no horizontal scroll",
   "ok": true,
-  "info": "sw=390 iw=390 "
+  "info": "sw=390 iw=390 LABEL.dchip,INPUT.,SPAN.,SMALL."
  },
  {
   "name": "m /service: no broken images",
@@ -542,21 +542,21 @@
  {
   "name": "hindi /compare has Devanagari",
   "ok": true,
-  "info": 382
+  "info": 391
  },
  {
   "name": "hindi /account has Devanagari",
   "ok": true,
-  "info": 407
+  "info": 415
  },
  {
   "name": "hindi /credits has Devanagari",
   "ok": true,
-  "info": 434
+  "info": 446
  },
  {
   "name": "hindi / has Devanagari",
   "ok": true,
-  "info": 1928
+  "info": 2394
  }
 ]
