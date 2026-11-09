@@ -73,7 +73,7 @@
       dpI.max = Math.max(pr * 0.9, 1000); if (+dpI.value > +dpI.max) dpI.value = dpI.max;
       ['price', 'dp', 'rate', 'months'].forEach(function (n) { var el = g(n), o = A.$('#o-' + n, box); if (el && o) o.textContent = fmt[n](el.value); });
       var loan = Math.max(0, pr - (+dpI.value)), m = +g('months').value, e = A.emi(loan, +g('rate').value, m);
-      A.tween(out('emi'), e); out('loan').textContent = A.inr(loan); out('interest').textContent = A.inr(e * m - loan); out('total').textContent = A.inr(e * m + (+dpI.value));
+      A.tween(out('emi'), e); var tot = (+dpI.value) + e * m, bar = A.$('.emi-bar', box); if (bar) { var q = bar.children; q[0].style.flexGrow = (+dpI.value) / tot * 100; q[1].style.flexGrow = loan / tot * 100; q[2].style.flexGrow = (e * m - loan) / tot * 100; } out('loan').textContent = A.inr(loan); out('interest').textContent = A.inr(e * m - loan); out('total').textContent = A.inr(e * m + (+dpI.value));
     }
     box.addEventListener('input', calc);
     box.addEventListener('emi:price', function (ev) { box.setAttribute('data-price', ev.detail); var dp = g('dp'); dp.value = Math.round(ev.detail * 0.2 / 5000) * 5000; calc(); });

@@ -331,6 +331,20 @@ const S = {
   cta_sub: { en: "Pick a slot. We will have the car ready, keys on the desk.", hi: "एक स्लॉट चुनें। कार तैयार मिलेगी, चाबी डेस्क पर।" },
   hero_aria: { en: "Featured models", hi: "चुनिंदा मॉडल" },
   slide_n: { en: "Slide", hi: "स्लाइड" },
+  tl_t: { en: "Its story so far", hi: "इसकी अब तक की कहानी" },
+  tl_reg: { en: "First registered", hi: "पहला रजिस्ट्रेशन" },
+  tl_own: { en: "previous owners including the current one", hi: "मालिक (वर्तमान सहित)" },
+  tl_km: { en: "driven so far", hi: "अब तक चली" },
+  tl_ins: { en: "100-point inspection score", hi: "100-पॉइंट जाँच स्कोर" },
+  tl_yard: { en: "Ready at our certified yard", hi: "हमारे प्रमाणित यार्ड में तैयार" },
+  wf_t: { en: "How the price builds up", hi: "कीमत कैसे बनती है" },
+  wf_full: { en: "Full breakup table", hi: "पूरी कीमत तालिका" },
+  offer_rb: { en: "Offer", hi: "ऑफ़र" },
+  emi_dp: { en: "Down payment", hi: "डाउन पेमेंट" },
+  emi_pr: { en: "Principal", hi: "मूलधन" },
+  emi_in: { en: "Interest", hi: "ब्याज" },
+  reserve_t: { en: "Reserve your interest", hi: "अपनी रुचि दर्ज करें" },
+  sheet_close: { en: "Close", hi: "बंद करें" },
   grievance: { en: 'Grievance officer', hi: 'शिकायत अधिकारी' }
 };
 

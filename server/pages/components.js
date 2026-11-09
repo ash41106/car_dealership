@@ -82,11 +82,19 @@ function usedCard(u, t, lang, bm) {
 function breakup(p, t, lang) {
   if (!p) return `<p class="muted">${esc(t('price_updating'))}</p>`;
   if (p.expired) return `<div class="notice"><p><strong>${esc(t('price_updating'))}</strong></p><a class="btn" href="/test-drive">${esc(t('request_quote'))} ${ICON.arrow}</a></div>`;
-  const grp = { ex_showroom: 'a', road_tax: 'b', tcs: 'b', registration: 'b', insurance: 'c', handling: 'd', fastag: 'd', accessories: 'd' }; const seg = { a: 0, b: 0, c: 0, d: 0 }; (p.lines || []).forEach(l => { if (l.kind === 'add') seg[grp[l.key] || 'd'] += l.amount; }); const tot = seg.a + seg.b + seg.c + seg.d || 1;
-  const names = { a: t('ex_showroom'), b: t('seg_tax'), c: t('seg_ins'), d: t('seg_other') };
-  const bar = `<div class="seg" role="img" aria-label="${esc(t('price_breakup'))}">${['a', 'b', 'c', 'd'].map(k => seg[k] ? `<i class="s-${k}" style="flex:${seg[k] / tot}" title="${esc(names[k])}"></i>` : '').join('')}</div><ul class="seg-l">${['a', 'b', 'c', 'd'].map(k => seg[k] ? `<li><i class="s-${k}"></i>${esc(names[k])} <b>${Math.round(seg[k] / tot * 100)}%</b></li>` : '').join('')}</ul>`;
-  const rows = (p.lines || []).map(l => `<tr class="${l.kind === 'total' ? 'tot' : ''}"><th scope="row">${esc(L(l, 'label', lang))}</th><td>${l.kind === 'less' ? '− ' : ''}${esc(inr(Math.abs(l.amount)))}</td></tr>`).join('');
-  return `${bar}<table class="bk"><caption class="sr">${esc(t('price_breakup'))}</caption><tbody>${rows}</tbody></table>
+  // waterfall: each row is a floating bar from the running total
+  const rows = []; let cum = 0, peak = 1;
+  (p.lines || []).forEach(l => {
+    if (l.kind === 'total') return;
+    const amt = Math.abs(l.amount); let start;
+    if (l.kind === 'less') { cum -= amt; start = cum; } else { start = cum; cum += amt; }
+    rows.push({ l, start, amt, cls: l.key === 'ex_showroom' ? 'ex' : l.kind === 'less' ? 'less' : l.key === 'insurance' ? 'ins' : 'tax' });
+    peak = Math.max(peak, cum, start + amt);
+  });
+  const pct = (v) => Math.round(v / peak * 1000) / 10;
+  const wf = `<ol class="wf" aria-hidden="true">${rows.map((r, i) => `<li class="${r.cls}" style="--s:${pct(r.start)};--w:${pct(r.amt)};--k:${i}"><span class="l">${esc(L(r.l, 'label', lang))}</span><span class="t"><i></i></span><b>${r.l.kind === 'less' ? '\u2212' : ''}${esc(inr(r.amt))}</b></li>`).join('')}<li class="tot" style="--s:0;--w:${pct(cum)};--k:${rows.length}"><span class="l">${esc(t('on_road'))}</span><span class="t"><i></i></span><b>${esc(inr(p.on_road))}</b></li></ol>`;
+  const trs = (p.lines || []).map(l => `<tr class="${l.kind === 'total' ? 'tot' : ''}"><th scope="row">${esc(L(l, 'label', lang))}</th><td>${l.kind === 'less' ? '\u2212 ' : ''}${esc(inr(Math.abs(l.amount)))}</td></tr>`).join('');
+  return `<h3 class="wf-h">${esc(t('wf_t'))}</h3>${wf}<details class="bkd" open><summary>${esc(t('wf_full'))}</summary><table class="bk"><caption class="sr">${esc(t('price_breakup'))}</caption><tbody>${trs}</tbody></table></details>
 <p class="valid">${esc(t('valid_until'))}: <time datetime="${esc(p.valid_until)}">${esc(p.valid_until)}</time></p><p class="muted small">${esc(L(p, 'note', lang) || t('price_note'))}</p>`;
 }
 
@@ -99,6 +107,7 @@ function emiWidget(t, o) { // {price, rate, months, id}
 ${sl('dp', t('down_payment'), 0, Math.max(price, 1000000), 5000, dp)}${sl('rate', t('rate'), 6, 18, 0.1, rate)}${sl('months', t('tenure'), 12, 84, 6, months)}</div>
 <div class="emi-out" aria-live="polite"><small>${esc(t('monthly_emi'))}</small><strong class="price big" data-out="emi">—</strong>
 <dl><div><dt>${esc(t('loan_amount'))}</dt><dd data-out="loan"></dd></div><div><dt>${esc(t('total_interest'))}</dt><dd data-out="interest"></dd></div><div><dt>${esc(t('total_payable'))}</dt><dd data-out="total"></dd></div></dl></div>
+<div class="emi-bar" aria-hidden="true"><i class="b-dp"></i><i class="b-pr"></i><i class="b-in"></i></div><ul class="emi-leg"><li><i class="b-dp"></i>${esc(t('emi_dp'))}</li><li><i class="b-pr"></i>${esc(t('emi_pr'))}</li><li><i class="b-in"></i>${esc(t('emi_in'))}</li></ul>
 <p class="muted small">${esc(t('emi_note'))}</p></div>`;
 }
 

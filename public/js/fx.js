@@ -131,3 +131,17 @@
     if (im.complete && im.naturalWidth) p.classList.add('ld'); else { im.addEventListener('load', function () { p.classList.add('ld'); }); im.addEventListener('error', function () { p.classList.add('ld'); }); }
   });
 })();
+
+(function () {
+  var A = window.A, d = document;
+  // generic dialog openers: <button data-open="id"> opens <dialog id>, closes on [data-close]/backdrop/Esc, returns focus
+  A.$$('[data-open]').forEach(function (b) {
+    var dl = d.getElementById(b.getAttribute('data-open')); if (!dl || !dl.showModal) return;
+    b.addEventListener('click', function () { dl.showModal(); dl._op = b; });
+    A.$$('[data-close]', dl).forEach(function (c) { c.addEventListener('click', function () { dl.close(); }); });
+    dl.addEventListener('click', function (e) { if (e.target === dl) dl.close(); });
+    dl.addEventListener('close', function () { if (dl._op) dl._op.focus(); });
+  });
+  // animate inspection mini-rings when they scroll into view
+  var rs = A.$$('.mini-ring'); if (rs.length && 'IntersectionObserver' in window && !A.RM) { var io = new IntersectionObserver(function (es) { es.forEach(function (e) { if (e.isIntersecting) { e.target.classList.add('in'); io.unobserve(e.target); } }); }); rs.forEach(function (r) { io.observe(r); }); } else rs.forEach(function (r) { r.classList.add('in'); });
+})();
