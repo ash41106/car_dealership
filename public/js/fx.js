@@ -19,7 +19,7 @@
     d.addEventListener('pointermove', function (e) { x = e.clientX; y = e.clientY; if (!on) { on = true; d.documentElement.classList.add('cur-on'); rx = x; ry = y; } c.style.transform = 'translate(' + x + 'px,' + y + 'px)'; var h = e.target.closest && e.target.closest('a,button,label,input,select,textarea,[data-tilt]'); d.documentElement.classList.toggle('cur-h', !!h); var lb = e.target.closest && e.target.closest('[data-cursor]'); r.classList.toggle('lbl', !!lb); if (lb) r.setAttribute('data-l', lb.getAttribute('data-cursor')); });
     d.addEventListener('pointerleave', function () { on = false; d.documentElement.classList.remove('cur-on'); });
     (function loop() { rx += (x - rx) * .18; ry += (y - ry) * .18; r.style.transform = 'translate(' + rx + 'px,' + ry + 'px)'; requestAnimationFrame(loop); })();
-    A.$$('.hero2 .btn,.band .btn,.scene-band .btn,.story-steps .btn').forEach(function (b) {
+    A.$$('.hero2 .btn,.band .btn,.scene-band .btn,.story-steps .btn,[data-mag]').forEach(function (b) {
       b.addEventListener('pointermove', function (e) { var k = b.getBoundingClientRect(); b.style.transform = 'translate(' + (e.clientX - k.left - k.width / 2) * .18 + 'px,' + (e.clientY - k.top - k.height / 2) * .25 + 'px)'; });
       b.addEventListener('pointerleave', function () { b.style.transform = ''; });
     });

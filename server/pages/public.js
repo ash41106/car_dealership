@@ -64,6 +64,8 @@ function newCars(ctx) {
   let models = safe(() => svc.catalog.listModels(), []);
   const ty = String(ctx.query.type || '');
   if (ty) models = models.filter(m => m.body_type === ty);
+  const maxP = Number(ctx.query.maxPrice) || 0;
+  if (maxP) { const pr = {}; require('./home').modelsWithPrice().forEach(x => { pr[x.slug] = x.onroad || x.from_price || 0; }); models = models.filter(m => (pr[m.slug] || 0) <= maxP); }
   const tabs = ['', 'hatchback', 'sedan', 'suv', 'mpv'].map(x => `<a class="pill${x === ty ? ' on' : ''}" href="/new-cars${x ? '?type=' + x : ''}"${x === ty ? ' aria-current="true"' : ''}>${esc(x ? t(x) : t('any'))}</a>`).join('');
   const body = `${crumbsHtml([[t('new_cars'), '/new-cars']], t)}${C.hdr({ title: esc(t('new_cars')), sub: t('new_cars_sub') })}<section class="sec tight"><div class="wrap"><div class="pills">${tabs}</div>
 ${models.length ? `<div class="grid">${models.map(m => C.modelCard(m, t, lang)).join('')}</div>` : `<p class="empty">${esc(t('no_results'))}</p>`}</div></section>`;
@@ -375,7 +377,7 @@ function wrap(fn) { return async (ctx) => { try { return await fn(ctx); } catch 
 
 module.exports = { register(router) {
   const g = (p, fn) => router.get(p, wrap(fn));
-  g('/', home); g('/new-cars', newCars); g('/new-cars/:slug', modelPage); g('/used-cars', usedList); g('/used-cars/:slug', usedPage);
+  g('/', (ctx) => require('./home').home(ctx)); g('/new-cars', newCars); g('/new-cars/:slug', modelPage); g('/used-cars', usedList); g('/used-cars/:slug', usedPage);
   g('/test-drive', testDrive); g('/service', servicePage); g('/emi', emiPage); g('/account', account); g('/credits', credits); g('/compare', comparePage); g('/trade-in', tradeIn); g('/contact', contact); g('/privacy', privacy); g('/opt-out', optOut);
   g('/sitemap.xml', sitemap); g('/robots.txt', robots); g('/img/car/:file', carImage); g('/ui/onroad', onroadFragment);
   router.post('/forms/lead', wrap(formLead)); router.post('/forms/test-drive', wrap(formTD)); router.post('/forms/service', wrap(formService)); router.post('/forms/optout', wrap(formOptOut)); router.post('/forms/callback', wrap(formCallback));
