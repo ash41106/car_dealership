@@ -268,7 +268,7 @@ const S = {
   bud_tenure: { en: "Tenure", hi: "अवधि" },
   bud_down: { en: "Down payment", hi: "डाउन पेमेंट" },
   bud_upto: { en: "Cars up to", hi: "कारें अधिकतम" },
-  bud_assume: { en: "at", hi: "ब्याज" },
+  bud_assume: { en: "Assumed rate", hi: "मानी गई दर" },
   bud_none: { en: "Nothing fits this budget yet. Try a longer tenure or a higher EMI.", hi: "इस बजट में अभी कुछ नहीं है। लंबी अवधि या ज़्यादा EMI आज़माएँ।" },
   bud_see_new: { en: "See new cars in budget", hi: "बजट में नई कारें" },
   bud_see_used: { en: "See used cars in budget", hi: "बजट में पुरानी कारें" },
@@ -376,7 +376,7 @@ function make(lang) {
   return t;
 }
 // subset of strings shipped to client JS
-const CLIENT_KEYS = ['loading', 'error_generic', 'retry', 'err_name', 'err_phone', 'err_email', 'err_consent', 'err_required', 'sending', 'submit', 'slot_taken', 'no_slots', 'slot_conflict', 'thanks', 'thanks_lead', 'your_consultant', 'booking_done', 'remaining', 'full', 'select', 'ex_showroom', 'on_road', 'valid_until', 'price_updating', 'request_quote', 'price_note', 'per_month', 'optout_done', 'inspection_pass', 'inspection_attn', 'step', 'continue', 'confirm_booking', 'choose_slot', 'compare', 'close', 'name', 'privacy', 'enlarge', 'prev', 'next', 'gallery_lbl', 'tk_t', 'tk_cal', 'tk_wa', 'tk_bring', 'tk_b1', 'tk_b2', 'tk_b3', 'tk_s1', 'tk_s2', 'tk_s3', 'tk_td', 'tk_sv', 'tk_where', 'tk_when', 'tk_who', 'tk_veh', 'tk_new', 'show_n', 'results'];
+const CLIENT_KEYS = ['loading', 'error_generic', 'retry', 'err_name', 'err_phone', 'err_email', 'err_consent', 'err_required', 'sending', 'submit', 'slot_taken', 'no_slots', 'slot_conflict', 'thanks', 'thanks_lead', 'your_consultant', 'booking_done', 'remaining', 'full', 'select', 'ex_showroom', 'on_road', 'valid_until', 'price_updating', 'request_quote', 'price_note', 'per_month', 'optout_done', 'inspection_pass', 'inspection_attn', 'step', 'continue', 'confirm_booking', 'choose_slot', 'compare', 'close', 'name', 'privacy', 'enlarge', 'prev', 'next', 'gallery_lbl', 'tk_t', 'tk_cal', 'tk_wa', 'tk_bring', 'tk_b1', 'tk_b2', 'tk_b3', 'tk_s1', 'tk_s2', 'tk_s3', 'tk_td', 'tk_sv', 'tk_where', 'tk_when', 'tk_who', 'tk_veh', 'tk_new', 'show_n', 'results', 'months_unit'];
 // all keys sharing a prefix (used to ship feature-specific strings to one page)
 function group(lang, prefix) { const t = make(lang), o = {}; Object.keys(S).forEach(k => { if (k.startsWith(prefix)) o[k] = t(k); }); return o; }
 function client(lang) {

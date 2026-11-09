@@ -67,7 +67,7 @@
   A.$$('[data-autosubmit]').forEach(function (s) { s.addEventListener('change', function () { s.form.submit(); }); });
   A.$$('[data-emi]').forEach(function (box) {
     var g = function (n) { return A.$('[name=' + n + ']', box); }, out = function (n) { return A.$('[data-out=' + n + ']', box); };
-    var fmt = { price: A.inr, dp: A.inr, rate: function (v) { return (+v).toFixed(1) + '%'; }, months: function (v) { return v + ' mo'; } };
+    var fmt = { price: A.inr, dp: A.inr, rate: function (v) { return (+v).toFixed(1) + '%'; }, months: function (v) { return v + ' ' + (A.I.months_unit || 'mo'); } };
     function calc() {
       var pr = g('price') ? +g('price').value : +box.getAttribute('data-price'); var dpI = g('dp');
       dpI.max = Math.max(pr * 0.9, 1000); if (+dpI.value > +dpI.max) dpI.value = dpI.max;
