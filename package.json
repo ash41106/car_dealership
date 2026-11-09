@@ -4,10 +4,16 @@
   "private": true,
   "description": "Company A Motors - Brand X dealership website (Lucknow)",
   "main": "server/server.js",
-  "engines": { "node": ">=22.13" },
+  "engines": {
+    "node": ">=22.13"
+  },
   "scripts": {
     "start": "node server/server.js",
     "seed": "node server/seed.js",
-    "test": "node --test --test-reporter=spec \"tests/api/*.test.js\""
+    "test": "node --test --test-reporter=spec \"tests/api/*.test.js\"",
+    "vendor:motion": "node -e \"const f=require('fs');f.mkdirSync('public/js/vendor',{recursive:true});f.copyFileSync('node_modules/framer-motion/dist/dom-mini.js','public/js/vendor/motion-mini.js');f.copyFileSync('node_modules/framer-motion/dist/dom.js','public/js/vendor/motion-dom.js')\""
+  },
+  "devDependencies": {
+    "motion": "^14.10.1"
   }
 }
