@@ -32,8 +32,11 @@
   var pg = A.$('#progress');
   if (pg) { pg.style.width = '70%'; w.addEventListener('load', function () { pg.style.width = '100%'; setTimeout(function () { pg.style.opacity = 0; }, 350); }); }
   var hdr = A.$('#hdr');
-  function onS() { if (hdr) hdr.classList.toggle('small', w.scrollY > 24); }
-  onS(); w.addEventListener('scroll', onS, { passive: true });
+  // header shrinks after 24px of scroll. An IntersectionObserver sentinel replaces scrollY reads (which forced a synchronous layout before first paint).
+  if (hdr && 'IntersectionObserver' in w) {
+    var sent = d.createElement('div'); sent.setAttribute('aria-hidden', 'true'); sent.style.cssText = 'position:absolute;top:0;left:0;width:1px;height:24px;pointer-events:none;visibility:hidden'; d.body.insertBefore(sent, d.body.firstChild);
+    new IntersectionObserver(function (es) { hdr.classList.toggle('small', !es[0].isIntersecting); }).observe(sent);
+  } else if (hdr) { var onS = function () { hdr.classList.toggle('small', w.scrollY > 24); }; onS(); w.addEventListener('scroll', onS, { passive: true }); }
   var bg = A.$('#burger'), nav = A.$('#nav');
   if (bg) bg.addEventListener('click', function () { var o = nav.classList.toggle('open'); bg.setAttribute('aria-expanded', o); });
   d.addEventListener('keydown', function (e) { if (e.key === 'Escape' && nav && nav.classList.contains('open')) { nav.classList.remove('open'); bg.setAttribute('aria-expanded', 'false'); bg.focus(); } });

@@ -1,10 +1,14 @@
 (function () {
   'use strict';
-  var A = window.A, d = document, w = window, RM = A.RM, fine = w.matchMedia && w.matchMedia('(pointer:fine)').matches;
+  var A = window.A, d = document, w = window, RM = A.RM, fine = !!(w.matchMedia && w.matchMedia('(hover:hover) and (pointer:fine) and (min-width: 900px)').matches); // pointer effects are desktop-only
   // scroll progress line
   var sb = d.createElement('div'); sb.className = 'scrollbar'; d.body.appendChild(sb);
-  var tk = 0;
-  w.addEventListener('scroll', function () { if (tk) return; tk = requestAnimationFrame(function () { var h = d.documentElement.scrollHeight - w.innerHeight; sb.style.transform = 'scaleX(' + (h > 0 ? w.scrollY / h : 0) + ')'; tk = 0; }); }, { passive: true });
+  var tk = 0, cssTimeline = !!(w.CSS && CSS.supports && CSS.supports('animation-timeline: scroll()'));
+  if (cssTimeline) sb.classList.add('tl');
+  // page height is cached (no layout read per scroll frame)
+  var H = 0, measure = function () { H = Math.max(0, d.documentElement.scrollHeight - w.innerHeight); };
+  if (!cssTimeline) { w.addEventListener('load', measure); w.addEventListener('resize', measure); if (w.ResizeObserver) new ResizeObserver(measure).observe(d.body); }
+  if (!cssTimeline) w.addEventListener('scroll', function () { if (tk) return; tk = requestAnimationFrame(function () { sb.style.transform = 'scaleX(' + (H > 0 ? w.scrollY / H : 0) + ')'; tk = 0; }); }, { passive: true });
   // page transition
   var nativeVT = !!(w.CSS && CSS.supports && CSS.supports('view-transition-name:a'));
   if (!RM && !nativeVT) d.addEventListener('click', function (e) {
@@ -19,7 +23,10 @@
     var x = 0, y = 0, rx = 0, ry = 0, on = false;
     d.addEventListener('pointermove', function (e) { x = e.clientX; y = e.clientY; if (!on) { on = true; d.documentElement.classList.add('cur-on'); rx = x; ry = y; } c.style.transform = 'translate(' + x + 'px,' + y + 'px)'; var h = e.target.closest && e.target.closest('a,button,label,input,select,textarea,[data-tilt]'); d.documentElement.classList.toggle('cur-h', !!h); var lb = e.target.closest && e.target.closest('[data-cursor]'); r.classList.toggle('lbl', !!lb); if (lb) r.setAttribute('data-l', lb.getAttribute('data-cursor')); });
     d.addEventListener('pointerleave', function () { on = false; d.documentElement.classList.remove('cur-on'); });
-    (function loop() { rx += (x - rx) * .18; ry += (y - ry) * .18; r.style.transform = 'translate(' + rx + 'px,' + ry + 'px)'; requestAnimationFrame(loop); })();
+    // the follow loop only runs while the ring is still catching up (no idle rAF)
+    var running = false;
+    function loop() { rx += (x - rx) * .18; ry += (y - ry) * .18; r.style.transform = 'translate(' + rx + 'px,' + ry + 'px)'; if (Math.abs(x - rx) < .3 && Math.abs(y - ry) < .3) { running = false; return; } requestAnimationFrame(loop); }
+    d.addEventListener('pointermove', function () { if (!running) { running = true; requestAnimationFrame(loop); } });
     A.$$('.hero2 .btn,.band .btn,.scene-band .btn,.story-steps .btn,[data-mag]').forEach(function (b) {
       b.addEventListener('pointermove', function (e) { var k = b.getBoundingClientRect(); b.style.transform = 'translate(' + (e.clientX - k.left - k.width / 2) * .18 + 'px,' + (e.clientY - k.top - k.height / 2) * .25 + 'px)'; });
       b.addEventListener('pointerleave', function () { b.style.transform = ''; });
@@ -125,7 +132,7 @@
 
 (function () {
   var A = window.A, w = window, els = A.$$('[data-bg]'); if (!els.length) return;
-  var big = w.innerWidth > 800 || w.devicePixelRatio > 1.5;
+  var big = (w.matchMedia && w.matchMedia('(min-width: 801px)').matches) || w.devicePixelRatio > 1.5;
   var load = function (el) { var u = (big && el.getAttribute('data-bg-l')) || el.getAttribute('data-bg'); el.style.backgroundImage = 'url(' + u + ')'; el.removeAttribute('data-bg'); el.classList.add('bg-in'); };
   if (!('IntersectionObserver' in w)) { w.addEventListener('load', function () { els.forEach(load); }); return; }
   var io = new IntersectionObserver(function (es) { es.forEach(function (e) { if (e.isIntersecting) { io.unobserve(e.target); load(e.target); } }); }, { rootMargin: '300px 0px' });
@@ -137,7 +144,7 @@
   if (document.readyState === 'complete') on(); else window.addEventListener('load', on);
 })();
 
-(function () { var on = function () { var run = function () { document.documentElement.classList.add("grain"); }; if (window.requestIdleCallback) requestIdleCallback(run, { timeout: 3000 }); else setTimeout(run, 1500); }; if (document.readyState === "complete") on(); else window.addEventListener("load", on); })();
+(function () { if (!(window.matchMedia && matchMedia('(hover:hover) and (pointer:fine) and (min-width: 900px)').matches)) return; var on = function () { var run = function () { document.documentElement.classList.add("grain"); }; if (window.requestIdleCallback) requestIdleCallback(run, { timeout: 4000 }); else setTimeout(run, 2000); }; if (document.readyState === "complete") on(); else window.addEventListener("load", on); })();
 
 (function () {
   var A = window.A; A.$$('.card-img img, .rs-img img').forEach(function (im) {
@@ -158,4 +165,12 @@
   });
   // animate inspection mini-rings when they scroll into view
   var rs = A.$$('.mini-ring'); if (rs.length && 'IntersectionObserver' in window && !A.RM) { var io = new IntersectionObserver(function (es) { es.forEach(function (e) { if (e.isIntersecting) { e.target.classList.add('in'); io.unobserve(e.target); } }); }); rs.forEach(function (r) { io.observe(r); }); } else rs.forEach(function (r) { r.classList.add('in'); });
+})();
+
+(function () {
+  var A = window.A, hdr = A.$('#hdr'), tones = A.$$('[data-tone=night]'); if (!hdr || !tones.length || !('IntersectionObserver' in window)) return;
+  var under = new Set(), set = function () { hdr.classList.toggle('on-night', under.size > 0); };
+  // a thin band at the top of the viewport (where the header sits) decides the header tone
+  var io = new IntersectionObserver(function (es) { es.forEach(function (e) { if (e.isIntersecting) under.add(e.target); else under.delete(e.target); }); set(); }, { rootMargin: '0px 0px -92% 0px' });
+  tones.forEach(function (t) { io.observe(t); });
 })();

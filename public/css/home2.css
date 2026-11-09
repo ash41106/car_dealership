@@ -19,8 +19,8 @@ body.home .hdr .nav.open a{color:#0b0b0e}
 .h3-slide{position:absolute;inset:0;margin:0;opacity:0;transition:opacity 1.1s var(--ease-inout);animation:none}
 .h3-slide.on{opacity:1}
 .h3-slide picture,.h3-slide img{display:block;width:100%;height:100%}
-.h3-slide img{object-fit:cover;object-position:60% 55%;filter:brightness(.66) contrast(1.08) saturate(.92);transform:translate3d(calc(var(--px,0) * -16px),calc(var(--py,0) * -9px),0) scale(1.03);transition:transform 1.4s var(--ease-out)}
-.h3-slide.on img{animation:kb 9s var(--ease-inout) both}
+.h3-slide img{object-fit:cover;object-position:60% 55%;transform:translate3d(calc(var(--px,0) * -16px),calc(var(--py,0) * -9px),0) scale(1.03);transition:transform 1.4s var(--ease-out)} /* grade (contrast, desaturation, split tone, vignette) is baked into the variants */
+.h3-slide.on img{animation:none}@media(hover:hover) and (min-width:900px){.h3-slide.on img{animation:kb 9s var(--ease-inout) both}}
 @keyframes kb{from{scale:1}to{scale:1.035}}
 .h3-shade{position:absolute;inset:0;background:linear-gradient(90deg,rgba(11,11,14,.94) 0%,rgba(11,11,14,.66) 42%,rgba(11,11,14,.12) 100%),linear-gradient(0deg,var(--ink) 0%,rgba(11,11,14,0) 28%)}
 @supports (animation-timeline:scroll()){.h3-bg{animation:h3par linear both;animation-timeline:scroll(root);animation-range:0 90vh}@keyframes h3par{to{transform:translate3d(0,60px,0)}}}
@@ -111,3 +111,27 @@ dialog.fdlg[open]{animation:dlg var(--dur-3) var(--ease-out)}@keyframes dlg{from
 
 /* non-active hero slides stay out of layout (and out of the network) until the page is idle, so the LCP image has the bandwidth */
 .hero3:not(.ready) .h3-slide:not(.on){display:none}
+
+
+/* contrast: lighter crimson for TEXT on night (>= 4.5:1), readable peek list, stronger mobile hero shade */
+.night{--crimson-text:#ff6479}
+.night .script,.night .h2 em,.night .h1 em{color:var(--crimson-text)}
+.fd-peek li{color:#9c9ca7}.fd-peek li:first-child{color:#c9c9d2}
+.night .eyebrow li{color:#e6e4df}.h3-in .lead{color:#e4e2dd}
+@media(max-width:700px){.h3-shade{background:linear-gradient(0deg,rgba(11,11,14,.96) 0%,rgba(11,11,14,.84) 38%,rgba(11,11,14,.6) 68%,rgba(11,11,14,.2) 100%)}.cta3::after{display:none}}
+/* rail pin is capped so tall monitors do not inflate it */
+.mrail{height:calc(var(--n) * min(72vh,700px) + min(52vh,500px))}
+.rail-pin{height:min(100vh,960px);top:calc((100vh - min(100vh,960px)) / 2)}
+/* art-directed frame: skewed crop + red slash + floor gradient so every photo reads as designed */
+.rs-img{position:relative;clip-path:polygon(7% 0,100% 0,100% 100%,0 100%);border-radius:0;box-shadow:none}
+.rs-img::before{content:"";position:absolute;left:0;top:0;bottom:0;width:7%;background:var(--crimson);transform:skewX(-9deg) translateX(-30%);z-index:2;opacity:.95}
+.rs-img::after{content:"";position:absolute;inset:auto 0 0 0;height:38%;background:linear-gradient(0deg,rgba(11,11,14,.7),transparent);z-index:1;pointer-events:none}
+/* budget: controls stay in view beside the results on desktop */
+@media(min-width:960px){
+  .bud-layout{display:grid;grid-template-columns:minmax(330px,.72fr) minmax(0,2fr);gap:2.2rem;align-items:start}
+  .bud-layout .bud-ctl{position:sticky;top:92px}
+  .bud-layout .bud-grid{grid-template-columns:repeat(2,minmax(0,1fr))}
+}
+.bud-top{max-width:46rem;margin-bottom:2rem}
+a.btn[aria-disabled=true]{opacity:.4;pointer-events:none}
+.fd-res .pc small{display:block;font:500 .68rem var(--f-body);letter-spacing:.08em;text-transform:uppercase;color:var(--muted-night)}.bud-out{flex-wrap:wrap}.bud-out output{font-size:clamp(2.2rem,3.4vw,3.4rem)}.bud-out span{white-space:nowrap}.bud-sum small{display:inline-block;white-space:nowrap}

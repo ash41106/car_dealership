@@ -2,7 +2,7 @@
 (function () {
   'use strict';
   var A = window.A, d = document, w = window, RM = A.RM, F = w.__F || {};
-  var fine = w.matchMedia && w.matchMedia('(pointer:fine)').matches;
+  var fine = !!(w.matchMedia && w.matchMedia('(hover:hover) and (pointer:fine) and (min-width: 900px)').matches);
   var data = {}; try { data = JSON.parse(A.$('#home-data').textContent); } catch (e) { }
   var clamp = function (v, a, b) { return Math.max(a, Math.min(b, v)); };
   var lakh = function (n) { n = Math.round(n); return n >= 1e7 ? '₹' + (n / 1e7).toFixed(2) + ' Cr' : n >= 1e5 ? '₹' + (n / 1e5).toFixed(2).replace(/\.?0+$/, '') + ' Lakh' : A.inr(n); };
@@ -41,17 +41,18 @@
     rail.style.setProperty('--n', n);
     var upd = function () {
       tk = 0; if (!desk.matches) { track.style.removeProperty('--tx'); return; }
-      var r = rail.getBoundingClientRect(), total = rail.offsetHeight - w.innerHeight, p = clamp(-r.top / total, 0, 1);
+      var r = rail.getBoundingClientRect(), pin = A.$('.rail-pin', rail), total = rail.offsetHeight - pin.offsetHeight, p = clamp((-r.top + (w.innerHeight - pin.offsetHeight) / 2) / total, 0, 1);
       track.style.setProperty('--tx', (-p * (n - 1) * 100).toFixed(3) + 'vw'); rail.style.setProperty('--p', p.toFixed(4)); if (prog) prog.parentNode.parentNode.style.setProperty('--p', p.toFixed(4));
       var i = Math.round(p * (n - 1)); if (i !== last) { last = i; tabs.forEach(function (t, k) { t.classList.toggle('on', k === i); }); }
     };
-    var onScroll = function () { if (!tk) tk = requestAnimationFrame(upd); };
-    w.addEventListener('scroll', onScroll, { passive: true }); w.addEventListener('resize', onScroll); upd();
+    var onScroll = function () { if (!tk) tk = requestAnimationFrame(upd); }, live = false;
+    var arm = function () { if (live) return; live = true; w.addEventListener('scroll', onScroll, { passive: true }); w.addEventListener('resize', onScroll); upd(); };
+    if ('IntersectionObserver' in w) { var rio = new IntersectionObserver(function (es) { if (es[0].isIntersecting) { rio.disconnect(); arm(); } }, { rootMargin: '120% 0px' }); rio.observe(rail); } else arm();
     // keyboard users tabbing into an off-screen slide bring it into view
     A.$$('.rail-slide', rail).forEach(function (s, i) {
       s.addEventListener('focusin', function () {
         if (!desk.matches) { s.scrollIntoView({ inline: 'center', block: 'nearest', behavior: RM ? 'auto' : 'smooth' }); return; }
-        var total = rail.offsetHeight - w.innerHeight; w.scrollTo({ top: rail.offsetTop + total * (i / Math.max(1, n - 1)), behavior: 'auto' });
+        var total = rail.offsetHeight - A.$('.rail-pin', rail).offsetHeight; w.scrollTo({ top: rail.offsetTop + total * (i / Math.max(1, n - 1)), behavior: 'auto' });
       });
     });
   }
@@ -81,11 +82,14 @@
       out.textContent = A.inr(e); emi.setAttribute('aria-valuetext', A.inr(e) + ' ' + (F.bud_month || '')); emi.style.setProperty('--fill', ((e - emi.min) / (emi.max - emi.min) * 100) + '%');
       A.tween(mx, max, lakh);
       var k = 0; flip(function () { items.forEach(function (el) { var ok = +el.getAttribute('data-p') <= max; el.hidden = !ok; if (ok) k++; }); });
+      var kn = 0, ku = 0; items.forEach(function (el) { if (!el.hidden) { if (el.getAttribute('data-k') === 'used') ku++; else kn++; } });
       cnt.textContent = k + ' ' + (F.bud_match || ''); none.hidden = k > 0;
+      [['#b-new', kn], ['#b-used', ku]].forEach(function (p) { var a = A.$(p[0]); if (p[1] > 0) { a.removeAttribute('aria-disabled'); a.removeAttribute('tabindex'); } else { a.setAttribute('aria-disabled', 'true'); a.setAttribute('tabindex', '-1'); } });
       A.$('#b-new').href = '/new-cars?maxPrice=' + Math.round(max); A.$('#b-used').href = '/used-cars?maxPrice=' + Math.round(max);
     }
     var sched = function () { if (!pending) pending = requestAnimationFrame(update); };
-    bc.addEventListener('input', sched); bc.addEventListener('change', sched); update();
+    bc.addEventListener('input', sched); bc.addEventListener('change', sched);
+    emi.style.setProperty('--fill', ((emi.value - emi.min) / (emi.max - emi.min) * 100) + '%'); // first paint state (hidden cards, counts, max) comes from the server
   }
 
   /* ---- "Find my car" matcher ---- */
@@ -109,7 +113,7 @@
       var prices = data.cars.map(function (c) { return c.price; }).sort(function (x, y) { return x - y; });
       return data.cars.map(function (c) {
         var s = 0, why = [], b = c.body, wv = (BODY[a.who] || {})[b] || 0, wh = (WHERE[a.where] || {})[b] || 0, pv = (PRIO[a.prio] || {})[b] || 0;
-        s += wv * 3; if (wv >= 3) why.push(F.fr_who);
+        s += wv * 3; if (wv >= 3) why.push({ solo: F.fr_who_solo, two: F.fr_who_two, fam: F.fr_who_fam, big: F.fr_who_big }[a.who]);
         s += wh * 2; if (wh >= 3) why.push(a.where === 'city' ? F.fr_city : a.where === 'hwy' ? F.fr_hwy : F.fr_mix);
         if (c.price <= maxp) { s += 7; why.push(F.fr_budget); } else if (c.price <= maxp * 1.12) s += 2; else s -= 10;
         s += pv * 2; if (pv >= 3) why.push({ eff: F.fr_eff, space: F.fr_space, comfort: F.fr_comfort, feat: F.fr_feat }[a.prio]);
@@ -124,7 +128,7 @@
       var ol = A.$('#fd-res', dlg);
       ol.innerHTML = top.map(function (x, i) {
         var why = x.why.slice(0, 2).join(', ');
-        return '<li><img src="' + A.esc(x.c.img) + '" alt="" width="120" height="80"><div><b>#' + (i + 1) + ' ' + A.esc(x.c.name) + '</b> <span class="chip">' + A.esc(x.c.k === 'new' ? F.kind_new : F.kind_used) + '</span><p>' + A.esc(why ? x.c.name + ' ' + why + '.' : x.c.name) + '</p></div><span class="pc">' + A.esc(lakh(x.c.price)) + '</span><a class="btn btn-red btn-sm" href="' + A.esc(x.c.url) + '">' + A.esc(F.fd_view) + '</a></li>';
+        return '<li><img src="' + A.esc(x.c.img) + '" alt="" width="120" height="80"><div><b>#' + (i + 1) + ' ' + A.esc(x.c.name) + '</b> <span class="chip">' + A.esc(x.c.k === 'new' ? F.kind_new : F.kind_used) + '</span><p>' + A.esc(why ? x.c.name + ' ' + why + '.' : x.c.name) + '</p></div><span class="pc"><small>' + A.esc(x.c.k === 'new' ? F.onroad_lko : F.price) + '</small>' + A.esc(lakh(x.c.price)) + '</span><a class="btn btn-red btn-sm" href="' + A.esc(x.c.url) + '">' + A.esc(F.fd_view) + '</a></li>';
       }).join('');
       if (!RM) { var load = function (cb) { if (w.Motion) return cb(w.Motion); var s = d.createElement('script'); s.src = '/js/vendor/motion-mini.js'; s.onload = function () { cb(w.Motion); }; s.onerror = function () { cb(null); }; d.head.appendChild(s); };
         load(function (M) { A.$$('li', ol).forEach(function (li, i) { if (M && M.animate) M.animate(li, { opacity: [0, 1], transform: ['translateY(18px)', 'translateY(0px)'] }, { duration: .6, delay: i * .1, ease: [.16, 1, .3, 1] }); }); }); }

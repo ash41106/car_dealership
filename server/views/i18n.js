@@ -366,6 +366,12 @@ const S = {
   live_slots: { en: "Live availability", hi: "लाइव उपलब्धता" },
   show_n: { en: "Show {n} cars", hi: "{n} कारें देखें" },
   filt_sheet: { en: "Filters", hi: "फ़िल्टर" },
+  price_lbl: { en: "Price", hi: "कीमत" },
+  slot_passed: { en: "Passed", hi: "बीत गया" },
+  fr_who_solo: { en: "is an easy, sensible fit for one driver", hi: "अकेले चलाने वाले के लिए आसान और सही है" },
+  fr_who_two: { en: "suits two people comfortably", hi: "दो लोगों के लिए आरामदायक है" },
+  fr_who_fam: { en: "seats a family of four or five comfortably", hi: "4-5 लोगों के परिवार के लिए आरामदायक है" },
+  fr_who_big: { en: "has room for a bigger group", hi: "बड़े समूह के लिए जगह है" },
   grievance: { en: 'Grievance officer', hi: 'शिकायत अधिकारी' }
 };
 
@@ -376,7 +382,7 @@ function make(lang) {
   return t;
 }
 // subset of strings shipped to client JS
-const CLIENT_KEYS = ['loading', 'error_generic', 'retry', 'err_name', 'err_phone', 'err_email', 'err_consent', 'err_required', 'sending', 'submit', 'slot_taken', 'no_slots', 'slot_conflict', 'thanks', 'thanks_lead', 'your_consultant', 'booking_done', 'remaining', 'full', 'select', 'ex_showroom', 'on_road', 'valid_until', 'price_updating', 'request_quote', 'price_note', 'per_month', 'optout_done', 'inspection_pass', 'inspection_attn', 'step', 'continue', 'confirm_booking', 'choose_slot', 'compare', 'close', 'name', 'privacy', 'enlarge', 'prev', 'next', 'gallery_lbl', 'tk_t', 'tk_cal', 'tk_wa', 'tk_bring', 'tk_b1', 'tk_b2', 'tk_b3', 'tk_s1', 'tk_s2', 'tk_s3', 'tk_td', 'tk_sv', 'tk_where', 'tk_when', 'tk_who', 'tk_veh', 'tk_new', 'show_n', 'results', 'months_unit'];
+const CLIENT_KEYS = ['loading', 'error_generic', 'retry', 'err_name', 'err_phone', 'err_email', 'err_consent', 'err_required', 'sending', 'submit', 'slot_taken', 'no_slots', 'slot_conflict', 'thanks', 'thanks_lead', 'your_consultant', 'booking_done', 'remaining', 'full', 'select', 'ex_showroom', 'on_road', 'valid_until', 'price_updating', 'request_quote', 'price_note', 'per_month', 'optout_done', 'inspection_pass', 'inspection_attn', 'step', 'continue', 'confirm_booking', 'choose_slot', 'compare', 'close', 'name', 'privacy', 'enlarge', 'prev', 'next', 'gallery_lbl', 'tk_t', 'tk_cal', 'tk_wa', 'tk_bring', 'tk_b1', 'tk_b2', 'tk_b3', 'tk_s1', 'tk_s2', 'tk_s3', 'tk_td', 'tk_sv', 'tk_where', 'tk_when', 'tk_who', 'tk_veh', 'tk_new', 'show_n', 'results', 'months_unit', 'slot_passed'];
 // all keys sharing a prefix (used to ship feature-specific strings to one page)
 function group(lang, prefix) { const t = make(lang), o = {}; Object.keys(S).forEach(k => { if (k.startsWith(prefix)) o[k] = t(k); }); return o; }
 function client(lang) {

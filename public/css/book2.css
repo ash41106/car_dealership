@@ -22,3 +22,8 @@
 ::view-transition-group(tkdate){animation-duration:700ms;animation-timing-function:var(--ease-out)}
 @media(prefers-reduced-motion:reduce){.slot span,.ticket,.tk-tick path{animation:none;stroke-dashoffset:0}.slot input+span::after{animation:none}}
 .dates{min-width:0;width:100%}.form>*,.panel{min-width:0}.rail-d{max-width:100%}
+
+/* step badges stay aligned on narrow screens; real photos in model tiles */
+.steps{align-items:flex-end}.steps li{align-items:center;justify-content:flex-start}.steps li span{flex:none}
+@media(max-width:520px){.steps li{justify-content:center;gap:0;min-height:44px;align-items:center;border-bottom-width:3px}.steps li span{margin:0}}
+.opt-in img{aspect-ratio:16/9;object-fit:cover;width:100%;height:auto;border-radius:10px}
